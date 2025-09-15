@@ -1,7 +1,7 @@
 # 6WCSERVER-Final-Project
 
 Aguiluz, Josh Andrei D.
-Camus, Mark Dave
+Camus, Mark Daves
 Tienzo, Krisean
 Velasquez, Ainshley
 Yamaguchi, Mikaella
