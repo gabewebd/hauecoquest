@@ -32,7 +32,6 @@ export function Navigation({ currentPage, onPageChange, isLoggedIn = false, onLo
     { id: 'home', label: 'Home', icon: Home },
     { id: 'quests', label: 'Quests', icon: BookOpen },
     { id: 'community', label: 'Community', icon: MessageCircle },
-    { id: 'events', label: 'Events', icon: Calendar },
     { id: 'leaderboard', label: 'Leaderboard', icon: Crown },
   ];
 
@@ -341,15 +340,12 @@ export function Navigation({ currentPage, onPageChange, isLoggedIn = false, onLo
                       Login
                     </button>
                     <button
-                      onClick={() => {
-                        onPageChange('signup');
-                        setMobileMenuOpen(false);
-                      }}
-                      className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-primary-foreground font-semibold transition-colors w-full shadow-md"
-                    >
-                      <Star className="w-5 h-5" />
-                      Join Adventure
-                    </button>
+                    onClick={() => onPageChange('signup')}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white font-semibold transition-colors shadow-md"
+                  >
+                    Join Adventure
+                  </button>
+
                   </>
                 )}
               </div>
