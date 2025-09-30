@@ -1,12 +1,11 @@
-import React from 'react';
-import HomePage from './HomePage';
+import './App.css';
+import HomePage from './HomePage.jsx'; // Corrected the import path
 
 function App() {
   return (
-    <div>
-      <HomePage />
-    </div>
+    <HomePage />
   );
 }
 
 export default App;
+
