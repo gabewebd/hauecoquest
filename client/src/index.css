@@ -1,36 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
+/* HAU ECO-QUEST CSS Color Palette based on the design */
 :root {
-  /* HAU ECO-QUEST CSS VARIABLES (Theming) */
-  --color-primary-green: #10b981;    /* Tailwind green-500 */
-  --color-secondary-green: #059669; /* Tailwind green-600 */
-  --color-dark-green: #14532d;      /* Tailwind green-900 */
-  --color-footer-green: #047857;    /* Tailwind green-700 */
-  --color-background: #fdfbf6;
-  --color-accent-orange: #f97316;   /* Tailwind orange-500 */
-  
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --color-primary-green: #22c55e;
+  --color-secondary-green: #16a3a;
+  --color-accent-orange: #f97316;
+  --color-hero-bg: #f0fdf4;
+  --color-body-bg: #f8fafc;
+  --color-footer-bg: #0f766e;
+  --color-text-dark: #1f2937;
+  --color-text-muted: #6b7280;
 }
 
 body {
   margin: 0;
-  background-color: var(--color-background);
-  color: #213547; /* Default text color for light mode */
-}
-
-/* Remove the default root container styling from the template */
-#root {
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  text-align: inherit;
+  background-color: var(--color-body-bg);
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
