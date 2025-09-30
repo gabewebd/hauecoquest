@@ -32,7 +32,6 @@ export function Navigation({ currentPage, onPageChange, isLoggedIn = false, onLo
     { id: 'home', label: 'Home', icon: Home },
     { id: 'quests', label: 'Quests', icon: BookOpen },
     { id: 'community', label: 'Community', icon: MessageCircle },
-    { id: 'events', label: 'Events', icon: Calendar },
     { id: 'leaderboard', label: 'Leaderboard', icon: Crown },
   ];
 

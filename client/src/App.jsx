@@ -9,7 +9,6 @@ import DashboardPage from './pages/DashboardPage';
 
 import ProfilePage from './pages/ProfilePage';
 
-import EventsPage from './pages/EventsPage';
 
 import { UserProvider } from './context/UserContext';
 
