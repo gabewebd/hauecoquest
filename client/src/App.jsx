@@ -1,4 +1,4 @@
-// Josh Andrei Aguiluz
+
 import React, { useState } from 'react';
 import { Navigation } from './layout/Navigation';
 import SignUp from './pages/SignUp';
