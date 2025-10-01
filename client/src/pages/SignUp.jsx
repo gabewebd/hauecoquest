@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { Check, Sprout, Users, Crown, ChevronLeft, GraduationCap } from "lucide-react";
+import { Check, Sprout, Users, Crown, ChevronLeft, GraduationCap, Mail, Lock } from "lucide-react";
 
-
+// --- Role Selection Component (Internal component for Step 2) ---
 const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAgreedToTerms, goToStep }) => {
     // Common style for role cards
     const RoleCard = ({ role, title, icon, features, requiresApproval = false }) => {
         const isSelected = selectedRole === role;
+        // Adjusted border, shadow, and hover for a cleaner look
         const baseClasses = "border-2 p-4 rounded-xl cursor-pointer transition-all duration-200 flex items-start gap-4";
-        const selectedClasses = "border-green-500 bg-green-50 shadow-md";
-        const unselectedClasses = "border-gray-200 hover:border-green-300";
+        const selectedClasses = "border-green-500 bg-green-50 shadow-sm"; // Used shadow-sm for a lighter look
+        const unselectedClasses = "border-gray-200 hover:border-green-300 hover:shadow-xs";
 
         return (
             <div
@@ -93,7 +94,7 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
                 />
             </div>
             
-            {/* Phone Number Input */}
+            {/* Phone Number Input - Styled for the new look */}
             <div className="mb-6">
                 <label htmlFor="phone" className="block text-sm font-medium mb-1 text-gray-700">
                     Phone Number (Optional)
@@ -102,7 +103,8 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
                     id="phone"
                     type="tel"
                     placeholder="+63 (9XX) XXX-XXXX"
-                    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    // Added subtle shadow-inner for depth, removed explicit border
+                    className="w-full bg-gray-50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-inner"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                     For important quest and event notifications
@@ -124,11 +126,11 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
                 </label>
             </div>
 
-            {/* Action Buttons */}
+            {/* Action Buttons - Styled with the green primary and light gray secondary */}
             <div className="flex gap-4">
                 <button
                     type="button"
-                    className="w-1/3 flex justify-center items-center gap-2 bg-gray-100 text-gray-700 font-semibold py-3 rounded-full hover:bg-gray-200 transition"
+                    className="w-1/3 flex justify-center items-center gap-2 bg-gray-200 text-gray-700 font-semibold py-3 rounded-full hover:bg-gray-300 transition"
                     onClick={() => goToStep(1)}
                 >
                     <ChevronLeft className="w-5 h-5" />
@@ -150,51 +152,62 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
 
 // --- Account Details Component (Internal component for Step 1) ---
 const AccountDetailsForm = ({ goToStep }) => {
-    return (
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); goToStep(2); }}>
-            <div>
-                <label className="block text-sm font-medium mb-1">Full Name</label>
+    // Custom input component matching the login page style
+    const StyledInput = ({ label, placeholder, type, icon, isPassword = false }) => (
+        <div>
+            <label className="block text-sm font-medium mb-1">{label}</label>
+            <div className="relative">
                 <input
-                    type="text"
-                    placeholder="Enter your full name"
+                    type={type}
+                    placeholder={placeholder}
                     required
-                    className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    // Matching the login page's rounded, white-field-on-light-background style
+                    className="w-full bg-gray-50 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-inner"
                 />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    {icon}
+                </div>
+                {isPassword && (
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer">
+                        {/* Assuming eye icon from lucide-react or similar */}
+                        <Lock className="w-5 h-5" /> 
+                    </div>
+                )}
             </div>
-            <div>
-                <label className="block text-sm font-medium mb-1">
-                    Email Address
-                </label>
-                <input
-                    type="email"
-                    placeholder="your.email@hau.edu.ph"
-                    required
-                    className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
+            {label === 'Email Address' && (
                 <p className="text-xs text-gray-500 mt-1">
                     We'll use this to send you quest updates and achievements
                 </p>
-            </div>
-            <div>
-                <label className="block text-sm font-medium mb-1">Password</label>
-                <input
-                    type="password"
-                    placeholder="Create a strong password"
-                    required
-                    className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-            </div>
-            <div>
-                <label className="block text-sm font-medium mb-1">
-                    Confirm Password
-                </label>
-                <input
-                    type="password"
-                    placeholder="Confirm your password"
-                    required
-                    className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-            </div>
+            )}
+        </div>
+    );
+
+    return (
+        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); goToStep(2); }}>
+            <StyledInput 
+                label="Full Name" 
+                placeholder="Enter your full name" 
+                type="text" 
+                icon={<GraduationCap className="w-5 h-5" />} 
+            />
+            <StyledInput 
+                label="Email Address" 
+                placeholder="your.email@hau.edu.ph" 
+                type="email" 
+                icon={<Mail className="w-5 h-5" />} 
+            />
+            <StyledInput 
+                label="Password" 
+                placeholder="Create a strong password" 
+                type="password" 
+                icon={<Lock className="w-5 h-5" />} 
+            />
+            <StyledInput 
+                label="Confirm Password" 
+                placeholder="Confirm your password" 
+                type="password" 
+                icon={<Lock className="w-5 h-5" />} 
+            />
 
             <button
                 type="submit"
@@ -236,10 +249,13 @@ const SignUp = () => {
         : "Select the role that best describes your environmental journey";
 
     return (
-        <div className="min-h-screen bg-white flex flex-col">
+        // 1. Updated min-h-screen to use a light green/white gradient for the background
+        <div className="min-h-screen bg-gradient-to-b from-white to-green-50 flex flex-col"> 
+            
             {/* Main Content Area */}
             <main className="flex-grow flex items-center justify-center px-4 py-12">
-                <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-8">
+                {/* 2. Updated form card styling: rounded-3xl and shadow-lg for the welcome back look */}
+                <div className="bg-white rounded-3xl shadow-lg max-w-lg w-full p-8"> 
                     
                     {/* Header */}
                     <div className="text-center mb-6">
@@ -279,20 +295,10 @@ const SignUp = () => {
                             Sign In Here
                         </a>
                     </p>
-
-                    {/* Small card */}
-                    <div className="mt-8 p-4 border rounded-xl bg-green-50 text-center">
-                        <div className="text-3xl mb-2">🌍</div>
-                        <h3 className="font-semibold mb-1">Join the Global Movement</h3>
-                        <p className="text-sm text-gray-600">
-                            Every account created brings us one step closer to a sustainable
-                            future. Welcome to the revolution!
-                        </p>
-                    </div>
                 </div>
             </main>
 
-            {/* Footer */}
+            {/* Footer remains the same */}
             <footer className="bg-green-600 text-white pt-12 pb-6 px-6">
                 <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
                     <div>
