@@ -143,7 +143,6 @@ const LeaderboardPage = () => {
                     <div className="flex gap-4">
                         {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
                         <button className="bg-green-500 text-white font-bold py-3 px-6 rounded-full">Start New Quest</button>
-                        <button className="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-full">Join Events</button>
                     </div>
                 </div>
             </section>
