@@ -1,7 +1,8 @@
-
+// Josh Andrei Aguiluz
 import React, { useState } from 'react';
 import { Navigation } from './layout/Navigation';
 import SignUp from './pages/SignUp';
+import LoginPage from './pages/LoginPage'; // Import the new LoginPage
 import HomePage from './pages/HomePage';
 import QuestsPage from './pages/QuestsPage';
 import CommunityPage from './pages/CommunityPage';
@@ -36,7 +37,9 @@ function App() {
         return <ProfilePage />;
       case 'dashboard':
         return <DashboardPage />;
-      case 'signup': // ✅ Added signup route
+      case 'login': // Added login route
+        return <LoginPage />;
+      case 'signup': 
         return <SignUp />;
       default:
         return <HomePage />;
