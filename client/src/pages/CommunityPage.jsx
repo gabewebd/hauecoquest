@@ -40,7 +40,8 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
           <Share2 className="w-5 h-5" /> {shares}
         </button>
       </div>
-      <a href="#" className="text-sm font-bold text-primary-green hover:underline">View Details</a>
+      {/* FIXED: Replaced text-primary-green with text-green-600 */}
+      <a href="#" className="text-sm font-bold text-green-600 hover:underline">View Details</a>
     </div>
   </div>
 );
@@ -61,10 +62,12 @@ const CommunityPage = () => {
         <section className="container mx-auto px-4 mb-12">
           <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
-              <h2 className="text-4xl font-extrabold text-dark-green mb-2">Community Hub</h2>
+              {/* FIXED: Replaced text-dark-green with text-green-900 */}
+              <h2 className="text-4xl font-extrabold text-green-900 mb-2">Community Hub</h2>
               <p className="text-gray-600 max-w-lg">Connect with fellow eco-heroes, share your environmental journey, and inspire others to make a positive impact on our planet!</p>
               <div className="flex items-center gap-4 mt-6">
-                <button className="flex items-center gap-2 bg-primary-green text-white font-bold py-3 px-6 rounded-full transition-transform transform hover:scale-105"><UserPlus className="w-5 h-5"/> Join Community</button>
+                {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
+                <button className="flex items-center gap-2 bg-green-500 text-white font-bold py-3 px-6 rounded-full transition-transform transform hover:scale-105"><UserPlus className="w-5 h-5"/> Join Community</button>
                 <button className="flex items-center gap-2 font-bold text-gray-700 py-3 px-6"><Share2 className="w-5 h-5"/> Share Achievement</button>
               </div>
             </div>
@@ -92,9 +95,11 @@ const CommunityPage = () => {
             <div className="bg-green-50 p-6 rounded-xl border border-green-200">
               <p className="font-bold text-green-800 mb-2">Plant 1,000 Trees Challenge</p>
               <div className="flex justify-between text-sm text-green-700 mb-1"><span>Progress: 687 / 1,000 trees</span><span>68.7%</span></div>
-              <div className="w-full bg-green-200 rounded-full h-3 mb-4"><div className="bg-primary-green h-3 rounded-full" style={{width: '68.7%'}}></div></div>
+              {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
+              <div className="w-full bg-green-200 rounded-full h-3 mb-4"><div className="bg-green-500 h-3 rounded-full" style={{width: '68.7%'}}></div></div>
               <div className="flex items-center gap-6 text-sm text-gray-600">
-                <button className="bg-primary-green text-white font-bold py-2 px-5 rounded-full">Join Challenge</button>
+                {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
+                <button className="bg-green-500 text-white font-bold py-2 px-5 rounded-full">Join Challenge</button>
                 <a href="#" className="font-semibold hover:underline">View Leaderboard</a>
               </div>
             </div>
@@ -106,7 +111,8 @@ const CommunityPage = () => {
           <h3 className="text-2xl font-bold mb-4">Community Feed</h3>
           <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div className="flex flex-wrap gap-2">
-              <button className="bg-primary-green text-white px-4 py-2 rounded-full text-sm font-semibold">Recent Activity</button>
+              {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
+              <button className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold">Recent Activity</button>
               <button className="bg-white border text-gray-700 px-4 py-2 rounded-full text-sm font-semibold">Most Popular</button>
             </div>
             <div className="relative w-full md:w-auto">

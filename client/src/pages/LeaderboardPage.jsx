@@ -15,14 +15,16 @@ const TopChampionCard = ({ user, rank }) => {
     <div className={`relative ${style.bg} p-6 rounded-2xl border-2 ${style.border} text-center flex flex-col items-center`}>
       {style.crown && <Crown className="absolute -top-4 text-yellow-500 w-8 h-8" />}
       <div className="relative mb-3">
-        <div className={`w-20 h-20 bg-gradient-to-br from-green-400 to-primary-green rounded-full flex items-center justify-center text-white text-3xl font-bold`}>
+        {/* FIXED: Replaced to-primary-green with to-green-500 */}
+        <div className={`w-20 h-20 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center text-white text-3xl font-bold`}>
             {user.avatarInitial}
         </div>
         <div className="absolute -bottom-1 -right-1 bg-white text-sm font-bold w-8 h-8 rounded-full border-2 flex items-center justify-center border-yellow-300">{user.level}</div>
       </div>
       <h4 className="font-bold text-lg text-gray-800">{user.name}</h4>
       <p className={`text-sm font-semibold ${style.text} mb-2`}>{user.title}</p>
-      <p className="text-2xl font-bold text-dark-green">{user.points.toLocaleString()}</p>
+      {/* FIXED: Replaced text-dark-green with text-green-900 */}
+      <p className="text-2xl font-bold text-green-900">{user.points.toLocaleString()}</p>
     </div>
   );
 };
@@ -46,7 +48,8 @@ const LeaderboardRow = ({ user, rank }) => (
       <Shield className="w-5 h-5" title="Guardian"/>
       <Sprout className="w-5 h-5" title="Planter"/>
     </div>
-    <div className="w-24 text-right font-bold text-primary-green text-lg">{user.points.toLocaleString()}</div>
+    {/* FIXED: Replaced text-primary-green with text-green-600 */}
+    <div className="w-24 text-right font-bold text-green-600 text-lg">{user.points.toLocaleString()}</div>
   </div>
 );
 
@@ -70,10 +73,12 @@ const LeaderboardPage = () => {
             <section className="container mx-auto px-4 mb-12">
                 <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
-                        <h2 className="text-4xl font-extrabold text-dark-green mb-2">Hall of Fame</h2>
+                        {/* FIXED: Replaced text-dark-green with text-green-900 */}
+                        <h2 className="text-4xl font-extrabold text-green-900 mb-2">Hall of Fame</h2>
                         <p className="text-gray-600 max-w-lg">Celebrate our environmental champions and see how you rank among the eco-heroes making a real difference in the world!</p>
                         <div className="flex items-center gap-4 mt-6">
-                            <button className="bg-primary-green text-white font-bold py-3 px-6 rounded-full">View Rankings</button>
+                            {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
+                            <button className="bg-green-500 text-white font-bold py-3 px-6 rounded-full">View Rankings</button>
                             <button className="font-bold text-gray-700 py-3 px-6">My Progress</button>
                         </div>
                     </div>
@@ -99,7 +104,8 @@ const LeaderboardPage = () => {
                     <div className="flex flex-wrap gap-4">
                         <div>
                             <p className="text-sm font-semibold text-gray-600 mb-2">Time Period</p>
-                            <div className="flex gap-2"><button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm">This Week</button><button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm">This Month</button><button className="bg-primary-green text-white px-4 py-2 rounded-full text-sm font-semibold">All Time</button></div>
+                            {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
+                            <div className="flex gap-2"><button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm">This Week</button><button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm">This Month</button><button className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold">All Time</button></div>
                         </div>
                         <div>
                             <p className="text-sm font-semibold text-gray-600 mb-2">Category</p>
@@ -130,11 +136,13 @@ const LeaderboardPage = () => {
              {/* CTA */}
             <section className="container mx-auto px-4 mt-24">
                 <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center flex flex-col items-center">
-                    <Rocket className="w-12 h-12 text-primary-green mb-4"/>
+                    {/* FIXED: Replaced text-primary-green with text-green-500 */}
+                    <Rocket className="w-12 h-12 text-green-500 mb-4"/>
                     <h2 className="text-3xl font-bold text-gray-800 mb-2">Climb the Eco-Hero Rankings!</h2>
                     <p className="text-gray-600 max-w-lg mx-auto mb-6">Complete quests, attend events, and make environmental impact to earn points and climb the leaderboard. Every action counts towards a sustainable future!</p>
                     <div className="flex gap-4">
-                        <button className="bg-primary-green text-white font-bold py-3 px-6 rounded-full">Start New Quest</button>
+                        {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
+                        <button className="bg-green-500 text-white font-bold py-3 px-6 rounded-full">Start New Quest</button>
                         <button className="bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-full">Join Events</button>
                     </div>
                 </div>
