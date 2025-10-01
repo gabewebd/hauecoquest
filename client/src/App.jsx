@@ -1,14 +1,14 @@
 // Josh Andrei Aguiluz
 import React, { useState } from 'react';
 import { Navigation } from './layout/Navigation';
+import SignUp from './pages/SignUp';
+import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import QuestsPage from './pages/QuestsPage';
 import CommunityPage from './pages/CommunityPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import DashboardPage from './pages/DashboardPage';
-
 import ProfilePage from './pages/ProfilePage';
-
 
 import { UserProvider } from './context/UserContext';
 
@@ -36,6 +36,10 @@ function App() {
         return <ProfilePage />;
       case 'dashboard':
         return <DashboardPage />;
+      case 'login': // Added login route
+        return <LoginPage />;
+      case 'signup': 
+        return <SignUp />;
       default:
         return <HomePage />;
     }
@@ -47,7 +51,6 @@ function App() {
         <Navigation
           currentPage={currentPage}
           onPageChange={handlePageChange}
-          // You can toggle this to see the logged-in vs. logged-out state
           isLoggedIn={false} 
         />
         <main>
