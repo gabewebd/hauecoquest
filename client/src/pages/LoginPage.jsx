@@ -82,15 +82,6 @@ const LoginPage = ({ onPageChange }) => {
 
                     <div className="text-center my-6 text-xs text-gray-400">or continue with</div>
 
-                    <div className="space-y-3">
-                        <button className="w-full flex justify-center items-center gap-3 bg-white border border-gray-300 text-gray-700 font-semibold py-3 rounded-full hover:bg-gray-50 transition-colors">
-                           <span className="font-bold">H</span> HAU Portal
-                        </button>
-                         <button className="w-full flex justify-center items-center gap-3 bg-white border border-gray-300 text-gray-700 font-semibold py-3 rounded-full hover:bg-gray-50 transition-colors">
-                            <img src="https://www.google.com/favicon.ico" alt="Google icon" className="w-5 h-5"/> Google
-                        </button>
-                    </div>
-
                     <p className="text-center text-sm text-gray-600 mt-8">
                         New to the environmental realm? <a href="#" className="font-bold text-green-600 hover:underline">Begin Your Journey</a>
                     </p>

@@ -82,7 +82,7 @@ const OverviewTabContent = () => (
                 <div className="space-y-3">
                     <QuickLink icon={<BookOpen className="w-5 h-5 text-blue-500" />} title="Browse Quests" subtitle="Discover new adventures" />
                     <QuickLink icon={<PlusCircle className="w-5 h-5 text-purple-500" />} title="Submit Proposal" subtitle="Pitch your own quest ideas" />
-                    <QuickLink icon={<Users className="w-5 h-5 text-green-500" />} title="View Community" subtitle="Connect with Eco-Heroes" />
+                    <QuickLink icon={<User className="w-5 h-5 text-green-500" />} title="View Community" subtitle="Connect with Eco-Heroes" />
                 </div>
             </div>
         </div>
@@ -132,6 +132,50 @@ const ProgressTabContent = () => (
     </div>
 );
 
+// TabButton component - NOW DEFINED AT TOP LEVEL
+const TabButton = ({ id, label, icon, activeTab, setActiveTab }) => (
+    <button
+        onClick={() => setActiveTab(id)}
+        className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all duration-200 text-sm ${
+            activeTab === id
+                ? 'bg-green-500 text-white shadow-md'
+                : 'bg-white text-gray-600 hover:bg-gray-100'
+        }`}
+    >
+        {icon}
+        {label}
+    </button>
+);
+
+// DashboardHeader component - NOW DEFINED AT TOP LEVEL
+const DashboardHeader = ({ userData, levelProgress }) => (
+    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 mb-8">
+        <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="relative">
+                <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-md">
+                    {userData.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-orange-400 to-orange-500 text-white text-xs font-bold w-8 h-8 rounded-full border-2 border-white flex items-center justify-center shadow-md">
+                    {userData.level}
+                </div>
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+                <h2 className="text-3xl font-bold text-gray-800">Welcome back, {userData.name}! 👋</h2>
+                <p className="text-gray-500">{userData.title}</p>
+                <div className="mt-4">
+                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <span>Progress to Level {userData.level + 1}</span>
+                        <span>{userData.points} / {userData.pointsToNextLevel} eco-points</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-green-500 h-2 rounded-full" style={{ width: `${levelProgress}%` }}></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
 // --- Main Dashboard Component ---
 const DashboardPage = () => {
     const [activeTab, setActiveTab] = useState('overview');
@@ -150,58 +194,14 @@ const DashboardPage = () => {
     };
 
     const levelProgress = (userData.points / userData.pointsToNextLevel) * 100;
-
-    // ✅ FIX: This component is now defined OUTSIDE the main component
-    const TabButton = ({ id, label, icon }) => (
-        <button
-            onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all duration-200 text-sm ${
-                activeTab === id
-                    ? 'bg-green-500 text-white shadow-md'
-                    : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-        >
-            {icon}
-            {label}
-        </button>
-    );
-
-    // ✅ FIX: This component is now defined OUTSIDE the main component
-    const DashboardHeader = () => (
-        <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 mb-8">
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-                <div className="relative">
-                    <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-md">
-                        {userData.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-orange-400 to-orange-500 text-white text-xs font-bold w-8 h-8 rounded-full border-2 border-white flex items-center justify-center shadow-md">
-                        {userData.level}
-                    </div>
-                </div>
-                <div className="flex-1 text-center sm:text-left">
-                    <h2 className="text-3xl font-bold text-gray-800">Welcome back, {userData.name}! 👋</h2>
-                    <p className="text-gray-500">{userData.title}</p>
-                    <div className="mt-4">
-                        <div className="flex justify-between text-xs text-gray-500 mb-1">
-                            <span>Progress to Level {userData.level + 1}</span>
-                            <span>{userData.points} / {userData.pointsToNextLevel} eco-points</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div className="bg-green-500 h-2 rounded-full" style={{ width: `${levelProgress}%` }}></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
     
     return (
         <div className="font-sans bg-app-bg text-gray-800">
             <main className="container mx-auto px-4 pt-24 pb-12">
-                <DashboardHeader />
+                <DashboardHeader userData={userData} levelProgress={levelProgress} />
                 <div className="bg-white p-2 rounded-full shadow-md border border-gray-100 inline-flex items-center gap-2 mb-8">
-                    <TabButton id="overview" label="Overview" icon={<Activity className="w-4 h-4" />} />
-                    <TabButton id="progress" label="Progress" icon={<BarChart className="w-4 h-4" />} />
+                    <TabButton id="overview" label="Overview" icon={<Activity className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <TabButton id="progress" label="Progress" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
                 {activeTab === 'overview' && <OverviewTabContent />}
                 {activeTab === 'progress' && <ProgressTabContent />}
