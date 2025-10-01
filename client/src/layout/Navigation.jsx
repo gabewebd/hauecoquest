@@ -67,9 +67,6 @@ export function Navigation({ currentPage, onPageChange }) {
             <button onClick={() => { onPageChange('profile'); setProfileDropdownOpen(false); }} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full">
               <User className="w-4 h-4" /> View Profile
             </button>
-            <button onClick={() => { onPageChange('dashboard'); setProfileDropdownOpen(false); }} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full">
-              <Settings className="w-4 h-4" /> Settings
-            </button>
             <div className="border-t border-gray-100 my-1"></div>
             <button onClick={() => { userLogout(); onPageChange('home'); setProfileDropdownOpen(false); }} className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full">
               <LogOut className="w-4 h-4" /> Logout
