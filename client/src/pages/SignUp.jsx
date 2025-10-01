@@ -1,9 +1,9 @@
 //Josh Andrei Aguiluz
 import React, { useState } from "react";
 import axios from "axios";
+import { useUser } from '../context/UserContext'; 
 import { Check, Sprout, Users, Crown, ChevronLeft, GraduationCap, Mail, Lock } from "lucide-react";
 
-// --- FIX: StyledInput is now defined at the TOP LEVEL ---
 const StyledInput = ({ label, placeholder, type, icon, name, value, onChange }) => (
     <div>
         <label className="block text-sm font-medium mb-1">{label}</label>
@@ -24,7 +24,6 @@ const StyledInput = ({ label, placeholder, type, icon, name, value, onChange }) 
     </div>
 );
 
-// --- FIX: AccountDetailsForm is defined OUTSIDE the SignUp component ---
 const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
     return (
         <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); goToStep(2); }}>
@@ -74,9 +73,7 @@ const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
     );
 };
 
-// --- FIX: RoleSelectionForm is defined OUTSIDE the SignUp component ---
 const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAgreedToTerms, goToStep, handleSubmit }) => {
-    // ... (This component is already correct and doesn't need internal changes)
     const RoleCard = ({ role, title, icon, features, requiresApproval = false }) => {
         const isSelected = selectedRole === role;
         const baseClasses = "border-2 p-4 rounded-xl cursor-pointer transition-all duration-200 flex items-start gap-4";
@@ -200,19 +197,17 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
 
 
 // --- Main SignUp Component ---
-const SignUp = () => {
-    // ... (The rest of the component logic remains the same and is correct)
+const SignUp = ({ onPageChange }) => {
+    const { login } = useUser();
     const [step, setStep] = useState(1);
     const [selectedRole, setSelectedRole] = useState("Eco-Hero Student");
     const [agreedToTerms, setAgreedToTerms] = useState(false);
-    
     const [formData, setFormData] = useState({
         username: '',
         email: '',
         password: '',
         confirmPassword: ''
     });
-
     const [message, setMessage] = useState('');
 
     const handleInputChange = (e) => {
@@ -238,11 +233,17 @@ const SignUp = () => {
                 password: formData.password,
                 role: selectedRole
             };
+            await axios.post('http://localhost:5000/api/auth/signup', userData);
 
-            const response = await axios.post('http://localhost:5000/api/auth/signup', userData);
+            setMessage("Sign up successful! Logging you in...");
 
-            setMessage("Sign up successful! You can now log in.");
-            console.log(response.data);
+            await login(formData.email, formData.password);
+            
+            setTimeout(() => {
+                if(onPageChange) {
+                    onPageChange('dashboard');
+                }
+            }, 1000);
 
         } catch (error) {
             if (error.response && error.response.data.error) {

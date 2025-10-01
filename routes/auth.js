@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const auth = require('../middleware/auth'); // Middleware to protect routes
 
 // ROUTE 1: Create a User (Sign Up) at POST "/api/auth/signup"
 router.post('/signup', async (req, res) => {
@@ -69,6 +70,19 @@ router.post('/login', async (req, res) => {
         console.error(error.message);
         res.status(500).send("Server error");
     }
+});
+
+// ROUTE 3: Get Logged In User's Data at GET "/api/auth/user"
+// This is a protected route that uses our auth middleware.
+router.get('/user', auth, async (req, res) => {
+  try {
+    // req.user is set by the auth middleware from the token
+    const user = await User.findById(req.user.id).select('-password'); // .select('-password') prevents sending the hashed password
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
 });
 
 

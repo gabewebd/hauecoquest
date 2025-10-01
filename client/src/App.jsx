@@ -28,18 +28,16 @@ function App() {
         return <QuestsPage />;
       case 'community':
         return <CommunityPage />;
-      case 'events':
-        return <EventsPage />;
       case 'leaderboard':
         return <LeaderboardPage />;
       case 'profile':
         return <ProfilePage />;
       case 'dashboard':
         return <DashboardPage />;
-      case 'login': // Added login route
-        return <LoginPage />;
-      case 'signup': 
-        return <SignUp />;
+      case 'login':
+        return <LoginPage onPageChange={handlePageChange} />;
+      case 'signup':
+        return <SignUp onPageChange={handlePageChange} />;
       default:
         return <HomePage />;
     }
@@ -51,7 +49,6 @@ function App() {
         <Navigation
           currentPage={currentPage}
           onPageChange={handlePageChange}
-          isLoggedIn={false} 
         />
         <main>
           {renderPage()}
