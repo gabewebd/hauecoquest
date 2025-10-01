@@ -10,7 +10,7 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
 
-import { UserProvider } from './context/UserContext';
+import { UserProvider } from './pages/UserContext';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');

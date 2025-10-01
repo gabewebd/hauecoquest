@@ -1,4 +1,8 @@
+// Josh Andrei Aguiluz
 import React from "react";
+// Import icons needed for the Hero section buttons
+import { Swords, BookOpen } from "lucide-react";
+
 
 export default function HomePage() {
   return (
@@ -14,14 +18,18 @@ export default function HomePage() {
           <div className="flex justify-center gap-4">
             <a
               href="#quests"
-              className="bg-white text-green-700 font-semibold px-6 py-3 rounded-lg shadow hover:bg-green-100"
+              // Add icon and adjust padding slightly for alignment
+              className="bg-white text-green-700 font-semibold px-6 py-3 rounded-lg shadow hover:bg-green-100 flex items-center gap-2 transition"
             >
+              <Swords className="w-5 h-5" />
               Start Questing
             </a>
             <a
               href="#learn"
-              className="bg-green-500 font-semibold px-6 py-3 rounded-lg shadow hover:bg-green-600"
+              // Add icon and adjust padding slightly for alignment
+              className="bg-green-500 font-semibold px-6 py-3 rounded-lg shadow hover:bg-green-600 flex items-center gap-2 transition"
             >
+              <BookOpen className="w-5 h-5" />
               Learn More
             </a>
           </div>
@@ -119,7 +127,7 @@ export default function HomePage() {
         </div>
       </section>
 
-            {/* Call to Action */}
+      {/* Call to Action */}
       <section className="py-20 px-6 bg-white text-center">
         <div className="max-w-3xl mx-auto">
           <div className="text-5xl mb-4">🌟</div>
@@ -135,7 +143,6 @@ export default function HomePage() {
           </button>
         </div>
       </section>
-
 
       {/* Footer */}
       <footer className="bg-green-700 text-white pt-16 pb-8 px-6">

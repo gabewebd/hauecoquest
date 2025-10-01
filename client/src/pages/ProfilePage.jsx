@@ -1,26 +1,41 @@
-import React, { useState } from "react";
+//Josh Andrei Aguiluz
+import React, { useState, useEffect } from "react";
 import {
   Award,
   Users,
   Edit,
   Settings,
   Trophy,
+  User,
+  UserCircle,
 } from "lucide-react";
-import { FaUserAlt, FaUserTie, FaFemale, FaMale } from "react-icons/fa";
+import { useUser } from "./UserContext";
 
 const ProfilePage = () => {
+  const { user, updateUser } = useUser();
+  
   const [activeTab, setActiveTab] = useState("Activity");
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editTab, setEditTab] = useState("avatar"); // avatar | header
-  const [selectedAvatar, setSelectedAvatar] = useState("Girl Avatar Long Hair");
-  const [headerTheme, setHeaderTheme] = useState("orange");
+  const [editTab, setEditTab] = useState("avatar");
+  const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || "Girl Avatar 1");
+  const [headerTheme, setHeaderTheme] = useState(user?.headerTheme || "orange");
 
-  // Avatars as ICONS
+  // ADD THIS: Update local state when user context changes
+  useEffect(() => {
+    if (user) {
+      setSelectedAvatar(user.avatar);
+      setHeaderTheme(user.headerTheme);
+    }
+  }, [user]);
+
+  // Rest of your code stays the same...
+
+  // Avatars with lucide-react icons and colors
   const avatars = [
-    { name: "Girl Avatar 1", gender: "Female", icon: <FaFemale className="w-16 h-16 text-pink-500" /> },
-    { name: "Girl Avatar 2", gender: "Female", icon: <FaUserAlt className="w-16 h-16 text-pink-400" /> },
-    { name: "Boy Avatar 1", gender: "Male", icon: <FaMale className="w-16 h-16 text-blue-500" /> },
-    { name: "Boy Avatar 2", gender: "Male", icon: <FaUserTie className="w-16 h-16 text-blue-400" /> },
+    { name: "Girl Avatar 1", gender: "Female", color: "text-pink-500", bg: "bg-pink-100" },
+    { name: "Girl Avatar 2", gender: "Female", color: "text-pink-400", bg: "bg-pink-50" },
+    { name: "Boy Avatar 1", gender: "Male", color: "text-blue-500", bg: "bg-blue-100" },
+    { name: "Boy Avatar 2", gender: "Male", color: "text-blue-400", bg: "bg-blue-50" },
   ];
 
   const headerThemes = {
@@ -29,26 +44,43 @@ const ProfilePage = () => {
     blue: "from-blue-400 to-indigo-500",
   };
 
+  const handleSaveChanges = () => {
+    updateUser({
+      avatar: selectedAvatar,
+      headerTheme: headerTheme,
+    });
+    setIsEditOpen(false);
+  };
+
+  const handleCancelEdit = () => {
+    setSelectedAvatar(user?.avatar || "Girl Avatar 1");
+    setHeaderTheme(user?.headerTheme || "orange");
+    setIsEditOpen(false);
+  };
+
+  const currentAvatar = avatars.find((a) => a.name === (user?.avatar || selectedAvatar));
+  const level = Math.floor((user?.points || 450) / 100) + 1;
+
   return (
     <div className="pt-20 flex flex-col min-h-screen">
       {/* Banner */}
-      <div className={`h-48 bg-gradient-to-r ${headerThemes[headerTheme]} relative`}>
+      <div className={`h-48 bg-gradient-to-r ${headerThemes[user?.headerTheme || headerTheme]} relative`}>
         {/* Profile Card */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-20 w-full max-w-4xl">
+        <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-20 w-full max-w-4xl px-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 flex items-center relative">
             {/* Avatar */}
             <div className="relative">
-              <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden flex justify-center items-center">
-                {avatars.find((a) => a.name === selectedAvatar)?.icon}
+              <div className={`w-24 h-24 rounded-full ${currentAvatar?.bg} overflow-hidden flex justify-center items-center`}>
+                <UserCircle className={`w-20 h-20 ${currentAvatar?.color}`} />
               </div>
               <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                5
+                {level}
               </div>
             </div>
 
             {/* Info */}
             <div className="ml-6 flex-1">
-              <h2 className="text-2xl font-bold">Maria Student</h2>
+              <h2 className="text-2xl font-bold">{user?.username || "Maria Student"}</h2>
               <p className="text-gray-600">HAU Student</p>
               <p className="text-sm text-gray-500 mt-1">
                 Environmental science student passionate about making a
@@ -58,13 +90,13 @@ const ProfilePage = () => {
               {/* Stats */}
               <div className="flex gap-6 mt-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
-                  <Trophy className="w-4 h-4 text-yellow-500" /> 450 points
+                  <Trophy className="w-4 h-4 text-yellow-500" /> {user?.points || 450} points
                 </div>
                 <div className="flex items-center gap-1">
-                  <Award className="w-4 h-4 text-orange-500" /> 2 badges
+                  <Award className="w-4 h-4 text-orange-500" /> {user?.badges || 2} badges
                 </div>
                 <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4 text-green-500" /> 3 friends
+                  <Users className="w-4 h-4 text-green-500" /> {user?.friends || 3} friends
                 </div>
               </div>
             </div>
@@ -72,7 +104,12 @@ const ProfilePage = () => {
             {/* Actions */}
             <div className="flex gap-2 absolute top-4 right-4">
               <button
-                onClick={() => { setEditTab("avatar"); setIsEditOpen(true); }}
+                onClick={() => { 
+                  setSelectedAvatar(user?.avatar || "Girl Avatar 1");
+                  setHeaderTheme(user?.headerTheme || "orange");
+                  setEditTab("avatar"); 
+                  setIsEditOpen(true); 
+                }}
                 className="px-3 py-1 bg-gray-100 rounded-lg text-sm flex items-center gap-1 hover:bg-gray-200"
               >
                 <Edit className="w-4 h-4" /> Edit
@@ -109,11 +146,6 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Footer (simple) */}
-      <footer className="bg-gray-100 py-6 text-center text-sm text-gray-500 mt-auto">
-        © 2025 HAU Eco-Quest. All rights reserved.
-      </footer>
-
       {/* Edit Modal */}
       {isEditOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
@@ -149,13 +181,15 @@ const ProfilePage = () => {
                   <div
                     key={avatar.name}
                     onClick={() => setSelectedAvatar(avatar.name)}
-                    className={`p-4 border rounded-xl cursor-pointer text-center transition ${
+                    className={`p-4 border-2 rounded-xl cursor-pointer text-center transition ${
                       selectedAvatar === avatar.name
                         ? "bg-green-100 border-green-500"
-                        : "hover:bg-gray-50"
+                        : "hover:bg-gray-50 border-gray-200"
                     }`}
                   >
-                    <div className="flex justify-center">{avatar.icon}</div>
+                    <div className={`flex justify-center ${avatar.bg} rounded-full w-20 h-20 mx-auto items-center`}>
+                      <UserCircle className={`w-16 h-16 ${avatar.color}`} />
+                    </div>
                     <h3 className="mt-2 font-medium">{avatar.name}</h3>
                     <p className="text-xs text-gray-500">
                       {avatar.gender} • Perfect For You!
@@ -172,12 +206,18 @@ const ProfilePage = () => {
                   <div
                     key={theme}
                     onClick={() => setHeaderTheme(theme)}
-                    className={`h-20 rounded-xl cursor-pointer border ${
+                    className={`h-20 rounded-xl cursor-pointer border-4 transition ${
                       headerTheme === theme
                         ? "border-green-500"
                         : "border-gray-200"
-                    } bg-gradient-to-r ${headerThemes[theme]}`}
-                  ></div>
+                    } bg-gradient-to-r ${headerThemes[theme]} flex items-center justify-center`}
+                  >
+                    {headerTheme === theme && (
+                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                        <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             )}
@@ -185,13 +225,13 @@ const ProfilePage = () => {
             {/* Buttons */}
             <div className="flex justify-between mt-6">
               <button
-                onClick={() => setIsEditOpen(false)}
+                onClick={handleCancelEdit}
                 className="px-6 py-2 rounded-lg border text-gray-600 hover:bg-gray-100"
               >
                 Cancel
               </button>
               <button
-                onClick={() => setIsEditOpen(false)}
+                onClick={handleSaveChanges}
                 className="px-6 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600"
               >
                 Done
@@ -200,65 +240,44 @@ const ProfilePage = () => {
           </div>
         </div>
       )}
+      
+      {/* Footer */}
       <footer className="bg-green-700 text-white pt-16 pb-8 px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
-          {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <img
-                src="/vite.svg"
-                alt="HAU Eco-Quest Logo"
-                className="h-8 w-8 bg-white rounded-full p-1"
-              />
+              <div className="h-8 w-8 bg-white rounded-full flex items-center justify-center text-2xl">🌱</div>
               <h3 className="text-2xl font-bold">HAU Eco-Quest</h3>
             </div>
             <p className="text-sm text-green-100">
               Empowering students to become environmental champions through
-              engaging sustainability adventures. Join the movement to save our
-              planet!
+              engaging sustainability adventures.
             </p>
           </div>
-
-          {/* Adventure Paths */}
           <div>
             <h4 className="font-bold mb-4">Adventure Paths</h4>
             <ul className="space-y-2 text-sm text-green-100">
               <li><a href="#" className="hover:text-white">Browse Epic Quests</a></li>
               <li><a href="#" className="hover:text-white">Upcoming Events</a></li>
-              <li><a href="#" className="hover:text-white">Hero Community</a></li>
-              <li><a href="#" className="hover:text-white">Hall of Fame</a></li>
             </ul>
           </div>
-
-          {/* Support Guild */}
           <div>
             <h4 className="font-bold mb-4">Support Guild</h4>
             <ul className="space-y-2 text-sm text-green-100">
               <li><a href="#" className="hover:text-white">Contact Quest Masters</a></li>
-              <li><a href="#" className="hover:text-white">Alliance Partners</a></li>
               <li><a href="#" className="hover:text-white">Help Center</a></li>
-              <li><a href="#" className="hover:text-white">Quest Rules</a></li>
             </ul>
           </div>
-
-          {/* Connect */}
           <div>
             <h4 className="font-bold mb-4">Connect with Us</h4>
             <div className="bg-green-600 p-4 rounded-lg text-sm">
               <p>eco-quest@hau.edu.ph</p>
               <p>+63 (2) 123-4567</p>
-              <p>HAU Main Campus</p>
-              <div className="flex gap-4 mt-4">
-                <div className="w-6 h-6 bg-green-500 rounded-full"></div>
-                <div className="w-6 h-6 bg-green-500 rounded-full"></div>
-                <div className="w-6 h-6 bg-green-500 rounded-full"></div>
-              </div>
             </div>
           </div>
         </div>
-
         <div className="max-w-6xl mx-auto text-center border-t border-green-600 mt-8 pt-6 text-green-200 text-sm">
-          <p>© 2024 HAU Eco-Quest. All rights reserved. Built with ❤️ for a sustainable future.</p>
+          <p>© 2024 HAU Eco-Quest. All rights reserved.</p>
         </div>
       </footer>
     </div>

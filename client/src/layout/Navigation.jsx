@@ -1,13 +1,18 @@
-//Josh Andrei Aguiluz
+// Josh Andrei Aguiluz
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, User, LogOut, Shield, Award, Star, Trophy, Zap, Calendar, Users, Home, BookOpen, MessageCircle, Crown, Settings, ChevronDown } from 'lucide-react';
-import { useUser } from '../context/UserContext';
-
+import { 
+  Menu, X, User, LogOut, Shield, Award, Star, Trophy, Zap, Calendar, 
+  Users, Home, BookOpen, MessageCircle, Crown, Settings, ChevronDown 
+} from 'lucide-react';
+import { useUser } from "../pages/UserContext";
 
 export function Navigation({ currentPage, onPageChange }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-  const { user, logout: userLogout } = useUser();
+
+  // ✅ Safe destructure (prevents "user is null" crash)
+  const { user, logout: userLogout } = useUser() || {};
+
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -27,14 +32,28 @@ export function Navigation({ currentPage, onPageChange }) {
     { id: 'leaderboard', label: 'Leaderboard', icon: Crown },
   ];
 
+  // UPDATED: Replicating the avatar theme structure from ProfilePage to ensure consistency
+  // These objects now contain the background (bg) and the icon color (color)
+  const avatars = [
+    { name: "Girl Avatar 1", gender: "Female", color: "text-pink-500", bg: "bg-pink-100" },
+    { name: "Girl Avatar 2", gender: "Female", color: "text-pink-400", bg: "bg-pink-50" },
+    { name: "Boy Avatar 1", gender: "Male", color: "text-blue-500", bg: "bg-blue-100" },
+    { name: "Boy Avatar 2", gender: "Male", color: "text-blue-400", bg: "bg-blue-50" },
+  ];
+  // Find the selected avatar object
+  const selectedAvatar = avatars.find((a) => a.name === (user?.avatar || "Girl Avatar 1"));
+  // Use a default style if the avatar isn't found
+  const defaultAvatarStyle = { bg: "bg-pink-100", color: "text-pink-500" };
+  const currentAvatarStyle = selectedAvatar || defaultAvatarStyle;
+
+
   const getProfileDropdown = () => {
     if (!user) return null;
 
-    // Use a default of 0 for points if it's not available yet
     const points = user.points || 0;
     const level = Math.floor(points / 100) + 1;
     const roleIcon = user.role === 'admin' ? '👑' : user.role === 'partner' ? '🤝' : '⭐';
-
+    
     return (
       <div className="relative" ref={dropdownRef}>
         <button
@@ -42,8 +61,9 @@ export function Navigation({ currentPage, onPageChange }) {
           className="flex items-center gap-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-3 py-2 shadow-sm hover:shadow-md transition-all"
         >
           <div className="relative">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold">
-              {user.username ? user.username.charAt(0).toUpperCase() : '?'}
+            {/* FINAL FIX APPLIED HERE: Using the correct background and icon color classes */}
+            <div className={`w-10 h-10 ${currentAvatarStyle.bg} rounded-full flex items-center justify-center`}>
+              <User className={`w-6 h-6 ${currentAvatarStyle.color}`} /> {/* Icon color is now dynamic */}
             </div>
             <div className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
               {level}
@@ -64,14 +84,23 @@ export function Navigation({ currentPage, onPageChange }) {
 
         {profileDropdownOpen && (
           <div className="absolute right-0 top-full mt-2 w-56 bg-white/95 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-xl py-2 z-50">
-            <button onClick={() => { onPageChange('profile'); setProfileDropdownOpen(false); }} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full">
+            <button 
+              onClick={() => { onPageChange('profile'); setProfileDropdownOpen(false); }} 
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+            >
               <User className="w-4 h-4" /> View Profile
             </button>
-            <button onClick={() => { onPageChange('dashboard'); setProfileDropdownOpen(false); }} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full">
+            <button 
+              onClick={() => { onPageChange('dashboard'); setProfileDropdownOpen(false); }} 
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+            >
               <Settings className="w-4 h-4" /> Settings
             </button>
             <div className="border-t border-gray-100 my-1"></div>
-            <button onClick={() => { userLogout(); onPageChange('home'); setProfileDropdownOpen(false); }} className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full">
+            <button 
+              onClick={() => { userLogout?.(); onPageChange('home'); setProfileDropdownOpen(false); }} 
+              className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
+            >
               <LogOut className="w-4 h-4" /> Logout
             </button>
           </div>
@@ -115,7 +144,10 @@ export function Navigation({ currentPage, onPageChange }) {
           <div className="hidden md:flex items-center space-x-3">
             {user ? (
               <div className="flex items-center space-x-3">
-                <button onClick={() => onPageChange('dashboard')} className="flex items-center gap-2 bg-green-100 text-green-600 border border-green-200 hover:bg-green-200 px-4 py-2 rounded-full font-semibold transition-colors">
+                <button 
+                  onClick={() => onPageChange('dashboard')} 
+                  className="flex items-center gap-2 bg-green-100 text-green-600 border border-green-200 hover:bg-green-200 px-4 py-2 rounded-full font-semibold transition-colors"
+                >
                   <Zap className="w-4 h-4" /> Dashboard
                 </button>
                 {getProfileDropdown()}

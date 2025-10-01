@@ -1,7 +1,7 @@
 //Josh Andrei Aguiluz
 import React, { useState } from 'react';
-import { useUser } from '../context/UserContext';
-import { BookOpen, PlusCircle, User, Settings, BarChart, TreePine, Recycle, Droplets, Sun, Zap, Activity, Badge, Trophy, CheckCircle, Clock, List, ChevronRight, Award } from 'lucide-react';
+import { useUser } from "../pages/UserContext";
+import { BookOpen, PlusCircle, User, Settings, BarChart, TreePine, Recycle, Droplets, Sun, Zap, Activity, Badge, Trophy, CheckCircle, Clock, List, ChevronRight, Award, UserCircle } from 'lucide-react';
 
 // --- ALL HELPER COMPONENTS ARE NOW DEFINED AT THE TOP LEVEL ---
 
@@ -147,28 +147,49 @@ const TabButton = ({ id, label, icon, activeTab, setActiveTab }) => (
     </button>
 );
 
-// DashboardHeader component - NOW DEFINED AT TOP LEVEL
-const DashboardHeader = ({ userData, levelProgress }) => (
-    <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 mb-8">
+// Avatar mapping
+const getAvatarStyles = (avatarName) => {
+    const avatars = {
+        "Girl Avatar 1": { color: "text-pink-500", bg: "bg-pink-100" },
+        "Girl Avatar 2": { color: "text-pink-400", bg: "bg-pink-50" },
+        "Boy Avatar 1": { color: "text-blue-500", bg: "bg-blue-100" },
+        "Boy Avatar 2": { color: "text-blue-400", bg: "bg-blue-50" },
+    };
+    return avatars[avatarName] || avatars["Girl Avatar 1"];
+};
+
+// Header theme mapping
+const getHeaderTheme = (themeName) => {
+    const themes = {
+        orange: "from-orange-400 to-pink-500",
+        green: "from-green-400 to-emerald-600",
+        blue: "from-blue-400 to-indigo-500",
+    };
+    return themes[themeName] || themes.orange;
+};
+
+// DashboardHeader component - NOW USES AVATAR & HEADER THEME FROM USER CONTEXT
+const DashboardHeader = ({ userData, levelProgress, avatarStyle, headerTheme }) => (
+    <div className={`bg-gradient-to-r ${headerTheme} p-6 rounded-2xl shadow-lg mb-8`}>
         <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="relative">
-                <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-bold text-3xl shadow-md">
-                    {userData.name.charAt(0).toUpperCase()}
+                <div className={`w-20 h-20 rounded-full ${avatarStyle.bg} flex items-center justify-center shadow-md`}>
+                    <UserCircle className={`w-16 h-16 ${avatarStyle.color}`} />
                 </div>
                 <div className="absolute -bottom-1 -right-1 bg-gradient-to-r from-orange-400 to-orange-500 text-white text-xs font-bold w-8 h-8 rounded-full border-2 border-white flex items-center justify-center shadow-md">
                     {userData.level}
                 </div>
             </div>
             <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-3xl font-bold text-gray-800">Welcome back, {userData.name}! 👋</h2>
-                <p className="text-gray-500">{userData.title}</p>
+                <h2 className="text-3xl font-bold text-white">Welcome back, {userData.name}! 👋</h2>
+                <p className="text-white/90">{userData.title}</p>
                 <div className="mt-4">
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <div className="flex justify-between text-xs text-white/80 mb-1">
                         <span>Progress to Level {userData.level + 1}</span>
                         <span>{userData.points} / {userData.pointsToNextLevel} eco-points</span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div className="bg-green-500 h-2 rounded-full" style={{ width: `${levelProgress}%` }}></div>
+                    <div className="w-full bg-white/30 rounded-full h-2">
+                        <div className="bg-white h-2 rounded-full" style={{ width: `${levelProgress}%` }}></div>
                     </div>
                 </div>
             </div>
@@ -193,12 +214,14 @@ const DashboardPage = () => {
         pointsToNextLevel: 100,
     };
 
+    const avatarStyle = getAvatarStyles(user.avatar);
+    const headerTheme = getHeaderTheme(user.headerTheme);
     const levelProgress = (userData.points / userData.pointsToNextLevel) * 100;
     
     return (
-        <div className="font-sans bg-app-bg text-gray-800">
+        <div className="font-sans bg-gray-50 text-gray-800 min-h-screen">
             <main className="container mx-auto px-4 pt-24 pb-12">
-                <DashboardHeader userData={userData} levelProgress={levelProgress} />
+                <DashboardHeader userData={userData} levelProgress={levelProgress} avatarStyle={avatarStyle} headerTheme={headerTheme} />
                 <div className="bg-white p-2 rounded-full shadow-md border border-gray-100 inline-flex items-center gap-2 mb-8">
                     <TabButton id="overview" label="Overview" icon={<Activity className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="progress" label="Progress" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
