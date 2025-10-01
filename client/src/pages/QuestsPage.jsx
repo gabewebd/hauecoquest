@@ -1,3 +1,4 @@
+//Josh Andrei Aguiluz
 import React from 'react';
 import { Search, Droplets, TreePine, Recycle, Sun, Leaf, Building, Clock, Users, Award, Lightbulb, BookOpen } from 'lucide-react';
 
@@ -8,11 +9,24 @@ const QuestCard = ({ icon, title, description, difficulty, points, duration, par
     Medium: 'bg-yellow-100 text-yellow-600',
     Hard: 'bg-red-100 text-red-600',
   };
+  
+  // This object helps Tailwind "see" the full class names so it can generate them properly.
+  // This is the key to fixing the "white button" issue.
+  const colorVariants = {
+    green: { bg: 'bg-green-500', hover: 'hover:bg-green-600', iconBg: 'bg-green-100' },
+    yellow: { bg: 'bg-yellow-500', hover: 'hover:bg-yellow-600', iconBg: 'bg-yellow-100' },
+    blue: { bg: 'bg-blue-500', hover: 'hover:bg-blue-600', iconBg: 'bg-blue-100' },
+    cyan: { bg: 'bg-cyan-500', hover: 'hover:bg-cyan-600', iconBg: 'bg-cyan-100' },
+    lime: { bg: 'bg-lime-500', hover: 'hover:bg-lime-600', iconBg: 'bg-lime-100' },
+    indigo: { bg: 'bg-indigo-500', hover: 'hover:bg-indigo-600', iconBg: 'bg-indigo-100' },
+  };
+  const activeColor = colorVariants[color] || colorVariants.green;
+
 
   return (
     <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-100 flex flex-col transition-transform transform hover:-translate-y-1">
       <div className="flex justify-between items-start mb-4">
-        <div className={`p-3 rounded-xl bg-${color}-100`}>{icon}</div>
+        <div className={`p-3 rounded-xl ${activeColor.iconBg}`}>{icon}</div>
         <span className={`text-xs font-bold px-3 py-1 rounded-full ${difficultyStyles[difficulty]}`}>{difficulty}</span>
       </div>
       <h3 className="text-lg font-bold text-gray-800 mb-2">{title}</h3>
@@ -32,11 +46,11 @@ const QuestCard = ({ icon, title, description, difficulty, points, duration, par
           <span>{progress}% Filled</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
-          <div className={`bg-${color}-500 h-2 rounded-full`} style={{ width: `${progress}%` }}></div>
+          <div className={`${activeColor.bg} h-2 rounded-full`} style={{ width: `${progress}%` }}></div>
         </div>
       </div>
 
-      <button className={`mt-auto w-full bg-${color}-500 text-white font-bold py-2.5 px-4 rounded-xl transition-transform transform hover:scale-105 hover:bg-${color}-600`}>
+      <button className={`mt-auto w-full ${activeColor.bg} text-white font-bold py-2.5 px-4 rounded-xl transition-transform transform hover:scale-105 ${activeColor.hover}`}>
         Start Quest
       </button>
     </div>
@@ -134,7 +148,7 @@ const QuestsPage = () => {
                 <Lightbulb className="w-10 h-10 text-yellow-500 mb-4"/>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Have an Idea for a New Quest?</h2>
                 <p className="text-gray-600 max-w-lg mb-6">Share your environmental project ideas with us! We're always looking for innovative ways to make our campus and community more sustainable.</p>
-                <button className="bg-accent-orange text-white font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-105">
+                <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-105">
                     Propose New Quest
                 </button>
             </div>
