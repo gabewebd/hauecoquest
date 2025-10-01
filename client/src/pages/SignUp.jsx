@@ -3,29 +3,29 @@ import React, { useState } from "react";
 import axios from "axios";
 import { Check, Sprout, Users, Crown, ChevronLeft, GraduationCap, Mail, Lock } from "lucide-react";
 
-// --- FIX: AccountDetailsForm is now defined OUTSIDE the SignUp component ---
-const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
-    
-    const StyledInput = ({ label, placeholder, type, icon, name, value, onChange }) => (
-        <div>
-            <label className="block text-sm font-medium mb-1">{label}</label>
-            <div className="relative">
-                <input
-                    type={type}
-                    placeholder={placeholder}
-                    required
-                    name={name}
-                    value={value}
-                    onChange={onChange}
-                    className="w-full bg-gray-50 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-inner"
-                />
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    {icon}
-                </div>
+// --- FIX: StyledInput is now defined at the TOP LEVEL ---
+const StyledInput = ({ label, placeholder, type, icon, name, value, onChange }) => (
+    <div>
+        <label className="block text-sm font-medium mb-1">{label}</label>
+        <div className="relative">
+            <input
+                type={type}
+                placeholder={placeholder}
+                required
+                name={name}
+                value={value}
+                onChange={onChange}
+                className="w-full bg-gray-50 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-inner"
+            />
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                {icon}
             </div>
         </div>
-    );
+    </div>
+);
 
+// --- FIX: AccountDetailsForm is defined OUTSIDE the SignUp component ---
+const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
     return (
         <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); goToStep(2); }}>
             <StyledInput 
@@ -64,7 +64,6 @@ const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
             />
-
             <button
                 type="submit"
                 className="w-full bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold py-3 rounded-full shadow-lg hover:opacity-90 transition"
@@ -75,8 +74,9 @@ const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
     );
 };
 
-// --- FIX: RoleSelectionForm is now defined OUTSIDE the SignUp component ---
+// --- FIX: RoleSelectionForm is defined OUTSIDE the SignUp component ---
 const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAgreedToTerms, goToStep, handleSubmit }) => {
+    // ... (This component is already correct and doesn't need internal changes)
     const RoleCard = ({ role, title, icon, features, requiresApproval = false }) => {
         const isSelected = selectedRole === role;
         const baseClasses = "border-2 p-4 rounded-xl cursor-pointer transition-all duration-200 flex items-start gap-4";
@@ -198,8 +198,10 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
     );
 };
 
+
 // --- Main SignUp Component ---
 const SignUp = () => {
+    // ... (The rest of the component logic remains the same and is correct)
     const [step, setStep] = useState(1);
     const [selectedRole, setSelectedRole] = useState("Eco-Hero Student");
     const [agreedToTerms, setAgreedToTerms] = useState(false);
