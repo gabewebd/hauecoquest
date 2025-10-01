@@ -330,7 +330,9 @@ const SignUp = ({ onPageChange }) => {
                     </p>
                 </div>
             </main>
-        </div>
+        </div> 
+
+        
     );
 };
 
