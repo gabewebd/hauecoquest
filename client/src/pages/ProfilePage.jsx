@@ -96,7 +96,10 @@ const ProfilePage = () => {
                   <Award className="w-4 h-4 text-orange-500" /> {user?.badges || 2} badges
                 </div>
                 <div className="flex items-center gap-1">
+<<<<<<< HEAD
                   <Users className="w-4 h-4 text-green-500" /> {user?.friends || 3} friends
+=======
+>>>>>>> e698dd07d690e4e8e3510973666b0fe8ab544f27
                 </div>
               </div>
             </div>
