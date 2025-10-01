@@ -68,7 +68,6 @@ const CommunityPage = () => {
               <div className="flex items-center gap-4 mt-6">
                 {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
                 <button className="flex items-center gap-2 bg-green-500 text-white font-bold py-3 px-6 rounded-full transition-transform transform hover:scale-105"><UserPlus className="w-5 h-5"/> Join Community</button>
-                <button className="flex items-center gap-2 font-bold text-gray-700 py-3 px-6"><Share2 className="w-5 h-5"/> Share Achievement</button>
               </div>
             </div>
             <div className="bg-green-50 p-6 rounded-2xl text-center">
