@@ -1,14 +1,86 @@
+//Josh Andrei Aguiluz
 import React, { useState } from "react";
+import axios from "axios";
 import { Check, Sprout, Users, Crown, ChevronLeft, GraduationCap, Mail, Lock } from "lucide-react";
 
-// --- Role Selection Component (Internal component for Step 2) ---
-const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAgreedToTerms, goToStep }) => {
-    // Common style for role cards
+// --- FIX: AccountDetailsForm is now defined OUTSIDE the SignUp component ---
+const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
+    
+    const StyledInput = ({ label, placeholder, type, icon, name, value, onChange }) => (
+        <div>
+            <label className="block text-sm font-medium mb-1">{label}</label>
+            <div className="relative">
+                <input
+                    type={type}
+                    placeholder={placeholder}
+                    required
+                    name={name}
+                    value={value}
+                    onChange={onChange}
+                    className="w-full bg-gray-50 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-inner"
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    {icon}
+                </div>
+            </div>
+        </div>
+    );
+
+    return (
+        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); goToStep(2); }}>
+            <StyledInput 
+                label="Full Name" 
+                placeholder="Enter your full name" 
+                type="text" 
+                icon={<GraduationCap className="w-5 h-5" />} 
+                name="username"
+                value={formData.username}
+                onChange={handleInputChange}
+            />
+            <StyledInput 
+                label="Email Address" 
+                placeholder="your.email@hau.edu.ph" 
+                type="email" 
+                icon={<Mail className="w-5 h-5" />}
+                name="email"
+                value={formData.email}
+                onChange={handleInputChange} 
+            />
+            <StyledInput 
+                label="Password" 
+                placeholder="Create a strong password" 
+                type="password" 
+                icon={<Lock className="w-5 h-5" />}
+                name="password"
+                value={formData.password}
+                onChange={handleInputChange}
+            />
+            <StyledInput 
+                label="Confirm Password" 
+                placeholder="Confirm your password" 
+                type="password" 
+                icon={<Lock className="w-5 h-5" />}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+            />
+
+            <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold py-3 rounded-full shadow-lg hover:opacity-90 transition"
+            >
+                Continue to Role Selection
+            </button>
+        </form>
+    );
+};
+
+// --- FIX: RoleSelectionForm is now defined OUTSIDE the SignUp component ---
+const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAgreedToTerms, goToStep, handleSubmit }) => {
     const RoleCard = ({ role, title, icon, features, requiresApproval = false }) => {
         const isSelected = selectedRole === role;
-        // Adjusted border, shadow, and hover for a cleaner look
         const baseClasses = "border-2 p-4 rounded-xl cursor-pointer transition-all duration-200 flex items-start gap-4";
-        const selectedClasses = "border-green-500 bg-green-50 shadow-sm"; // Used shadow-sm for a lighter look
+        const selectedClasses = "border-green-500 bg-green-50 shadow-sm";
         const unselectedClasses = "border-gray-200 hover:border-green-300 hover:shadow-xs";
 
         return (
@@ -17,7 +89,6 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
                 onClick={() => setSelectedRole(role)}
             >
                 <div className="flex-shrink-0 mt-1">
-                    {/* Icon container */}
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                         requiresApproval ? 'bg-amber-100 text-amber-500' : 'bg-green-100 text-green-600'
                     }`}>
@@ -44,12 +115,11 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
                     </div>
                 </div>
 
-                {/* Custom radio button checkmark */}
                 <div className="flex-shrink-0 w-6 h-6 border rounded-full flex items-center justify-center mt-1"
                      style={{
-                        borderColor: isSelected ? 'rgb(16, 185, 129)' : 'rgb(209, 213, 219)',
-                        backgroundColor: isSelected ? 'rgb(16, 185, 129)' : 'white',
-                    }}
+                         borderColor: isSelected ? 'rgb(16, 185, 129)' : 'rgb(209, 213, 219)',
+                         backgroundColor: isSelected ? 'rgb(16, 185, 129)' : 'white',
+                     }}
                 >
                     {isSelected && <Check className="w-4 h-4 text-white" />}
                 </div>
@@ -58,11 +128,9 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
     };
 
     return (
-        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-6" onSubmit={handleSubmit}>
             <h3 className="font-bold text-lg mb-4 text-gray-800">Select Your Role</h3>
-
             <div className="space-y-4 mb-6">
-                {/* Role Cards */}
                 <RoleCard
                     role="Eco-Hero Student"
                     title="Eco-Hero Student"
@@ -94,24 +162,6 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
                 />
             </div>
             
-            {/* Phone Number Input - Styled for the new look */}
-            <div className="mb-6">
-                <label htmlFor="phone" className="block text-sm font-medium mb-1 text-gray-700">
-                    Phone Number (Optional)
-                </label>
-                <input
-                    id="phone"
-                    type="tel"
-                    placeholder="+63 (9XX) XXX-XXXX"
-                    // Added subtle shadow-inner for depth, removed explicit border
-                    className="w-full bg-gray-50 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-inner"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                    For important quest and event notifications
-                </p>
-            </div>
-            
-            {/* Terms and Privacy Checkbox */}
             <div className="mb-8">
                 <label className="flex items-start text-sm text-gray-600 cursor-pointer">
                     <input
@@ -126,7 +176,6 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
                 </label>
             </div>
 
-            {/* Action Buttons - Styled with the green primary and light gray secondary */}
             <div className="flex gap-4">
                 <button
                     type="button"
@@ -140,7 +189,6 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
                     type="submit"
                     className="w-2/3 flex justify-center items-center gap-2 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold py-3 rounded-full shadow-lg hover:opacity-90 transition disabled:opacity-50"
                     disabled={!agreedToTerms || !selectedRole}
-                    onClick={() => console.log('Successfully Signed Up with role:', selectedRole)}
                 >
                     <Check className="w-5 h-5 mr-1" />
                     Join the Adventure!
@@ -150,84 +198,62 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
     );
 };
 
-// --- Account Details Component (Internal component for Step 1) ---
-const AccountDetailsForm = ({ goToStep }) => {
-    // Custom input component matching the login page style
-    const StyledInput = ({ label, placeholder, type, icon, isPassword = false }) => (
-        <div>
-            <label className="block text-sm font-medium mb-1">{label}</label>
-            <div className="relative">
-                <input
-                    type={type}
-                    placeholder={placeholder}
-                    required
-                    // Matching the login page's rounded, white-field-on-light-background style
-                    className="w-full bg-gray-50 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-inner"
-                />
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                    {icon}
-                </div>
-                {isPassword && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer">
-                        {/* Assuming eye icon from lucide-react or similar */}
-                        <Lock className="w-5 h-5" /> 
-                    </div>
-                )}
-            </div>
-            {label === 'Email Address' && (
-                <p className="text-xs text-gray-500 mt-1">
-                    We'll use this to send you quest updates and achievements
-                </p>
-            )}
-        </div>
-    );
-
-    return (
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); goToStep(2); }}>
-            <StyledInput 
-                label="Full Name" 
-                placeholder="Enter your full name" 
-                type="text" 
-                icon={<GraduationCap className="w-5 h-5" />} 
-            />
-            <StyledInput 
-                label="Email Address" 
-                placeholder="your.email@hau.edu.ph" 
-                type="email" 
-                icon={<Mail className="w-5 h-5" />} 
-            />
-            <StyledInput 
-                label="Password" 
-                placeholder="Create a strong password" 
-                type="password" 
-                icon={<Lock className="w-5 h-5" />} 
-            />
-            <StyledInput 
-                label="Confirm Password" 
-                placeholder="Confirm your password" 
-                type="password" 
-                icon={<Lock className="w-5 h-5" />} 
-            />
-
-            <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold py-3 rounded-full shadow-lg hover:opacity-90 transition"
-            >
-                Continue to Role Selection
-            </button>
-        </form>
-    );
-};
-
 // --- Main SignUp Component ---
 const SignUp = () => {
     const [step, setStep] = useState(1);
     const [selectedRole, setSelectedRole] = useState("Eco-Hero Student");
     const [agreedToTerms, setAgreedToTerms] = useState(false);
+    
+    const [formData, setFormData] = useState({
+        username: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+    });
+
+    const [message, setMessage] = useState('');
+
+    const handleInputChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleFinalSubmit = async (e) => {
+        e.preventDefault();
+        setMessage('');
+
+        if (formData.password !== formData.confirmPassword) {
+            setMessage("Passwords do not match!");
+            return;
+        }
+
+        try {
+            const userData = {
+                username: formData.username,
+                email: formData.email,
+                password: formData.password,
+                role: selectedRole
+            };
+
+            const response = await axios.post('http://localhost:5000/api/auth/signup', userData);
+
+            setMessage("Sign up successful! You can now log in.");
+            console.log(response.data);
+
+        } catch (error) {
+            if (error.response && error.response.data.error) {
+                setMessage(error.response.data.error);
+            } else {
+                setMessage("An error occurred during sign up. Please try again.");
+            }
+            console.error("Signup error:", error);
+        }
+    };
 
     const isStep1 = step === 1;
 
-    // Helper function to render the correct step indicator icon
     const StepIcon = ({ number, isCurrent, isComplete, label }) => (
         <div className="flex items-center gap-2">
             <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold transition-all duration-300 ${
@@ -249,15 +275,9 @@ const SignUp = () => {
         : "Select the role that best describes your environmental journey";
 
     return (
-        // 1. Updated min-h-screen to use a light green/white gradient for the background
         <div className="min-h-screen bg-gradient-to-b from-white to-green-50 flex flex-col"> 
-            
-            {/* Main Content Area */}
             <main className="flex-grow flex items-center justify-center px-4 py-12">
-                {/* 2. Updated form card styling: rounded-3xl and shadow-lg for the welcome back look */}
                 <div className="bg-white rounded-3xl shadow-lg max-w-lg w-full p-8"> 
-                    
-                    {/* Header */}
                     <div className="text-center mb-6">
                         <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
                             <GraduationCap className="w-8 h-8 text-green-600" />
@@ -266,7 +286,6 @@ const SignUp = () => {
                         <p className="text-gray-600">{FormSubtitle}</p>
                     </div>
 
-                    {/* Step Indicator */}
                     <div className="flex justify-center mb-8">
                         <div className="flex items-center gap-4">
                             <StepIcon number={1} isCurrent={isStep1} isComplete={!isStep1} label="Account Details" />
@@ -275,9 +294,20 @@ const SignUp = () => {
                         </div>
                     </div>
 
-                    {/* Dynamic Form Content */}
+                    {message && (
+                        <div className={`p-3 rounded-lg mb-4 text-center text-sm font-semibold ${
+                            message.includes('successful') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                            {message}
+                        </div>
+                    )}
+
                     {isStep1 ? (
-                        <AccountDetailsForm goToStep={setStep} />
+                        <AccountDetailsForm 
+                            goToStep={setStep} 
+                            formData={formData}
+                            handleInputChange={handleInputChange}
+                        />
                     ) : (
                         <RoleSelectionForm 
                             selectedRole={selectedRole}
@@ -285,10 +315,10 @@ const SignUp = () => {
                             agreedToTerms={agreedToTerms}
                             setAgreedToTerms={setAgreedToTerms}
                             goToStep={setStep}
+                            handleSubmit={handleFinalSubmit}
                         />
                     )}
 
-                    {/* Login link */}
                     <p className="text-center text-sm mt-6 text-gray-600">
                         Already part of the eco-community?{" "}
                         <a href="#" className="text-green-600 font-semibold hover:underline">
@@ -297,48 +327,6 @@ const SignUp = () => {
                     </p>
                 </div>
             </main>
-
-            {/* Footer remains the same */}
-            <footer className="bg-green-600 text-white pt-12 pb-6 px-6">
-                <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
-                    <div>
-                        <h3 className="text-2xl font-bold mb-4">HAU Eco-Quest</h3>
-                        <p className="text-sm text-green-100">
-                            Empowering students to become environmental champions through
-                            engaging sustainability adventures. Join the movement to save our
-                            planet! 🌍
-                        </p>
-                    </div>
-                    <div>
-                        <h4 className="font-bold mb-4">Adventure Paths</h4>
-                        <ul className="space-y-2 text-sm text-green-100">
-                            <li>Browse Epic Quests</li>
-                            <li>Upcoming Events</li>
-                            <li>Hero Community</li>
-                            <li>Hall of Fame</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 className="font-bold mb-4">Support Guild</h4>
-                        <ul className="space-y-2 text-sm text-green-100">
-                            <li>Contact Quest Masters</li>
-                            <li>Alliance Partners</li>
-                            <li>Help Center</li>
-                            <li>Quest Rules</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 className="font-bold mb-4">Connect with Us</h4>
-                        <p>eco-quest@hau.edu.ph</p>
-                        <p>+63 (2) 123-4567</p>
-                        <p>HAU Main Campus</p>
-                    </div>
-                </div>
-                <div className="text-center text-green-200 text-sm mt-8 border-t border-green-500 pt-4">
-                    © 2024 HAU Eco-Quest. All rights reserved. Built with 💚 for a
-                    sustainable future.
-                </div>
-            </footer>
         </div>
     );
 };
