@@ -15,6 +15,7 @@ export const useUser = () => {
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     // Check if user is logged in on mount
@@ -24,11 +25,50 @@ export const UserProvider = ({ children }) => {
     } else {
       setLoading(false);
     }
+
+    // Set up periodic checking for approval status changes (every 30 seconds)
+    let intervalId;
+    if (token) {
+      intervalId = setInterval(() => {
+        fetchUser();
+      }, 30000); // Check every 30 seconds
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
   }, []);
 
   const fetchUser = async () => {
     try {
       const userData = await authAPI.getCurrentUser();
+      
+      // Check if approval status changed
+      if (user && userData) {
+        // User was pending and now approved (role changed from user to partner/admin)
+        if (user.requested_role && !user.is_approved && userData.is_approved && userData.role !== 'user' && userData.role !== user.role) {
+          const roleTitle = userData.role === 'partner' ? 'Partner' : 'Admin';
+          alert(`🎉 Congratulations! Your ${roleTitle} request has been approved! You now have access to additional features. Redirecting to your dashboard...`);
+          
+          // Redirect to appropriate dashboard
+          setTimeout(() => {
+            if (userData.role === 'admin') {
+              window.location.href = '/admin-dashboard';
+            } else if (userData.role === 'partner') {
+              window.location.href = '/partner-dashboard';
+            }
+          }, 2000);
+          return; // Don't continue with normal user setting
+        }
+        // User request was rejected (had requested_role, now null and still user)
+        else if (user.requested_role && !userData.requested_role && userData.role === 'user') {
+          const roleTitle = user.requested_role === 'partner' ? 'Partner' : 'Admin';
+          alert(`Your ${roleTitle} request was not approved at this time. You can still enjoy all the regular user features!`);
+        }
+      }
+      
       setUser(userData);
     } catch (error) {
       console.error('Error fetching user:', error);
@@ -74,7 +114,12 @@ export const UserProvider = ({ children }) => {
       if (data.success) {
         localStorage.setItem('token', data.token);
         setUser(data.user);
-        return { success: true, message: data.message, user: data.user };
+        return { 
+          success: true, 
+          message: data.message, 
+          user: data.user,
+          pendingApproval: data.user.requested_role && !data.user.is_approved
+        };
       } else {
         console.error('Signup failed:', data.error);
         return { success: false, error: data.error || 'Signup failed' };
@@ -117,6 +162,42 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  const dismissNotification = () => {
+    setNotification(null);
+  };
+
+  const requestRole = async (roleRequested) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch('http://localhost:5000/api/auth/request-role', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        },
+        body: JSON.stringify({ roleRequested })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Update user state with new requested_role
+        setUser(prev => ({
+          ...prev,
+          requested_role: data.user.requested_role,
+          is_approved: data.user.is_approved
+        }));
+        return { success: true, message: data.msg };
+      } else {
+        return { success: false, error: data.msg || 'Role request failed' };
+      }
+    } catch (error) {
+      console.error('Role request error:', error);
+      return { success: false, error: `Network error: ${error.message}` };
+    }
+  };
+
   return (
     <UserContext.Provider value={{ 
       user, 
@@ -127,7 +208,10 @@ export const UserProvider = ({ children }) => {
       updateUser, 
       deleteAccount,
       setUser,
-      refreshUser: fetchUser 
+      refreshUser: fetchUser,
+      notification,
+      dismissNotification,
+      requestRole
     }}>
       {children}
     </UserContext.Provider>

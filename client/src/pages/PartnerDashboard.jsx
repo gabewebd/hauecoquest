@@ -1132,13 +1132,25 @@ const PartnerDashboard = () => {
 
     useEffect(() => {
         // Protect against unauthorized access and pending role requests
-        if (!user || user.role !== 'partner' || (user.requested_role && !user.is_approved)) {
+        if (!user) return;
+        
+        if (user.role !== 'partner') {
             alert('Access denied. Partner privileges required.');
-            if (user) logout();
+            logout();
             window.location.href = '/';
             return;
         }
-        fetchData();
+        
+        // Block access if user has pending role request (they're still technically 'user' role)
+        if (user.requested_role && !user.is_approved) {
+            alert('Your partner application is still pending approval. Redirecting to dashboard.');
+            window.location.href = '/dashboard';
+            return;
+        }
+        
+        if (user.role === 'partner' && user.is_approved) {
+            fetchData();
+        }
     }, [user]);
 
     const fetchData = async () => {

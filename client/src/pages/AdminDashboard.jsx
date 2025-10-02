@@ -1293,13 +1293,23 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         // Protect against unauthorized access and pending role requests
-        if (!user || user.role !== 'admin' || (user.requested_role && !user.is_approved)) {
+        if (!user) return;
+        
+        if (user.role !== 'admin') {
             alert('Access denied. Admin privileges required.');
-            if (user) logout();
+            logout();
             window.location.href = '/';
             return;
         }
-        if (user && user.role === 'admin') {
+        
+        // Block access if user has pending role request (they're still technically 'user' role)
+        if (user.requested_role && !user.is_approved) {
+            alert('Your account approval is still pending. Redirecting to dashboard.');
+            window.location.href = '/dashboard';
+            return;
+        }
+        
+        if (user.role === 'admin' && user.is_approved) {
             fetchData();
         }
     }, [user]);

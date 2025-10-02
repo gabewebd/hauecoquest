@@ -11,7 +11,7 @@ const auth = require('../middleware/auth');
 router.post('/signup', async (req, res) => {
   try {
     const { username, email, password, role } = req.body;
-    console.log('Signup request:', { username, email, role });
+    console.log('Signup request:', { username, email });
 
     // Check if a user with this email already exists
     let user = await User.findOne({ email });
@@ -19,30 +19,27 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ success: false, error: "Sorry, a user with this email already exists." });
     }
 
-    // Create a new user with all default fields
-    // Users requesting partner/admin roles start as 'user' with requested_role set
-    const requestedRole = role || 'user';
-    const actualRole = (requestedRole === 'partner' || requestedRole === 'admin') ? 'user' : requestedRole;
-    
+    // Create a new user - everyone starts as 'user' role
     user = new User({
       username,
       email,
       password,
-      role: actualRole,
-      requested_role: (requestedRole === 'partner' || requestedRole === 'admin') ? requestedRole : null,
+      role: 'user', // Everyone starts as user
+      requested_role: null, // No role requests during signup
       eco_score: 0,
       points: 0,
       profile_picture_url: '',
       hau_affiliation: '',
       avatar_theme: 'Girl Avatar 1',
       header_theme: 'orange',
-      is_approved: requestedRole === 'user' ? true : false, // Auto-approve regular users, require approval for partner and admin
+      is_approved: true, // All users are approved by default
+      is_original_admin: false,
       questsCompleted: [],
       created_at: new Date()
     });
     
     await user.save();
-    console.log('User saved successfully:', user._id);
+    console.log('User created successfully:', user._id);
     
     // Create token
     const payload = {
@@ -67,7 +64,7 @@ router.post('/signup', async (req, res) => {
         console.log('Token generated successfully');
         res.status(201).json({ 
           success: true, 
-          message: requestedRole === 'user' ? 'User created successfully!' : 'Request submitted. Awaiting admin approval.',
+          message: 'User created successfully!',
           token,
           user: {
             _id: user._id,
@@ -82,6 +79,7 @@ router.post('/signup', async (req, res) => {
             avatar_theme: user.avatar_theme,
             header_theme: user.header_theme,
             is_approved: user.is_approved,
+            is_original_admin: user.is_original_admin,
             questsCompleted: user.questsCompleted,
             created_at: user.created_at
           }
@@ -108,10 +106,12 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: "Invalid credentials." });
     }
 
-    // Check if user has a pending role request (partner or admin)
+    // Check if user has a pending role request (partner or admin) - allow login but with limited access
     if (user.requested_role && !user.is_approved) {
-      const roleTitle = user.requested_role === 'partner' ? 'partner' : 'admin';
-      return res.status(403).json({ error: `Your ${roleTitle} account request is pending admin approval.` });
+      // They can login but will be redirected to dashboard showing pending status
+      console.log(`User ${user.email} logging in with pending ${user.requested_role} request`);
+    } else if (user.role !== 'user' && user.is_approved) {
+      console.log(`Approved ${user.role} ${user.email} logging in`);
     }
 
     // Check if partner/admin is approved (in case they somehow got the role without approval)
@@ -155,6 +155,7 @@ router.post('/login', async (req, res) => {
             avatar_theme: user.avatar_theme,
             header_theme: user.header_theme,
             is_approved: user.is_approved,
+            is_original_admin: user.is_original_admin,
             questsCompleted: user.questsCompleted,
             created_at: user.created_at
           }
@@ -183,29 +184,114 @@ router.get('/me', auth, async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/request-partner-access
-// @desc    Request partner access for existing user
+// @route   POST /api/auth/request-role
+// @desc    Request partner or admin access for existing user
 // @access  Private
-router.post('/request-partner-access', auth, async (req, res) => {
+router.post('/request-role', auth, async (req, res) => {
+  console.log('=== ROLE REQUEST ENDPOINT HIT ===');
+  console.log('Request body:', req.body);
+  console.log('User from middleware:', req.user);
+  
   try {
+    const { roleRequested } = req.body;
+    console.log('Role request received:', { roleRequested, userId: req.user.id });
+    
+    // Validate input
+    if (!roleRequested || !['partner', 'admin'].includes(roleRequested)) {
+      console.log('Invalid role requested:', roleRequested);
+      return res.status(400).json({ 
+        success: false,
+        msg: 'Invalid role requested. Must be partner or admin.' 
+      });
+    }
+
+    // Find user in database
     const user = await User.findById(req.user.id);
+    console.log('User found:', { 
+      id: user?._id, 
+      role: user?.role, 
+      requested_role: user?.requested_role,
+      is_approved: user?.is_approved 
+    });
     
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' });
+      console.log('User not found in database');
+      return res.status(404).json({ 
+        success: false,
+        msg: 'User not found' 
+      });
     }
 
-    if (user.role === 'partner' || user.role === 'admin') {
-      return res.status(400).json({ msg: 'User already has elevated privileges' });
+    // Validate user can make request
+    if (user.role !== 'user') {
+      console.log('User is not a regular user, role:', user.role);
+      return res.status(400).json({ 
+        success: false,
+        msg: 'Only regular users can request role upgrades' 
+      });
     }
 
-    user.role = 'partner';
+    if (user.requested_role) {
+      console.log('User already has pending request:', user.requested_role);
+      return res.status(400).json({ 
+        success: false,
+        msg: 'You already have a pending role request' 
+      });
+    }
+
+    // Update user with request
+    user.requested_role = roleRequested;
     user.is_approved = false;
     await user.save();
+    
+    console.log('Role request saved successfully:', { 
+      requested_role: user.requested_role, 
+      is_approved: user.is_approved 
+    });
 
-    res.json({ msg: 'Partner access requested. Awaiting admin approval.' });
+    const roleTitle = roleRequested === 'partner' ? 'Partner' : 'Admin';
+    
+    const response = { 
+      success: true,
+      msg: `${roleTitle} access requested successfully. Awaiting admin approval.`,
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        requested_role: user.requested_role,
+        is_approved: user.is_approved
+      }
+    };
+    
+    console.log('Sending response:', response);
+    res.status(200).json(response);
+    
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ msg: 'Server error' });
+    console.error('Role request error:', err);
+    res.status(500).json({ 
+      success: false,
+      msg: 'Server error',
+      error: err.message 
+    });
+  }
+});
+
+// @route   GET /api/auth/test-role
+// @desc    Test endpoint for role functionality
+// @access  Private
+router.get('/test-role', auth, async (req, res) => {
+  try {
+    res.json({ 
+      success: true,
+      msg: 'Role test endpoint working',
+      user: req.user
+    });
+  } catch (err) {
+    res.status(500).json({ 
+      success: false,
+      msg: 'Test endpoint error' 
+    });
   }
 });
 

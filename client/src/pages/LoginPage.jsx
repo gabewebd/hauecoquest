@@ -22,14 +22,20 @@ const LoginPage = ({ onPageChange }) => {
             const result = await login(email, password);
             
             if (result.success && result.user) {
-                // Redirect based on role from the returned user data
-                const userRole = result.user.role;
-                if (userRole === 'admin') {
-                    onPageChange('admin-dashboard');
-                } else if (userRole === 'partner') {
-                    onPageChange('partner-dashboard');
-                } else {
+                // Check if user has pending role request
+                if (result.user.requested_role && !result.user.is_approved) {
+                    // Redirect to dashboard to show pending status
                     onPageChange('dashboard');
+                } else {
+                    // Redirect based on actual approved role
+                    const userRole = result.user.role;
+                    if (userRole === 'admin' && result.user.is_approved) {
+                        onPageChange('admin-dashboard');
+                    } else if (userRole === 'partner' && result.user.is_approved) {
+                        onPageChange('partner-dashboard');
+                    } else {
+                        onPageChange('dashboard');
+                    }
                 }
             } else {
                 setError(result.error || 'Login failed. Please try again.');

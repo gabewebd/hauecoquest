@@ -73,90 +73,28 @@ const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
     );
 };
 
-const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAgreedToTerms, goToStep, handleSubmit, loading }) => {
-    const RoleCard = ({ role, title, icon, features, requiresApproval = false }) => {
-        const isSelected = selectedRole === role;
-        const baseClasses = "border-2 p-4 rounded-xl cursor-pointer transition-all duration-200 flex items-start gap-4";
-        const selectedClasses = "border-green-500 bg-green-50 shadow-sm";
-        const unselectedClasses = "border-gray-200 hover:border-green-300 hover:shadow-xs";
-
-        return (
-            <div
-                className={`${baseClasses} ${isSelected ? selectedClasses : unselectedClasses}`}
-                onClick={() => setSelectedRole(role)}
-            >
-                <div className="flex-shrink-0 mt-1">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        requiresApproval ? 'bg-amber-100 text-amber-500' : 'bg-green-100 text-green-600'
-                    }`}>
-                        {icon}
-                    </div>
-                </div>
-                
-                <div className="flex-grow">
-                    <div className="flex justify-between items-center mb-1">
-                        <h3 className="font-semibold text-gray-800">{title}</h3>
-                        {requiresApproval && (
-                            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-500 text-white">
-                                Requires Approval
-                            </span>
-                        )}
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">
-                        {features.main}
-                    </p>
-                    <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-500">
-                        {features.tags.map((tag, index) => (
-                            <span key={index} className="font-medium">{tag}</span>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="flex-shrink-0 w-6 h-6 border rounded-full flex items-center justify-center mt-1"
-                     style={{
-                         borderColor: isSelected ? 'rgb(16, 185, 129)' : 'rgb(209, 213, 219)',
-                         backgroundColor: isSelected ? 'rgb(16, 185, 129)' : 'white',
-                     }}
-                >
-                    {isSelected && <Check className="w-4 h-4 text-white" />}
-                </div>
-            </div>
-        );
-    };
-
+const AgreementForm = ({ agreedToTerms, setAgreedToTerms, goToStep, handleSubmit, loading }) => {
     return (
         <form className="space-y-6" onSubmit={handleSubmit}>
-            <h3 className="font-bold text-lg mb-4 text-gray-800">Select Your Role</h3>
-            <div className="space-y-4 mb-6">
-                <RoleCard
-                    role="user"
-                    title="Eco-Hero Student"
-                    icon={<Sprout className="w-5 h-5" />}
-                    features={{
-                        main: "Join environmental quests and make a difference on campus",
-                        tags: ["Complete quests", "Earn rewards", "Join community", "Track progress"]
-                    }}
-                />
-                <RoleCard
-                    role="partner"
-                    title="Environmental Partner"
-                    icon={<Users className="w-5 h-5" />}
-                    features={{
-                        main: "Organizations working together for sustainability",
-                        tags: ["Create events", "Manage quests", "Analytics dashboard", "Community impact"]
-                    }}
-                    requiresApproval
-                />
-                <RoleCard
-                    role="admin"
-                    title="Quest Master Admin"
-                    icon={<Crown className="w-5 h-5" />}
-                    features={{
-                        main: "University administrators managing the platform",
-                        tags: ["Full platform control", "User management", "Content approval", "System reports"]
-                    }}
-                    requiresApproval
-                />
+            <div className="text-center mb-6">
+                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Sprout className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="font-bold text-xl mb-2 text-gray-800">Welcome to HAU Eco-Quest!</h3>
+                <p className="text-gray-600">
+                    Start your environmental journey as an Eco-Hero. You can request additional roles 
+                    like Partner or Admin access from your dashboard after completing your registration.
+                </p>
+            </div>
+            
+            <div className="bg-green-50 p-4 rounded-xl border border-green-200">
+                <h4 className="font-semibold text-green-800 mb-2">Your Account Features:</h4>
+                <ul className="text-sm text-green-700 space-y-1">
+                    <li>• Complete environmental quests and earn points</li>
+                    <li>• Join the eco-community and share your progress</li>
+                    <li>• Track your environmental impact</li>
+                    <li>• Request Partner or Admin access from your dashboard</li>
+                </ul>
             </div>
             
             <div className="mb-8">
@@ -185,7 +123,7 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
                 <button
                     type="submit"
                     className="w-2/3 flex justify-center items-center gap-2 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold py-3 rounded-full shadow-lg hover:opacity-90 transition disabled:opacity-50"
-                    disabled={!agreedToTerms || !selectedRole || loading}
+                    disabled={!agreedToTerms || loading}
                 >
                     {loading ? (
                         <>
@@ -209,7 +147,6 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
 const SignUp = ({ onPageChange }) => {
     const { signup, logout, user } = useUser();
     const [step, setStep] = useState(1);
-    const [selectedRole, setSelectedRole] = useState("user");
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
@@ -243,36 +180,17 @@ const SignUp = ({ onPageChange }) => {
                 formData.username,
                 formData.email,
                 formData.password,
-                selectedRole
+                'user' // Everyone starts as a user
             );
 
             if (result.success && result.user) {
-                // Check if user has a pending role request
-                if (result.user.requested_role && !result.user.is_approved) {
-                    const roleTitle = result.user.requested_role === 'partner' ? 'Partner' : 'Admin';
-                    setMessage(`${roleTitle} request submitted. Awaiting admin approval. You cannot login until approved.`);
-                    
-                    // IMPORTANT: Completely logout the user since they can't access the system yet
-                    logout();
-                    
-                    setTimeout(() => {
-                        onPageChange('home');
-                        setLoading(false);
-                    }, 3000);
-                } else {
-                    setMessage(result.message || "Sign up successful! Redirecting...");
-                    
-                    // Redirect based on actual role (only for approved users)
-                    const userRole = result.user.role;
-                    
-                    if (userRole === 'admin') {
-                        setTimeout(() => onPageChange('admin-dashboard'), 1000);
-                    } else if (userRole === 'partner') {
-                        setTimeout(() => onPageChange('partner-dashboard'), 1000);
-                    } else {
-                        setTimeout(() => onPageChange('dashboard'), 1000);
-                    }
-                }
+                setMessage("Sign up successful! Welcome to HAU Eco-Quest! Redirecting to your dashboard...");
+                
+                // All new users go to dashboard
+                setTimeout(() => {
+                    onPageChange('dashboard');
+                    setLoading(false);
+                }, 1500);
             } else {
                 setMessage(result.error || "Sign up failed. Please try again.");
                 setLoading(false);
@@ -306,10 +224,10 @@ const SignUp = ({ onPageChange }) => {
         </div>
     );
 
-    const FormTitle = isStep1 ? "Join the Eco-Revolution!" : "Choose Your Eco-Role";
+    const FormTitle = isStep1 ? "Join the Eco-Revolution!" : "Finalize Your Registration";
     const FormSubtitle = isStep1 
         ? "Create your account and start making a positive environmental impact today"
-        : "Select the role that best describes your environmental journey";
+        : "Review the terms and complete your HAU Eco-Quest registration";
 
     const containerClass = "min-h-screen bg-gradient-to-b from-white to-green-50 flex flex-col";
     const mainClass = "flex-grow flex items-center justify-center px-4 py-12";
@@ -331,7 +249,7 @@ const SignUp = ({ onPageChange }) => {
                         <div className="flex items-center gap-4">
                             <StepIcon number={1} isCurrent={isStep1} isComplete={!isStep1} label="Account Details" />
                             <div className={`h-0.5 w-12 transition-colors duration-300 ${isStep1 ? 'bg-gray-300' : 'bg-green-600'}`}></div>
-                            <StepIcon number={2} isCurrent={!isStep1} isComplete={false} label="Role & Preferences" />
+                            <StepIcon number={2} isCurrent={!isStep1} isComplete={false} label="Terms & Agreement" />
                         </div>
                     </div>
 
@@ -350,9 +268,7 @@ const SignUp = ({ onPageChange }) => {
                             handleInputChange={handleInputChange}
                         />
                     ) : (
-                        <RoleSelectionForm 
-                            selectedRole={selectedRole}
-                            setSelectedRole={setSelectedRole}
+                        <AgreementForm 
                             agreedToTerms={agreedToTerms}
                             setAgreedToTerms={setAgreedToTerms}
                             goToStep={setStep}

@@ -55,7 +55,11 @@ const userSchema = new mongoose.Schema({
   },
   is_approved: {
     type: Boolean,
-    default: true  // Regular users are auto-approved, only partner/admin requests need approval
+    default: true  // Default to true, but explicitly set to false for partner/admin requests in signup route
+  },
+  is_original_admin: {
+    type: Boolean,
+    default: false  // Only the original admin@hau.edu.ph should have this set to true
   },
   questsCompleted: [{
     type: mongoose.Schema.Types.ObjectId,

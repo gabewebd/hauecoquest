@@ -50,26 +50,57 @@ router.put('/users/:id/role', auth, roleCheck('admin'), async (req, res) => {
 // @access  Private (Admin only)
 router.put('/users/:id/approve', auth, roleCheck('admin'), async (req, res) => {
   try {
+    console.log(`=== APPROVING USER: ${req.params.id} ===`);
     const user = await User.findById(req.params.id);
     
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' });
+      console.log('User not found for approval');
+      return res.status(404).json({ 
+        success: false,
+        msg: 'User not found' 
+      });
     }
+
+    console.log('User before approval:', {
+      id: user._id,
+      email: user.email,
+      role: user.role,
+      requested_role: user.requested_role,
+      is_approved: user.is_approved
+    });
 
     // If user has a requested_role, promote them to that role
     if (user.requested_role) {
+      const previousRole = user.role;
       user.role = user.requested_role;
       user.requested_role = null;
+      console.log(`Promoting user from ${previousRole} to ${user.role}`);
     }
     
     user.is_approved = true;
     await user.save();
 
+    console.log('User after approval:', {
+      id: user._id,
+      email: user.email,
+      role: user.role,
+      requested_role: user.requested_role,
+      is_approved: user.is_approved
+    });
+
     const updatedUser = await User.findById(req.params.id).select('-password');
-    res.json(updatedUser);
+    res.json({
+      success: true,
+      msg: `User approved as ${updatedUser.role}`,
+      user: updatedUser
+    });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ msg: 'Server error' });
+    console.error('Approval error:', err.message);
+    res.status(500).json({ 
+      success: false,
+      msg: 'Server error',
+      error: err.message 
+    });
   }
 });
 
@@ -78,11 +109,26 @@ router.put('/users/:id/approve', auth, roleCheck('admin'), async (req, res) => {
 // @access  Private (Admin only)
 router.put('/users/:id/reject', auth, roleCheck('admin'), async (req, res) => {
   try {
+    console.log(`=== REJECTING USER: ${req.params.id} ===`);
     const user = await User.findById(req.params.id);
     
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' });
+      console.log('User not found for rejection');
+      return res.status(404).json({ 
+        success: false,
+        msg: 'User not found' 
+      });
     }
+
+    console.log('User before rejection:', {
+      id: user._id,
+      email: user.email,
+      role: user.role,
+      requested_role: user.requested_role,
+      is_approved: user.is_approved
+    });
+
+    const rejectedRole = user.requested_role;
 
     // Clear the requested role and set as regular approved user
     user.requested_role = null;
@@ -90,11 +136,27 @@ router.put('/users/:id/reject', auth, roleCheck('admin'), async (req, res) => {
     user.is_approved = true;
     await user.save();
 
+    console.log('User after rejection:', {
+      id: user._id,
+      email: user.email,
+      role: user.role,
+      requested_role: user.requested_role,
+      is_approved: user.is_approved
+    });
+
     const updatedUser = await User.findById(req.params.id).select('-password');
-    res.json(updatedUser);
+    res.json({
+      success: true,
+      msg: `${rejectedRole} request rejected. User remains as regular user.`,
+      user: updatedUser
+    });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ msg: 'Server error' });
+    console.error('Rejection error:', err.message);
+    res.status(500).json({ 
+      success: false,
+      msg: 'Server error',
+      error: err.message 
+    });
   }
 });
 

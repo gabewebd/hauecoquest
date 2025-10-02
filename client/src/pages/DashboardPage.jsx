@@ -1,7 +1,7 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
 import { useUser } from "../context/UserContext";
-import { BookOpen, PlusCircle, User, Settings, BarChart, TreePine, Recycle, Droplets, Sun, Zap, Activity, Badge, Trophy, CheckCircle, Clock, List, ChevronRight, Award, UserCircle } from 'lucide-react';
+import { BookOpen, PlusCircle, User, Settings, BarChart, TreePine, Recycle, Droplets, Sun, Zap, Activity, Badge, Trophy, CheckCircle, Clock, List, ChevronRight, Award, UserCircle, Users, Crown } from 'lucide-react';
 
 // --- ALL HELPER COMPONENTS ARE NOW DEFINED AT THE TOP LEVEL ---
 
@@ -188,6 +188,171 @@ const TabButton = ({ id, label, icon, activeTab, setActiveTab }) => (
     </button>
 );
 
+// Pending Approval Component
+const PendingApprovalCard = ({ user }) => {
+    const roleTitle = user.requested_role === 'partner' ? 'Environmental Partner' : 'Admin';
+    const roleIcon = user.requested_role === 'partner' ? 
+        <Users className="w-8 h-8 text-yellow-500" /> : 
+        <Crown className="w-8 h-8 text-red-500" />;
+    
+    return (
+        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-6 rounded-2xl shadow-lg mb-8 text-white">
+            <div className="flex items-center gap-6">
+                <div className="bg-white/20 p-4 rounded-full">
+                    {roleIcon}
+                </div>
+                <div className="flex-1">
+                    <h2 className="text-2xl font-bold mb-2">🕐 Role Request Pending</h2>
+                    <p className="text-white/90 mb-1">
+                        Your <strong>{roleTitle}</strong> request is being reviewed by our administrators.
+                    </p>
+                    <p className="text-white/80 text-sm">
+                        You'll receive access to additional features once your request is approved.
+                        In the meantime, you can still participate in quests and earn points!
+                    </p>
+                </div>
+                <div className="text-center">
+                    <div className="bg-white/20 px-4 py-2 rounded-full mb-2">
+                        <Clock className="w-6 h-6 mx-auto" />
+                    </div>
+                    <p className="text-sm font-semibold">Awaiting Approval</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Role Request Component
+const RoleRequestCard = ({ user, onRequestRole }) => {
+    const [showModal, setShowModal] = useState(false);
+    const [selectedRole, setSelectedRole] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleRoleRequest = async () => {
+        if (!selectedRole) return;
+        
+        setLoading(true);
+        try {
+            const result = await onRequestRole(selectedRole);
+            
+            if (result.success) {
+                setShowModal(false);
+                setSelectedRole('');
+                const roleTitle = selectedRole === 'partner' ? 'Partner' : 'Admin';
+                alert(`✅ Request sent! Your ${roleTitle} request has been submitted successfully. You will be notified when an admin reviews your request.`);
+                // The page will automatically refresh and show the pending approval card
+                window.location.reload();
+            } else {
+                console.error('Role request failed:', result.error);
+                alert(`❌ ${result.error || 'Failed to submit role request'}`);
+            }
+        } catch (error) {
+            console.error('Role request error:', error);
+            alert(`❌ Network error: ${error.message}`);
+        }
+        setLoading(false);
+    };
+
+    return (
+        <>
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 rounded-2xl shadow-lg mb-8 text-white">
+                <div className="flex items-center gap-6">
+                    <div className="bg-white/20 p-4 rounded-full">
+                        <Settings className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="flex-1">
+                        <h2 className="text-2xl font-bold mb-2">🚀 Upgrade Your Account</h2>
+                        <p className="text-white/90 mb-1">
+                            Ready to take on more responsibilities? Request Partner or Admin access!
+                        </p>
+                        <p className="text-white/80 text-sm">
+                            Partners can create and manage quests, while Admins have full platform control.
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => setShowModal(true)}
+                        className="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-lg font-semibold transition"
+                    >
+                        Request Role
+                    </button>
+                </div>
+            </div>
+
+            {/* Role Request Modal */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+                        <div className="p-6">
+                            <h3 className="text-2xl font-bold mb-4">Request Role Upgrade</h3>
+                            <p className="text-gray-600 mb-6">
+                                Choose the role you'd like to request. Your request will be reviewed by administrators.
+                            </p>
+
+                            <div className="space-y-3 mb-6">
+                                <label className="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <input
+                                        type="radio"
+                                        name="role"
+                                        value="partner"
+                                        checked={selectedRole === 'partner'}
+                                        onChange={(e) => setSelectedRole(e.target.value)}
+                                        className="mt-1"
+                                    />
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Users className="w-5 h-5 text-purple-500" />
+                                            <span className="font-semibold">Environmental Partner</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">
+                                            Create and manage environmental quests, access analytics dashboard
+                                        </p>
+                                    </div>
+                                </label>
+
+                                <label className="flex items-start gap-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <input
+                                        type="radio"
+                                        name="role"
+                                        value="admin"
+                                        checked={selectedRole === 'admin'}
+                                        onChange={(e) => setSelectedRole(e.target.value)}
+                                        className="mt-1"
+                                    />
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Crown className="w-5 h-5 text-red-500" />
+                                            <span className="font-semibold">Platform Administrator</span>
+                                        </div>
+                                        <p className="text-sm text-gray-600">
+                                            Full platform control, user management, content approval
+                                        </p>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowModal(false)}
+                                    className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50 transition"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleRoleRequest}
+                                    disabled={!selectedRole || loading}
+                                    className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {loading ? 'Submitting...' : 'Submit Request'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
+
 // Avatar mapping
 const getAvatarStyles = (avatarName) => {
     const avatars = {
@@ -245,7 +410,7 @@ const DashboardHeader = ({ userData, levelProgress, avatarStyle, headerTheme }) 
 
 // --- Main Dashboard Component ---
 const DashboardPage = () => {
-    const { user, logout } = useUser();
+    const { user, logout, requestRole } = useUser();
     const [dashboardData, setDashboardData] = useState({
         questsCompleted: 0,
         badgesEarned: 0,
@@ -262,14 +427,8 @@ const DashboardPage = () => {
     });
     const [loading, setLoading] = useState(true);
 
-    // Protect against pending role requests
+    // Handle pending role requests - show special pending view instead of blocking access
     useEffect(() => {
-        if (user && user.requested_role && !user.is_approved) {
-            alert('Your account is pending approval. You cannot access the dashboard yet.');
-            logout();
-            window.location.href = '/';
-            return;
-        }
         if (user) {
             fetchDashboardData();
         }
@@ -457,6 +616,16 @@ const DashboardPage = () => {
     return (
         <div className="font-sans bg-gray-50 text-gray-800 min-h-screen">
             <main className="container mx-auto px-4 pt-24 pb-12">
+                {/* Show pending approval card if user has requested role */}
+                {user.requested_role && !user.is_approved && (
+                    <PendingApprovalCard user={user} />
+                )}
+                
+                {/* Show role request card if user is regular user with no pending requests */}
+                {user.role === 'user' && !user.requested_role && (
+                    <RoleRequestCard user={user} onRequestRole={requestRole} />
+                )}
+                
                 <DashboardHeader userData={userData} levelProgress={levelProgress} avatarStyle={avatarStyle} headerTheme={headerTheme} />
                 
                 {/* Combined Content */}
