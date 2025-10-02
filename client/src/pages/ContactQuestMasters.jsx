@@ -130,17 +130,6 @@ const ContactQuestMasters = () => {
               ============================================================ 
             */}
             <header className="bg-white shadow-lg fixed top-0 left-0 right-0 z-50">
-                <nav className="container mx-auto px-4 py-3 flex justify-between items-center max-w-7xl">
-                    <div className="flex items-center space-x-2">
-                        <span className="text-xl font-extrabold text-green-700">🌱 HAU Eco-Quest</span>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                        <button className="text-sm text-gray-600 hover:text-green-700 font-medium">Dashboard</button>
-                        <button className="bg-green-600 text-white text-sm px-4 py-2 rounded-full hover:bg-green-700 transition-colors shadow-md">
-                            Product Hub
-                        </button>
-                    </div>
-                </nav>
             </header>
 
             {/* Main Content Area */}
@@ -251,7 +240,7 @@ const ContactQuestMasters = () => {
                   <h4 className="font-bold mb-4">Support Guild</h4>
                   <ul className="space-y-2 text-sm text-green-100">
                     <li><button onClick={() => onPageChange('contactquestmasters')} className="hover:text-white">Contact Quest Masters</button></li>
-                    <li><button className="hover:text-white">Alliance Partners</button></li>
+                    <li><button onClick={() => onPageChange('alliancepartners')} className="hover:text-white">Alliance Partners</button></li>
                   </ul>
                 </div>
       
