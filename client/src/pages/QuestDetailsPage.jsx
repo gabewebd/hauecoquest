@@ -201,8 +201,12 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess }) => {
 
     const category = propCategory || "General Quest";
     const location = propLocation || "HAU Campus";
-    // Mock detailed data, ensuring it exists for all quests
-    const objectives = quest.objectives || ["Complete the primary task as outlined in the quest description.", "Document your progress with photo evidence.", "Submit a short reflection on the experience."];
+    
+    // --- CHANGE: Process objectives to remove the word count from the text ---
+    // This will dynamically remove "(50-word)" from any objective text that contains it.
+    const originalObjectives = quest.objectives || ["Complete the primary task as outlined in the quest description.", "Document your progress with photo evidence.", "Submit a reflection on the experience."];
+    const objectives = originalObjectives.map(obj => obj.replace(/a short \(50-word\) /i, 'a '));
+
     const submissionRequirements = quest.submissionRequirements || ["One high-resolution photo/video.","A log or text summary of your results.","Adherence to HAU Eco-Quest guidelines."];
     
     // Determine quest status based on user's submission
@@ -364,3 +368,4 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess }) => {
 }
 
 export default QuestDetailsPage;
+
