@@ -11,6 +11,8 @@ import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
 import PartnerDashboard from './pages/PartnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import ContactQuestMasters from './pages/ContactQuestMasters';
+// import AlliancePartners from './pages/AlliancePartners';
 
 import { UserProvider, useUser } from './context/UserContext';
 import { CheckCircle, Info, X } from 'lucide-react';
@@ -85,6 +87,10 @@ const AppContent = () => {
         return <PartnerDashboard onPageChange={handlePageChange} />;
       case 'admin-dashboard':
         return <AdminDashboard onPageChange={handlePageChange} />;
+      case 'contactquestmasters':
+        return <ContactQuestMasters onPageChange={handlePageChange} />;
+      // case 'alliancepartners':
+      //   return <AlliancePartners onPageChange={handlePageChange} />;
       default:
         return <HomePage onPageChange={handlePageChange} />;
     }
