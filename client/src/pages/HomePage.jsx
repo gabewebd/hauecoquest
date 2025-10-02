@@ -230,7 +230,6 @@ export default function HomePage({ onPageChange }) {
             <h4 className="font-bold mb-4">Adventure Paths</h4>
             <ul className="space-y-2 text-sm text-green-100">
               <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Browse Epic Quests</button></li>
-              <li><button onClick={() => onPageChange('events')} className="hover:text-white">Upcoming Events</button></li>
               <li><button onClick={() => onPageChange('community')} className="hover:text-white">Hero Community</button></li>
               <li><button onClick={() => onPageChange('leaderboard')} className="hover:text-white">Hall of Fame</button></li>
             </ul>

@@ -433,7 +433,7 @@ const CommunityPage = ({ onPageChange }) => {
         </section>
       </main>
 
-      {/* Your Requested Footer */}
+      {/* Footer */}
       <footer className="bg-green-700 text-white pt-16 pb-8 px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
           {/* Brand */}
@@ -458,7 +458,7 @@ const CommunityPage = ({ onPageChange }) => {
             <h4 className="font-bold mb-4">Adventure Paths</h4>
             <ul className="space-y-2 text-sm text-green-100">
               <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Browse Epic Quests</button></li>
-              <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Upcoming Events</button></li>
+              <li><button onClick={() => onPageChange('events')} className="hover:text-white">Upcoming Events</button></li>
               <li><button onClick={() => onPageChange('community')} className="hover:text-white">Hero Community</button></li>
               <li><button onClick={() => onPageChange('leaderboard')} className="hover:text-white">Hall of Fame</button></li>
             </ul>
@@ -468,10 +468,10 @@ const CommunityPage = ({ onPageChange }) => {
           <div>
             <h4 className="font-bold mb-4">Support Guild</h4>
             <ul className="space-y-2 text-sm text-green-100">
-              <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Contact Quest Masters</button></li>
-              <li><button onClick={() => onPageChange('community')} className="hover:text-white">Alliance Partners</button></li>
-              <li><button onClick={() => onPageChange('community')} className="hover:text-white">Help Center</button></li>
-              <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Quest Rules</button></li>
+              <li><button className="hover:text-white">Contact Quest Masters</button></li>
+              <li><button className="hover:text-white">Alliance Partners</button></li>
+              <li><button className="hover:text-white">Help Center</button></li>
+              <li><button className="hover:text-white">Quest Rules</button></li>
             </ul>
           </div>
 
