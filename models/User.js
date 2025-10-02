@@ -24,6 +24,11 @@ const userSchema = new mongoose.Schema({
     enum: ['user', 'partner', 'admin'],
     default: 'user'
   },
+  requested_role: {
+    type: String,
+    enum: ['user', 'partner', 'admin'],
+    default: null
+  },
   eco_score: {
     type: Number,
     default: 0
@@ -50,7 +55,7 @@ const userSchema = new mongoose.Schema({
   },
   is_approved: {
     type: Boolean,
-    default: false
+    default: true  // Regular users are auto-approved, only partner/admin requests need approval
   },
   questsCompleted: [{
     type: mongoose.Schema.Types.ObjectId,

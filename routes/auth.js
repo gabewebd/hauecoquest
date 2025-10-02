@@ -20,18 +20,23 @@ router.post('/signup', async (req, res) => {
     }
 
     // Create a new user with all default fields
+    // Users requesting partner/admin roles start as 'user' with requested_role set
+    const requestedRole = role || 'user';
+    const actualRole = (requestedRole === 'partner' || requestedRole === 'admin') ? 'user' : requestedRole;
+    
     user = new User({
       username,
       email,
       password,
-      role: role || 'user',
+      role: actualRole,
+      requested_role: (requestedRole === 'partner' || requestedRole === 'admin') ? requestedRole : null,
       eco_score: 0,
       points: 0,
       profile_picture_url: '',
       hau_affiliation: '',
       avatar_theme: 'Girl Avatar 1',
       header_theme: 'orange',
-            is_approved: role === 'user' ? true : false, // Auto-approve regular users, require approval for partner and admin
+      is_approved: requestedRole === 'user' ? true : false, // Auto-approve regular users, require approval for partner and admin
       questsCompleted: [],
       created_at: new Date()
     });
@@ -62,13 +67,14 @@ router.post('/signup', async (req, res) => {
         console.log('Token generated successfully');
         res.status(201).json({ 
           success: true, 
-          message: role === 'user' ? 'User created successfully!' : 'Request submitted. Awaiting approval.',
+          message: requestedRole === 'user' ? 'User created successfully!' : 'Request submitted. Awaiting admin approval.',
           token,
           user: {
             _id: user._id,
             username: user.username,
             email: user.email,
             role: user.role,
+            requested_role: user.requested_role,
             eco_score: user.eco_score,
             points: user.points,
             profile_picture_url: user.profile_picture_url,
@@ -102,9 +108,15 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: "Invalid credentials." });
     }
 
-    // Check if partner is approved
-    if (user.role === 'partner' && !user.is_approved) {
-      return res.status(403).json({ error: "Your partner account is pending approval." });
+    // Check if user has a pending role request (partner or admin)
+    if (user.requested_role && !user.is_approved) {
+      const roleTitle = user.requested_role === 'partner' ? 'partner' : 'admin';
+      return res.status(403).json({ error: `Your ${roleTitle} account request is pending admin approval.` });
+    }
+
+    // Check if partner/admin is approved (in case they somehow got the role without approval)
+    if ((user.role === 'partner' || user.role === 'admin') && !user.is_approved) {
+      return res.status(403).json({ error: "Your account is pending approval." });
     }
 
     // Use our custom method to compare passwords
@@ -135,6 +147,7 @@ router.post('/login', async (req, res) => {
             username: user.username,
             email: user.email,
             role: user.role,
+            requested_role: user.requested_role,
             eco_score: user.eco_score,
             points: user.points,
             profile_picture_url: user.profile_picture_url,

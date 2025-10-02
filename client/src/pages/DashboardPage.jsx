@@ -245,7 +245,7 @@ const DashboardHeader = ({ userData, levelProgress, avatarStyle, headerTheme }) 
 
 // --- Main Dashboard Component ---
 const DashboardPage = () => {
-    const { user } = useUser();
+    const { user, logout } = useUser();
     const [dashboardData, setDashboardData] = useState({
         questsCompleted: 0,
         badgesEarned: 0,
@@ -262,7 +262,14 @@ const DashboardPage = () => {
     });
     const [loading, setLoading] = useState(true);
 
+    // Protect against pending role requests
     useEffect(() => {
+        if (user && user.requested_role && !user.is_approved) {
+            alert('Your account is pending approval. You cannot access the dashboard yet.');
+            logout();
+            window.location.href = '/';
+            return;
+        }
         if (user) {
             fetchDashboardData();
         }

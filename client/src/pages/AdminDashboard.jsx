@@ -223,31 +223,40 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
 
     return (
         <div className="space-y-8">
-            {/* Pending Partner Approvals */}
+            {/* Pending Role Approvals (Partner & Admin) */}
             {pendingPartners.length > 0 && (
                 <div className="bg-yellow-50 border-2 border-yellow-200 p-6 rounded-2xl">
                     <div className="flex items-center gap-2 mb-4">
                         <Shield className="w-6 h-6 text-yellow-600" />
-                        <h3 className="text-xl font-bold text-yellow-900">Pending Partner Approvals ({pendingPartners.length})</h3>
+                        <h3 className="text-xl font-bold text-yellow-900">Pending Role Requests ({pendingPartners.length})</h3>
                     </div>
                     <div className="space-y-3">
-                        {pendingPartners.map(partner => (
-                            <div key={partner._id} className="bg-white p-4 rounded-lg flex items-center justify-between">
+                        {pendingPartners.map(request => (
+                            <div key={request._id} className="bg-white p-4 rounded-lg flex items-center justify-between">
                                 <div>
-                                    <p className="font-semibold">{partner.username}</p>
-                                    <p className="text-sm text-gray-500">{partner.email}</p>
-                                    <p className="text-xs text-gray-400 mt-1">Applied: {new Date(partner.created_at).toLocaleDateString()}</p>
+                                    <p className="font-semibold">{request.username}</p>
+                                    <p className="text-sm text-gray-500">{request.email}</p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                                            request.requested_role === 'admin' 
+                                                ? 'bg-red-100 text-red-700' 
+                                                : 'bg-purple-100 text-purple-700'
+                                        }`}>
+                                            Requested: {request.requested_role === 'admin' ? 'Admin' : 'Partner'}
+                                        </span>
+                                        <p className="text-xs text-gray-400">Applied: {new Date(request.created_at).toLocaleDateString()}</p>
+                                    </div>
                                 </div>
                                 <div className="flex gap-2">
                                     <button 
-                                        onClick={() => onApprove(partner._id)}
+                                        onClick={() => onApprove(request._id)}
                                         className="flex items-center gap-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
                                     >
                                         <CheckCircle className="w-4 h-4" />
                                         Approve
                                     </button>
                                     <button 
-                                        onClick={() => onReject(partner._id)}
+                                        onClick={() => onReject(request._id)}
                                         className="flex items-center gap-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
                                     >
                                         <XCircle className="w-4 h-4" />
@@ -1272,7 +1281,7 @@ const DailyChallengeModal = ({ onClose, onSave }) => {
 // --- MAIN ADMIN DASHBOARD ---
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
-    const { user } = useUser();
+    const { user, logout } = useUser();
     const [users, setUsers] = useState([]);
     const [quests, setQuests] = useState([]);
     const [stats, setStats] = useState({
@@ -1283,6 +1292,13 @@ const AdminDashboard = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Protect against unauthorized access and pending role requests
+        if (!user || user.role !== 'admin' || (user.requested_role && !user.is_approved)) {
+            alert('Access denied. Admin privileges required.');
+            if (user) logout();
+            window.location.href = '/';
+            return;
+        }
         if (user && user.role === 'admin') {
             fetchData();
         }
@@ -1306,14 +1322,14 @@ const AdminDashboard = () => {
             const questsData = await questsRes.json();
             setQuests(questsData);
 
-            // Calculate stats
-            const pendingPartners = usersData.filter(u => u.role === 'partner' && !u.is_approved).length;
+            // Calculate stats - include both pending partner AND admin requests
+            const pendingRequests = usersData.filter(u => u.requested_role && !u.is_approved).length;
             const activeQuests = questsData.filter(q => q.isActive).length;
 
             setStats({
                 totalUsers: usersData.length,
                 activeQuests: activeQuests,
-                pendingPartners: pendingPartners
+                pendingPartners: pendingRequests
             });
 
             setLoading(false);
@@ -1337,16 +1353,16 @@ const AdminDashboard = () => {
     };
 
     const handleRejectPartner = async (userId) => {
-        if (!confirm('Are you sure you want to reject this partner request?')) return;
+        if (!confirm('Are you sure you want to reject this role request? The user will become a regular user.')) return;
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
-                method: 'DELETE',
+            await fetch(`http://localhost:5000/api/admin/users/${userId}/reject`, {
+                method: 'PUT',
                 headers: { 'x-auth-token': token }
             });
             fetchData();
         } catch (error) {
-            console.error('Error rejecting partner:', error);
+            console.error('Error rejecting role request:', error);
         }
     };
 
@@ -1402,7 +1418,8 @@ const AdminDashboard = () => {
         );
     }
 
-    const pendingPartners = users.filter(u => u.role === 'partner' && !u.is_approved);
+    // Filter for users with pending role requests (partner or admin)
+    const pendingPartners = users.filter(u => u.requested_role && !u.is_approved);
 
     return (
         <div className="font-sans bg-gray-50 text-gray-800">

@@ -207,7 +207,7 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
 
 // --- Main SignUp Component ---
 const SignUp = ({ onPageChange }) => {
-    const { signup, user } = useUser();
+    const { signup, logout, user } = useUser();
     const [step, setStep] = useState(1);
     const [selectedRole, setSelectedRole] = useState("user");
     const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -247,23 +247,31 @@ const SignUp = ({ onPageChange }) => {
             );
 
             if (result.success && result.user) {
-                setMessage(result.message || "Sign up successful! Redirecting...");
-                
-                // Redirect based on role from the returned user data
-                const userRole = result.user.role;
-                
-                if (userRole === 'admin') {
-                    setTimeout(() => onPageChange('admin-dashboard'), 1000);
-                } else if (userRole === 'partner') {
-                    // Partner needs approval
-                    if (!result.user.is_approved) {
-                        setMessage('Partner request submitted. Awaiting admin approval.');
-                        setTimeout(() => onPageChange('home'), 2000);
-                    } else {
-                        setTimeout(() => onPageChange('partner-dashboard'), 1000);
-                    }
+                // Check if user has a pending role request
+                if (result.user.requested_role && !result.user.is_approved) {
+                    const roleTitle = result.user.requested_role === 'partner' ? 'Partner' : 'Admin';
+                    setMessage(`${roleTitle} request submitted. Awaiting admin approval. You cannot login until approved.`);
+                    
+                    // IMPORTANT: Completely logout the user since they can't access the system yet
+                    logout();
+                    
+                    setTimeout(() => {
+                        onPageChange('home');
+                        setLoading(false);
+                    }, 3000);
                 } else {
-                    setTimeout(() => onPageChange('dashboard'), 1000);
+                    setMessage(result.message || "Sign up successful! Redirecting...");
+                    
+                    // Redirect based on actual role (only for approved users)
+                    const userRole = result.user.role;
+                    
+                    if (userRole === 'admin') {
+                        setTimeout(() => onPageChange('admin-dashboard'), 1000);
+                    } else if (userRole === 'partner') {
+                        setTimeout(() => onPageChange('partner-dashboard'), 1000);
+                    } else {
+                        setTimeout(() => onPageChange('dashboard'), 1000);
+                    }
                 }
             } else {
                 setMessage(result.error || "Sign up failed. Please try again.");

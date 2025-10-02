@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Crown, Award, Shield, Sprout, Recycle, Zap, Users, Swords, Users2, Leaf, Rocket } from 'lucide-react';
 import { userAPI } from '../utils/api';
+import { useUser } from '../context/UserContext';
 
 // Helper component for the Top 3 champions
 const TopChampionCard = ({ user, rank, onPageChange }) => {

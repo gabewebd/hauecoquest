@@ -1124,15 +1124,22 @@ const DailyTab = () => {
 // --- MAIN PARTNER DASHBOARD ---
 const PartnerDashboard = () => {
     const [activeTab, setActiveTab] = useState('overview');
-    const { user } = useUser();
+    const { user, logout } = useUser();
 
     const [quests, setQuests] = useState([]);
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Protect against unauthorized access and pending role requests
+        if (!user || user.role !== 'partner' || (user.requested_role && !user.is_approved)) {
+            alert('Access denied. Partner privileges required.');
+            if (user) logout();
+            window.location.href = '/';
+            return;
+        }
         fetchData();
-    }, []);
+    }, [user]);
 
     const fetchData = async () => {
         try {

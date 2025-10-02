@@ -165,7 +165,8 @@ export function Navigation({ currentPage, onPageChange }) {
           <div className="hidden md:flex items-center space-x-3">
             {user ? (
               <div className="flex items-center space-x-3">
-                {user.role === 'user' && (
+                {/* Only show dashboard buttons if user doesn't have a pending role request */}
+                {!user.requested_role && user.role === 'user' && (
                   <button 
                     onClick={() => onPageChange('dashboard')} 
                     className="flex items-center gap-2 bg-green-100 text-green-600 border border-green-200 hover:bg-green-200 px-4 py-2 rounded-full font-semibold transition-colors"
@@ -173,7 +174,7 @@ export function Navigation({ currentPage, onPageChange }) {
                     <Zap className="w-4 h-4" /> Dashboard
                   </button>
                 )}
-                {user.role === 'partner' && (
+                {!user.requested_role && user.role === 'partner' && (
                   <button 
                     onClick={() => onPageChange('partner-dashboard')} 
                     className="flex items-center gap-2 bg-purple-100 text-purple-600 border border-purple-200 hover:bg-purple-200 px-4 py-2 rounded-full font-semibold transition-colors"
@@ -181,13 +182,19 @@ export function Navigation({ currentPage, onPageChange }) {
                     <Shield className="w-4 h-4" /> Partner
                   </button>
                 )}
-                {user.role === 'admin' && (
+                {!user.requested_role && user.role === 'admin' && (
                   <button 
                     onClick={() => onPageChange('admin-dashboard')} 
                     className="flex items-center gap-2 bg-red-100 text-red-600 border border-red-200 hover:bg-red-200 px-4 py-2 rounded-full font-semibold transition-colors"
                   >
                     <Shield className="w-4 h-4" /> Admin
                   </button>
+                )}
+                {/* Show pending status badge if user has pending request */}
+                {user.requested_role && !user.is_approved && (
+                  <div className="flex items-center gap-2 bg-amber-100 text-amber-700 border border-amber-200 px-4 py-2 rounded-full font-semibold">
+                    <Shield className="w-4 h-4" /> Pending Approval
+                  </div>
                 )}
                 {getProfileDropdown()}
               </div>

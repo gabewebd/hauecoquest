@@ -46,21 +46,52 @@ router.put('/users/:id/role', auth, roleCheck('admin'), async (req, res) => {
 });
 
 // @route   PUT /api/admin/users/:id/approve
-// @desc    Approve a partner
+// @desc    Approve a partner/admin request
 // @access  Private (Admin only)
 router.put('/users/:id/approve', auth, roleCheck('admin'), async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { is_approved: true },
-      { new: true }
-    ).select('-password');
-
+    const user = await User.findById(req.params.id);
+    
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
 
-    res.json(user);
+    // If user has a requested_role, promote them to that role
+    if (user.requested_role) {
+      user.role = user.requested_role;
+      user.requested_role = null;
+    }
+    
+    user.is_approved = true;
+    await user.save();
+
+    const updatedUser = await User.findById(req.params.id).select('-password');
+    res.json(updatedUser);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   PUT /api/admin/users/:id/reject
+// @desc    Reject a partner/admin request
+// @access  Private (Admin only)
+router.put('/users/:id/reject', auth, roleCheck('admin'), async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    // Clear the requested role and set as regular approved user
+    user.requested_role = null;
+    user.role = 'user';
+    user.is_approved = true;
+    await user.save();
+
+    const updatedUser = await User.findById(req.params.id).select('-password');
+    res.json(updatedUser);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ msg: 'Server error' });
@@ -68,14 +99,18 @@ router.put('/users/:id/approve', auth, roleCheck('admin'), async (req, res) => {
 });
 
 // @route   GET /api/admin/partner-requests
-// @desc    Get all pending partner requests
+// @desc    Get all pending partner and admin requests
 // @access  Private (Admin only)
 router.get('/partner-requests', auth, roleCheck('admin'), async (req, res) => {
   try {
-    const partners = await User.find({ role: 'partner', is_approved: false })
+    // Find all users with pending role requests (have requested_role set and not approved)
+    const pendingRequests = await User.find({ 
+      requested_role: { $in: ['partner', 'admin'] },
+      is_approved: false 
+    })
       .select('-password')
       .sort({ created_at: -1 });
-    res.json(partners);
+    res.json(pendingRequests);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ msg: 'Server error' });
