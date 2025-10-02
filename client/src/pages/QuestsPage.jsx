@@ -27,6 +27,8 @@ const QuestCard = ({ icon, title, description, difficulty, points, duration, par
   // Determine button text and style based on submission status
   const getButtonText = () => {
     if (!user) return 'Login to Start';
+    // Admin and Partner can only view, not participate
+    if (user.role === 'admin' || user.role === 'partner') return 'View Quest';
     if (questData.existingSubmission) {
       if (questData.existingSubmission.status === 'pending') return 'IN PROGRESS';
       if (questData.existingSubmission.status === 'approved') return 'COMPLETED';
@@ -36,6 +38,10 @@ const QuestCard = ({ icon, title, description, difficulty, points, duration, par
   };
 
   const getButtonColor = () => {
+    // Admin and Partner view mode
+    if (user && (user.role === 'admin' || user.role === 'partner')) {
+      return 'bg-blue-500 hover:bg-blue-600';
+    }
     if (questData.existingSubmission) {
       if (questData.existingSubmission.status === 'pending') return 'bg-yellow-500 hover:bg-yellow-600';
       if (questData.existingSubmission.status === 'approved') return 'bg-green-600 hover:bg-green-700';
@@ -54,23 +60,23 @@ const QuestCard = ({ icon, title, description, difficulty, points, duration, par
       <h3 className="text-lg font-bold text-gray-800 mb-2">{title}</h3>
       <p className="text-gray-600 text-sm mb-4 flex-grow">{description}</p>
       
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-2 text-sm text-gray-500 mb-4 border-t border-b border-gray-100 py-3">
-        <div className="flex items-center gap-1.5"><Award className="w-4 h-4 text-yellow-500"/><span>{points} points</span></div>
-        <div className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-blue-500"/><span>{duration}</span></div>
-        <div className="flex items-center gap-1.5"><Users className="w-4 h-4 text-purple-500"/><span>{participants}</span></div>
-      </div>
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-2 text-sm text-gray-500 mb-4 border-t border-b border-gray-100 py-3">
+        <div className="flex items-center gap-1.5"><Award className="w-4 h-4 text-yellow-500"/><span>{points} pts</span></div>
+        <div className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-blue-500"/><span>{duration}</span></div>
+        <div className="flex items-center gap-1.5"><Users className="w-4 h-4 text-purple-500"/><span>{participants}/{questData.maxParticipants || 100}</span></div>
+      </div>
 
-      {/* Progress Bar */}
-      <div className="mb-4">
-        <div className="flex justify-between text-xs text-gray-500 mb-1">
-          <span>Participants</span>
-          <span>{progress}% Filled</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div className={`${activeColor.bg} h-2 rounded-full`} style={{ width: `${progress}%` }}></div>
-        </div>
-      </div>
+      {/* Progress Bar */}
+      <div className="mb-4">
+        <div className="flex justify-between text-xs text-gray-500 mb-1">
+          <span>{participants} / {questData.maxParticipants || 100} joined</span>
+          <span>{Math.round(progress)}% Full</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className={`${activeColor.bg} h-2 rounded-full transition-all duration-300`} style={{ width: `${progress}%` }}></div>
+        </div>
+      </div>
 
       <button 
             // 🔑 Action: Pass the full quest object to the handler
@@ -242,7 +248,7 @@ const QuestsPage = ({ onPageChange }) => {
     }
 
     if (selectedQuest) {
-        return <QuestDetailsPage quest={selectedQuest} onBack={handleBack} onSubmissionSuccess={handleQuestSubmission} />;
+        return <QuestDetailsPage quest={selectedQuest} onBack={handleBack} onSubmissionSuccess={handleQuestSubmission} userRole={user?.role} />;
     }
 
   return (

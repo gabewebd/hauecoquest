@@ -58,8 +58,8 @@ const OverviewTab = ({ stats, setActiveTab }) => (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard icon={<Users className="w-6 h-6 text-blue-500" />} value={stats.totalUsers} label="Total Users" bgColor="bg-blue-50" />
             <StatCard icon={<BookOpen className="w-6 h-6 text-green-500" />} value={stats.activeQuests} label="Active Quests" bgColor="bg-green-50" />
-            <StatCard icon={<Shield className="w-6 h-6 text-yellow-500" />} value={stats.pendingPartners} label="Pending Requests" bgColor="bg-yellow-50" />
-            <StatCard icon={<BarChart className="w-6 h-6 text-purple-500" />} value="98%" label="System Health" bgColor="bg-purple-50" />
+            <StatCard icon={<Shield className="w-6 h-6 text-yellow-500" />} value={stats.pendingPartners} label="Pending Role Requests" bgColor="bg-yellow-50" />
+            <StatCard icon={<FileCheck className="w-6 h-6 text-orange-500" />} value={stats.pendingSubmissions} label="Pending Submissions" bgColor="bg-orange-50" />
         </div>
 
         <div className="bg-white p-6 rounded-2xl shadow-lg border">
@@ -1412,26 +1412,26 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                                     <div className="flex gap-2">
                                         <button 
                                             onClick={() => setSelectedSubmission(submission)}
-                                            className="p-2 hover:bg-blue-50 rounded-lg transition border border-blue-200"
+                                            className="p-2 hover:bg-blue-50 hover:shadow-md rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-400 transform hover:scale-105"
                                             title="View Details"
                                         >
-                                            <Eye className="w-5 h-5 text-blue-600" />
+                                            <Eye className="w-5 h-5 text-blue-600 hover:text-blue-700" />
                                         </button>
                                         {submission.status === 'pending' && (
                                             <>
                                                 <button 
                                                     onClick={() => handleApprove(submission._id)}
-                                                    className="p-2 hover:bg-green-50 rounded-lg transition border border-green-200"
+                                                    className="p-2 hover:bg-green-50 hover:shadow-md rounded-lg transition-all duration-200 border border-green-200 hover:border-green-400 transform hover:scale-105"
                                                     title="Approve"
                                                 >
-                                                    <CheckCircle className="w-5 h-5 text-green-600" />
+                                                    <CheckCircle className="w-5 h-5 text-green-600 hover:text-green-700" />
                                                 </button>
                                                 <button 
                                                     onClick={() => handleReject(submission._id)}
-                                                    className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
+                                                    className="p-2 hover:bg-red-50 hover:shadow-md rounded-lg transition-all duration-200 border border-red-200 hover:border-red-400 transform hover:scale-105"
                                                     title="Reject"
                                                 >
-                                                    <XCircle className="w-5 h-5 text-red-600" />
+                                                    <XCircle className="w-5 h-5 text-red-600 hover:text-red-700" />
                                                 </button>
                                             </>
                                         )}
@@ -1601,7 +1601,8 @@ const AdminDashboard = () => {
     const [stats, setStats] = useState({
         totalUsers: 0,
         activeQuests: 0,
-        pendingPartners: 0
+        pendingPartners: 0,
+        pendingSubmissions: 0
     });
     const [loading, setLoading] = useState(true);
 
@@ -1650,10 +1651,18 @@ const AdminDashboard = () => {
             const pendingRequests = usersData.filter(u => u.requested_role && !u.is_approved).length;
             const activeQuests = questsData.filter(q => q.isActive).length;
 
+            // Fetch pending submissions count
+            const submissionsRes = await fetch('http://localhost:5000/api/quests/submissions/all', {
+                headers: { 'x-auth-token': token }
+            });
+            const submissionsData = await submissionsRes.json();
+            const pendingSubmissions = submissionsData.filter(s => s.status === 'pending').length;
+
             setStats({
                 totalUsers: usersData.length,
                 activeQuests: activeQuests,
-                pendingPartners: pendingRequests
+                pendingPartners: pendingRequests,
+                pendingSubmissions: pendingSubmissions
             });
 
             setLoading(false);
