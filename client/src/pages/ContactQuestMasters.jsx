@@ -71,7 +71,7 @@ const FAQItem = ({ question, answer, isOpen, onToggle }) => (
 // Main Component
 // ============================================================
 
-const ContactQuestMasters = () => {
+const ContactQuestMasters = ({ onPageChange }) => {
     // State to track the currently open FAQ item
     const [openFAQ, setOpenFAQ] = useState(null);
 

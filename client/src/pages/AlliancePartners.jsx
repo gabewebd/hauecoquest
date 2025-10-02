@@ -59,7 +59,7 @@ const PartnerCard = ({ name, description, iconColor, metrics }) => (
 // ============================================================
 // 3. MAIN COMPONENT
 // ============================================================
-const AlliancePartners = () => {
+const AlliancePartners = ({ onPageChange }) => {
     // Mock Data based on the provided image
     const statsData = [
         { icon: Globe, value: '9,700', label: 'Global Reach' },
