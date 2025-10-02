@@ -110,28 +110,28 @@ const ProgressTabContent = ({ dashboardData, userData, levelProgress }) => (
                     <h3 className="text-xl font-bold mb-2">Level {userData.level}</h3>
                     <p className="text-gray-500 text-sm mb-4">Environmental Champion</p>
                     <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
-                        <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${levelProgress}%` }}></div>
+                        <div className="bg-green-500 h-2.5 rounded-full transition-all duration-300" style={{ width: `${Math.min(levelProgress || 0, 100)}%` }}></div>
                     </div>
-                    <p className="text-xs text-gray-500">{userData.pointsToNextLevel - (userData.points % userData.pointsToNextLevel)} more points needed</p>
+                    <p className="text-xs text-gray-500">{Math.max(userData.pointsToNextLevel - userData.points, 0)} more points needed</p>
                 </div>
                 <div className="bg-white p-6 rounded-2xl shadow-lg border">
                     <h3 className="text-xl font-bold mb-4">Streaks & Goals</h3>
                     <GoalItem 
                         title="Day Streak" 
                         value={dashboardData.currentStreak || 0} 
-                        progress={(dashboardData.currentStreak || 0) / 30 * 100} 
+                        progress={Math.min((dashboardData.currentStreak || 0) / 30 * 100, 100)} 
                         label={`Longest Streak: ${dashboardData.longestStreak || 0} days`} 
                     />
                     <GoalItem 
                         title="Weekly Goal" 
                         value={`${dashboardData.weeklyPoints || 0}/150`} 
-                        progress={(dashboardData.weeklyPoints || 0) / 150 * 100} 
+                        progress={Math.min((dashboardData.weeklyPoints || 0) / 150 * 100, 100)} 
                         label="Earn 150 eco-points this week" 
                     />
                     <GoalItem 
                         title="Monthly Goal" 
                         value={`${dashboardData.monthlyQuests || 0}/3`} 
-                        progress={(dashboardData.monthlyQuests || 0) / 3 * 100} 
+                        progress={Math.min((dashboardData.monthlyQuests || 0) / 3 * 100, 100)} 
                         label="Complete 3 new quests this month" 
                     />
                 </div>
@@ -400,7 +400,7 @@ const DashboardHeader = ({ userData, levelProgress, avatarStyle, headerTheme }) 
                         <span>{userData.points} / {userData.pointsToNextLevel} eco-points</span>
                     </div>
                     <div className="w-full bg-white/30 rounded-full h-2">
-                        <div className="bg-white h-2 rounded-full" style={{ width: `${levelProgress}%` }}></div>
+                        <div className="bg-white h-2 rounded-full transition-all duration-300" style={{ width: `${Math.min(levelProgress || 0, 100)}%` }}></div>
                     </div>
                 </div>
             </div>
@@ -497,89 +497,45 @@ const DashboardPage = () => {
             const token = localStorage.getItem('token');
             const headers = { 'x-auth-token': token };
 
-            // Fetch user's quest submissions
-            const questsRes = await fetch('http://localhost:5000/api/quests/submissions/my', { headers });
-            const questsData = await questsRes.json();
+            // Fetch dashboard stats from new endpoint
+            const dashboardRes = await fetch('http://localhost:5000/api/dashboard/stats', { headers });
+            const dashboardStats = await dashboardRes.json();
 
-            // Fetch user's badges
-            const badgesRes = await fetch('http://localhost:5000/api/badges/my', { headers });
-            const badgesData = await badgesRes.json();
+            console.log('Dashboard stats loaded:', dashboardStats);
 
-            // Fetch all quests for stats
-            const allQuestsRes = await fetch('http://localhost:5000/api/quests', { headers });
-            const allQuestsData = await allQuestsRes.json();
-
-            // Fetch user's posts for activity
-            const postsRes = await fetch('http://localhost:5000/api/posts/my', { headers });
-            const postsData = await postsRes.json();
-
-            // Calculate stats
-            const completedQuests = questsData.filter(q => q.status === 'approved').length;
-            const inProgressQuests = questsData.filter(q => q.status === 'pending').length;
-            const availableQuests = allQuestsData.filter(q => q.isActive).length;
-
-            // Calculate category progress
-            const categoryProgress = {};
-            allQuestsData.forEach(quest => {
-                if (!categoryProgress[quest.category]) {
-                    categoryProgress[quest.category] = { completed: 0, total: 0 };
-                }
-                categoryProgress[quest.category].total++;
-                if (questsData.some(q => q.quest_id === quest._id && q.status === 'approved')) {
-                    categoryProgress[quest.category].completed++;
-                }
-            });
-
-            // Recent activity
+            // Prepare recent activity with icons
             const recentActivity = [
-                ...questsData.slice(0, 3).map(q => ({
+                ...dashboardStats.recentSubmissions.map(s => ({
                     icon: <CheckCircle className="w-5 h-5 text-green-500" />,
-                    title: `Completed '${q.quest_id?.title || 'Quest'}'`,
-                    subtitle: `You earned ${q.points_earned || 0} points`,
-                    time: new Date(q.submitted_at).toLocaleDateString(),
-                    points: `+${q.points_earned || 0} points`
+                    title: `Completed '${s.quest}'`,
+                    subtitle: `You earned ${s.points} points`,
+                    time: new Date(s.submittedAt).toLocaleDateString(),
+                    points: `+${s.points} points`
                 })),
-                ...postsData.slice(0, 2).map(p => ({
+                ...dashboardStats.recentPosts.map(p => ({
                     icon: <User className="w-5 h-5 text-blue-500" />,
                     title: `Posted: ${p.title}`,
                     subtitle: 'Shared with the community',
-                    time: new Date(p.created_at).toLocaleDateString()
+                    time: new Date(p.createdAt).toLocaleDateString()
                 }))
             ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);
 
-            // Calculate streaks and goals
-            const now = new Date();
-            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-
-            // Weekly points (from approved quests in last 7 days)
-            const weeklyQuests = questsData.filter(q => 
-                q.status === 'approved' && new Date(q.submitted_at) >= oneWeekAgo
-            );
-            const weeklyPoints = weeklyQuests.reduce((sum, q) => sum + (q.quest_id?.points || 0), 0);
-
-            // Monthly quests (approved in last 30 days)
-            const monthlyQuests = questsData.filter(q => 
-                q.status === 'approved' && new Date(q.submitted_at) >= oneMonthAgo
-            ).length;
-
-            // Calculate current streak (consecutive days with activity)
-            const currentStreak = calculateCurrentStreak(questsData);
-            const longestStreak = calculateLongestStreak(questsData);
-
             setDashboardData({
-                questsCompleted: completedQuests,
-                badgesEarned: badgesData.length,
-                ecoPoints: user.points || 0,
-                questsInProgress: inProgressQuests,
-                availableQuests: availableQuests,
+                questsCompleted: dashboardStats.questsCompleted,
+                badgesEarned: dashboardStats.badgesEarned,
+                ecoPoints: dashboardStats.eco_score,
+                questsInProgress: dashboardStats.questsInProgress,
+                availableQuests: dashboardStats.availableQuests,
                 recentActivity: recentActivity,
-                achievements: badgesData,
-                categoryProgress: categoryProgress,
-                currentStreak: currentStreak,
-                longestStreak: longestStreak,
-                weeklyPoints: weeklyPoints,
-                monthlyQuests: monthlyQuests
+                achievements: dashboardStats.badges,
+                categoryProgress: dashboardStats.categoryProgress,
+                currentStreak: dashboardStats.currentStreak,
+                longestStreak: dashboardStats.longestStreak,
+                weeklyPoints: dashboardStats.weeklyPoints,
+                monthlyQuests: dashboardStats.monthlyQuests,
+                level: dashboardStats.level,
+                progressToNextLevel: dashboardStats.progressToNextLevel,
+                pointsForNextLevel: dashboardStats.pointsForNextLevel
             });
             setLoading(false);
         } catch (error) {

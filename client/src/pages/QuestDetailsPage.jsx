@@ -18,11 +18,16 @@ const StatItem = ({ icon, value, label, iconColor }) => (
 );
 
 // Quest Submission Form Component
-const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission }) => {
+const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission, questData }) => {
     const [file, setFile] = useState(null);
     const [reflection, setReflection] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
+    // Check if quest is full
+    const currentParticipants = questData?.completions?.length || 0;
+    const maxParticipants = questData?.maxParticipants || 100;
+    const isQuestFull = currentParticipants >= maxParticipants;
     
     // --- CHANGE: Minimum word count constant removed ---
 
@@ -76,6 +81,18 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission 
 
     // --- CHANGE: Submission is ready if reflection has any content and a file is present ---
     const isSubmissionReady = reflection.trim().length > 0 && file;
+
+    // Check if quest is full
+    if (isQuestFull) {
+        return (
+            <div className="bg-gray-50 border border-gray-300 p-6 rounded-xl text-center">
+                <CheckCircle className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                <h4 className="text-xl font-bold text-gray-800 mb-2">Quest Completed!</h4>
+                <p className="text-gray-700">This quest has reached maximum capacity ({maxParticipants} participants). No more submissions are being accepted.</p>
+                <p className="text-sm text-gray-500 mt-2">Check out other available quests!</p>
+            </div>
+        );
+    }
 
     // Check if submission already exists
     if (existingSubmission) {
@@ -212,10 +229,15 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
 
     const submissionRequirements = quest.submissionRequirements || ["One high-resolution photo/video.","A log or text summary of your results.","Adherence to HAU Eco-Quest guidelines."];
     
-    // Determine quest status based on user's submission
+    // Determine quest status based on user's submission and quest capacity
     const getQuestStatus = () => {
-        // This would need to be passed from the parent component or fetched
-        // For now, we'll use the quest status if provided
+        // Check if quest is full (reached max participants)
+        const currentParticipants = quest.completions?.length || participants || 0;
+        const maxParticipants = quest.maxParticipants || 100;
+        
+        if (currentParticipants >= maxParticipants) return 'Completed';
+        
+        // Check user's submission status
         if (quest.submissionStatus === 'approved') return 'Completed';
         if (quest.submissionStatus === 'pending') return 'Under Review';
         if (quest.submissionStatus === 'rejected') return 'Rejected';
@@ -380,6 +402,7 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
                                     questId={quest._id} 
                                     onSubmissionSuccess={onSubmissionSuccess}
                                     existingSubmission={quest.existingSubmission}
+                                    questData={quest}
                                 />
                             )}
                         </div>

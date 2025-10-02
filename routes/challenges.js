@@ -6,6 +6,41 @@ const UserBadge = require('../models/UserBadge');
 const Badge = require('../models/Badge');
 const auth = require('../middleware/auth');
 const checkRole = require('../middleware/roleCheck');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+// Create uploads directory if it doesn't exist
+const uploadDir = 'uploads';
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, `challenge-${Date.now()}${path.extname(file.originalname)}`);
+    }
+});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: function (req, file, cb) {
+        const allowedTypes = /jpeg|jpg|png|gif/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
+        
+        if (mimetype && extname) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Only images are allowed!'));
+        }
+    }
+});
 
 // @route   GET /api/challenges
 // @desc    Get all active challenges
@@ -81,9 +116,9 @@ router.post('/', [auth, checkRole('admin', 'partner')], async (req, res) => {
 });
 
 // @route   POST /api/challenges/:id/join
-// @desc    Join a challenge (Users only - not admin/partner)
+// @desc    Join a challenge with photo proof (Users only - not admin/partner)
 // @access  Private
-router.post('/:id/join', auth, async (req, res) => {
+router.post('/:id/join', [auth, upload.single('photo')], async (req, res) => {
     try {
         const challenge = await Challenge.findById(req.params.id);
         
@@ -107,49 +142,121 @@ router.post('/:id/join', auth, async (req, res) => {
             return res.status(400).json({ msg: 'You have already joined this challenge' });
         }
 
+        if (!req.file) {
+            return res.status(400).json({ msg: 'Please upload a photo as proof' });
+        }
+
         const { contribution } = req.body;
         const contributionAmount = contribution || 1;
 
-        // Add user to participants
+        // Add user to participants with pending status
         challenge.participants.push({
             user: req.user.id,
-            contribution: contributionAmount
+            contribution: contributionAmount,
+            photo_url: req.file.path,
+            status: 'pending'
         });
-
-        // Update progress
-        challenge.currentProgress += contributionAmount;
 
         await challenge.save();
 
-        // Award "Tree Master" badge
-        const treeMasterBadge = await Badge.findOne({ name: 'Tree Master' });
-        
-        if (treeMasterBadge) {
-            // Check if user already has this badge
-            const existingUserBadge = await UserBadge.findOne({
-                user_id: req.user.id,
-                badge_id: treeMasterBadge._id
-            });
-
-            if (!existingUserBadge) {
-                const userBadge = new UserBadge({
-                    user_id: req.user.id,
-                    badge_id: treeMasterBadge._id
-                });
-                await userBadge.save();
-                console.log(`Tree Master badge awarded to user ${user.username}`);
-            }
-        }
-
-        console.log(`User ${user.username} joined challenge: ${challenge.title}. Progress: ${challenge.currentProgress}/${challenge.goal}`);
+        console.log(`User ${user.username} submitted to join challenge: ${challenge.title}. Awaiting approval.`);
 
         res.json({ 
-            msg: 'Successfully joined challenge and earned Tree Master badge!', 
-            challenge,
-            badgeAwarded: treeMasterBadge ? true : false
+            msg: 'Challenge submission sent for approval!', 
+            challenge
         });
     } catch (err) {
         console.error('Error joining challenge:', err.message);
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+// @route   GET /api/challenges/:id/submissions/pending
+// @desc    Get pending challenge submissions (Admin only)
+// @access  Private
+router.get('/:id/submissions/pending', [auth, checkRole('admin')], async (req, res) => {
+    try {
+        const challenge = await Challenge.findById(req.params.id)
+            .populate('participants.user', 'username email role');
+        
+        if (!challenge) {
+            return res.status(404).json({ msg: 'Challenge not found' });
+        }
+
+        const pendingParticipants = challenge.participants.filter(p => p.status === 'pending');
+        
+        res.json(pendingParticipants);
+    } catch (err) {
+        console.error('Error fetching pending submissions:', err.message);
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+// @route   PUT /api/challenges/:id/submissions/:participantId/review
+// @desc    Approve or reject a challenge submission (Admin only)
+// @access  Private
+router.put('/:id/submissions/:participantId/review', [auth, checkRole('admin')], async (req, res) => {
+    try {
+        const { status } = req.body;
+        
+        if (!['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ msg: 'Invalid status' });
+        }
+
+        const challenge = await Challenge.findById(req.params.id);
+        
+        if (!challenge) {
+            return res.status(404).json({ msg: 'Challenge not found' });
+        }
+
+        const participant = challenge.participants.id(req.params.participantId);
+        
+        if (!participant) {
+            return res.status(404).json({ msg: 'Participant not found' });
+        }
+
+        if (participant.status === 'approved') {
+            return res.status(400).json({ msg: 'This submission is already approved' });
+        }
+
+        participant.status = status;
+        participant.reviewed_by = req.user.id;
+        participant.reviewed_at = Date.now();
+
+        // If approved, update progress and award badge
+        if (status === 'approved') {
+            challenge.currentProgress += participant.contribution;
+
+            // Award "Tree Master" badge
+            const treeMasterBadge = await Badge.findOne({ name: 'Tree Master' });
+            
+            if (treeMasterBadge) {
+                const existingUserBadge = await UserBadge.findOne({
+                    user_id: participant.user,
+                    badge_id: treeMasterBadge._id
+                });
+
+                if (!existingUserBadge) {
+                    const userBadge = new UserBadge({
+                        user_id: participant.user,
+                        badge_id: treeMasterBadge._id
+                    });
+                    await userBadge.save();
+                    console.log(`Tree Master badge awarded to user`);
+                }
+            }
+        }
+
+        await challenge.save();
+
+        console.log(`Challenge submission ${status}. Progress: ${challenge.currentProgress}/${challenge.goal}`);
+
+        res.json({ 
+            msg: `Submission ${status}`, 
+            challenge 
+        });
+    } catch (err) {
+        console.error('Error reviewing submission:', err.message);
         res.status(500).json({ msg: 'Server error' });
     }
 });

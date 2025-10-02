@@ -34,6 +34,22 @@ const ChallengeSchema = new mongoose.Schema({
         contribution: {
             type: Number,
             default: 1
+        },
+        photo_url: {
+            type: String,
+            default: ''
+        },
+        status: {
+            type: String,
+            enum: ['pending', 'approved', 'rejected'],
+            default: 'pending'
+        },
+        reviewed_by: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        reviewed_at: {
+            type: Date
         }
     }],
     badgeReward: {
