@@ -1,15 +1,15 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
 import { useUser } from "../context/UserContext";
-import { BookOpen, PlusCircle, User, Settings, BarChart, TreePine, Recycle, Droplets, Sun, Zap, Activity, Badge, Trophy, CheckCircle, Clock, List, ChevronRight, Award, UserCircle, Users, Crown } from 'lucide-react';
+import { BookOpen, PlusCircle, User, Settings, BarChart, TreePine, Recycle, Droplets, Sun, Zap, Activity, Badge, Trophy, CheckCircle, Clock, List, ChevronRight, Award, UserCircle, Users, Crown, Building } from 'lucide-react';
 
 // --- ALL HELPER COMPONENTS ARE NOW DEFINED AT THE TOP LEVEL ---
 
 const StatCard = ({ icon, value, label, change }) => (
     <div className="bg-white p-5 rounded-xl shadow-md border"><div className="flex items-center gap-4">{icon}<div><p className="text-2xl font-bold">{value}</p><p className="text-sm text-gray-500">{label}</p></div></div><p className="text-xs text-green-600 mt-2 font-semibold">{change}</p></div>
 );
-const QuickLink = ({ icon, title, subtitle }) => (
-    <a href="#" className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors"><div className="bg-gray-100 p-2 rounded-lg">{icon}</div><div className="flex-1"><p className="font-semibold">{title}</p><p className="text-xs text-gray-500">{subtitle}</p></div><ChevronRight className="w-5 h-5 text-gray-400" /></a>
+const QuickLink = ({ icon, title, subtitle, onClick }) => (
+    <button onClick={onClick} className="w-full flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"><div className="bg-gray-100 p-2 rounded-lg">{icon}</div><div className="flex-1"><p className="font-semibold">{title}</p><p className="text-xs text-gray-500">{subtitle}</p></div><ChevronRight className="w-5 h-5 text-gray-400" /></button>
 );
 const ActivityItem = ({ icon, title, subtitle, time, points }) => (
     <div className="flex items-start gap-3"><div className="mt-1">{icon}</div><div className="flex-1"><p className="font-semibold text-sm">{title}</p><p className="text-xs text-gray-500">{subtitle}</p></div><div className="text-right"><p className="text-xs text-gray-400">{time}</p>{points && <p className="text-xs font-bold text-green-600">{points}</p>}</div></div>
@@ -64,7 +64,7 @@ const AchievementSection = ({ achievements }) => (
     </div>
 );
 
-const OverviewTabContent = ({ dashboardData }) => (
+const OverviewTabContent = ({ dashboardData, onPageChange }) => (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -75,8 +75,8 @@ const OverviewTabContent = ({ dashboardData }) => (
             <div className="bg-white p-6 rounded-2xl shadow-lg border">
                 <h3 className="text-xl font-bold mb-4">Quick Adventures</h3>
                 <div className="space-y-3">
-                    <QuickLink icon={<BookOpen className="w-5 h-5 text-blue-500" />} title="Browse Quests" subtitle="Discover new adventures" />
-                    <QuickLink icon={<User className="w-5 h-5 text-green-500" />} title="View Community" subtitle="Connect with Eco-Heroes" />
+                    <QuickLink icon={<BookOpen className="w-5 h-5 text-blue-500" />} title="Browse Quests" subtitle="Discover new adventures" onClick={() => onPageChange('quests')} />
+                    <QuickLink icon={<User className="w-5 h-5 text-green-500" />} title="View Community" subtitle="Connect with Eco-Heroes" onClick={() => onPageChange('community')} />
                 </div>
             </div>
         </div>
@@ -112,7 +112,7 @@ const ProgressTabContent = ({ dashboardData, userData, levelProgress }) => (
                     <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
                         <div className="bg-green-500 h-2.5 rounded-full transition-all duration-300" style={{ width: `${Math.min(levelProgress || 0, 100)}%` }}></div>
                     </div>
-                    <p className="text-xs text-gray-500">{Math.max(userData.pointsToNextLevel - userData.points, 0)} more points needed</p>
+                    <p className="text-xs text-gray-500">{Math.max(100 - (userData.points % 100), 0)} more points to next level</p>
                 </div>
                 <div className="bg-white p-6 rounded-2xl shadow-lg border">
                     <h3 className="text-xl font-bold mb-4">Streaks & Goals</h3>
@@ -173,7 +173,7 @@ const ProgressTabContent = ({ dashboardData, userData, levelProgress }) => (
     </div>
 );
 
-// TabButton component - NOW DEFINED AT TOP LEVEL
+// TabButton component
 const TabButton = ({ id, label, icon, activeTab, setActiveTab }) => (
     <button
         onClick={() => setActiveTab(id)}
@@ -240,7 +240,6 @@ const RoleRequestCard = ({ user, onRequestRole }) => {
                 setSelectedRole('');
                 const roleTitle = selectedRole === 'partner' ? 'Partner' : 'Admin';
                 alert(`✅ Request sent! Your ${roleTitle} request has been submitted successfully. You will be notified when an admin reviews your request.`);
-                // The page will automatically refresh and show the pending approval card
                 window.location.reload();
             } else {
                 console.error('Role request failed:', result.error);
@@ -278,7 +277,6 @@ const RoleRequestCard = ({ user, onRequestRole }) => {
                 </div>
             </div>
 
-            {/* Role Request Modal */}
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
@@ -361,7 +359,7 @@ const getAvatarStyles = (avatarName) => {
         "Boy Avatar 1": { color: "text-blue-500", bg: "bg-blue-100" },
         "Boy Avatar 2": { color: "text-blue-400", bg: "bg-blue-50" },
     };
-    return avatars[avatarName] || avatars["Girl Avatar 1"];
+    return avatars[avatarName] || avatars["Girl Avatar 1"]; // Default avatar
 };
 
 // Header theme mapping
@@ -371,10 +369,9 @@ const getHeaderTheme = (themeName) => {
         green: "from-green-400 to-emerald-600",
         blue: "from-blue-400 to-indigo-500",
     };
-    return themes[themeName] || themes.orange;
+    return themes[themeName] || themes.orange; // Default theme
 };
 
-// DashboardHeader component - NOW USES AVATAR & HEADER THEME FROM USER CONTEXT
 const DashboardHeader = ({ userData, levelProgress, avatarStyle, headerTheme }) => (
     <div className={`bg-gradient-to-r ${headerTheme} p-6 rounded-2xl shadow-lg mb-8`}>
         <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -397,7 +394,7 @@ const DashboardHeader = ({ userData, levelProgress, avatarStyle, headerTheme }) 
                 <div className="mt-4">
                     <div className="flex justify-between text-xs text-white/80 mb-1">
                         <span>Progress to Level {userData.level + 1}</span>
-                        <span>{userData.points} / {userData.pointsToNextLevel} eco-points</span>
+                        <span>{userData.points % 100} / 100 eco-points</span>
                     </div>
                     <div className="w-full bg-white/30 rounded-full h-2">
                         <div className="bg-white h-2 rounded-full transition-all duration-300" style={{ width: `${Math.min(levelProgress || 0, 100)}%` }}></div>
@@ -409,7 +406,7 @@ const DashboardHeader = ({ userData, levelProgress, avatarStyle, headerTheme }) 
 );
 
 // --- Main Dashboard Component ---
-const DashboardPage = () => {
+const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
     const { user, logout, requestRole } = useUser();
     const [dashboardData, setDashboardData] = useState({
         questsCompleted: 0,
@@ -427,96 +424,41 @@ const DashboardPage = () => {
     });
     const [loading, setLoading] = useState(true);
 
-    // Handle pending role requests - show special pending view instead of blocking access
     useEffect(() => {
         if (user) {
             fetchDashboardData();
+        } else {
+            setLoading(false); // If no user, stop loading
         }
     }, [user]);
-
-    const calculateCurrentStreak = (questsData) => {
-        const completedQuests = questsData
-            .filter(q => q.status === 'approved')
-            .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
-        
-        if (completedQuests.length === 0) return 0;
-        
-        let streak = 0;
-        let currentDate = new Date();
-        currentDate.setHours(0, 0, 0, 0);
-        
-        for (let quest of completedQuests) {
-            const questDate = new Date(quest.submitted_at);
-            questDate.setHours(0, 0, 0, 0);
-            
-            const daysDiff = Math.floor((currentDate - questDate) / (1000 * 60 * 60 * 24));
-            
-            if (daysDiff === streak) {
-                streak++;
-                currentDate.setDate(currentDate.getDate() - 1);
-            } else if (daysDiff > streak) {
-                break;
-            }
-        }
-        
-        return streak;
-    };
-
-    const calculateLongestStreak = (questsData) => {
-        const completedQuests = questsData
-            .filter(q => q.status === 'approved')
-            .sort((a, b) => new Date(a.submitted_at) - new Date(b.submitted_at));
-        
-        if (completedQuests.length === 0) return 0;
-        
-        let longestStreak = 0;
-        let currentStreak = 1;
-        
-        for (let i = 1; i < completedQuests.length; i++) {
-            const prevDate = new Date(completedQuests[i - 1].submitted_at);
-            const currDate = new Date(completedQuests[i].submitted_at);
-            
-            prevDate.setHours(0, 0, 0, 0);
-            currDate.setHours(0, 0, 0, 0);
-            
-            const daysDiff = Math.floor((currDate - prevDate) / (1000 * 60 * 60 * 24));
-            
-            if (daysDiff === 1) {
-                currentStreak++;
-            } else {
-                longestStreak = Math.max(longestStreak, currentStreak);
-                currentStreak = 1;
-            }
-        }
-        
-        return Math.max(longestStreak, currentStreak);
-    };
 
     const fetchDashboardData = async () => {
         try {
             const token = localStorage.getItem('token');
             const headers = { 'x-auth-token': token };
 
-            // Fetch dashboard stats from new endpoint
             const dashboardRes = await fetch('http://localhost:5000/api/dashboard/stats', { headers });
             const dashboardStats = await dashboardRes.json();
+            
+            if(!dashboardRes.ok) {
+                throw new Error(dashboardStats.msg || "Failed to fetch dashboard stats");
+            }
 
             console.log('Dashboard stats loaded:', dashboardStats);
 
-            // Prepare recent activity with icons
             const recentActivity = [
                 ...dashboardStats.recentSubmissions.map(s => ({
                     icon: <CheckCircle className="w-5 h-5 text-green-500" />,
-                    title: `Completed '${s.quest}'`,
-                    subtitle: `You earned ${s.points} points`,
-                    time: new Date(s.submittedAt).toLocaleDateString(),
-                    points: `+${s.points} points`
+                    title: `Completed '${s.quest?.title || 'a quest'}'`,
+                    subtitle: `You earned ${s.points_earned} points`,
+                    time: new Date(s.submitted_at).toLocaleDateString(),
+                    points: `+${s.points_earned} points`
                 })),
                 ...dashboardStats.recentPosts.map(p => ({
                     icon: <User className="w-5 h-5 text-blue-500" />,
                     title: `Posted: ${p.title}`,
                     subtitle: 'Shared with the community',
-                    time: new Date(p.createdAt).toLocaleDateString()
+                    time: new Date(p.created_at).toLocaleDateString()
                 }))
             ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);
 
@@ -527,8 +469,8 @@ const DashboardPage = () => {
                 questsInProgress: dashboardStats.questsInProgress,
                 availableQuests: dashboardStats.availableQuests,
                 recentActivity: recentActivity,
-                achievements: dashboardStats.badges,
-                categoryProgress: dashboardStats.categoryProgress,
+                achievements: dashboardStats.badges || [],
+                categoryProgress: dashboardStats.categoryProgress || {},
                 currentStreak: dashboardStats.currentStreak,
                 longestStreak: dashboardStats.longestStreak,
                 weeklyPoints: dashboardStats.weeklyPoints,
@@ -543,57 +485,61 @@ const DashboardPage = () => {
             setLoading(false);
         }
     };
-
-    if (!user) {
-        return <div className="pt-24 text-center">Loading Dashboard...</div>;
-    }
-
+    
+    // --- FIX START ---
+    // This is the main cause of the white screen.
+    // If the user is not loaded yet, we should show a loading indicator.
     if (loading) {
         return (
             <div className="pt-24 text-center">
                 <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading dashboard data...</p>
+                <p className="text-gray-600">Loading your dashboard...</p>
             </div>
         );
     }
 
+    if (!user) {
+        return (
+            <div className="pt-24 text-center">
+                <p>Please log in to view your dashboard.</p>
+            </div>
+        );
+    }
+
+    // This block was causing the crash. We create a safe `userData` object with defaults.
     const userData = {
-        name: user.username,
-        title: 'Environmental Champion',
+        name: user.username || 'Eco Hero',
+        title: 'Environmental Champion', // This can be dynamic later
         level: Math.floor((user.points || 0) / 100) + 1,
         points: user.points || 0,
-        pointsToNextLevel: 100,
+        pointsToNextLevel: 100, // This should come from your backend if it's dynamic
+        avatar: user.avatar || 'Girl Avatar 1', // Provide a default
+        headerTheme: user.headerTheme || 'orange', // Provide a default
     };
-
-    const avatarStyle = getAvatarStyles(user.avatar);
-    const headerTheme = getHeaderTheme(user.headerTheme);
-    const levelProgress = (userData.points / userData.pointsToNextLevel) * 100;
+    
+    const avatarStyle = getAvatarStyles(userData.avatar);
+    const headerTheme = getHeaderTheme(userData.headerTheme);
+    const levelProgress = ((userData.points % 100) / 100) * 100;
+    // --- FIX END ---
     
     return (
         <div className="font-sans bg-gray-50 text-gray-800 min-h-screen">
             <main className="container mx-auto px-4 pt-24 pb-12">
-                {/* Show pending approval card if user has requested role */}
                 {user.requested_role && !user.is_approved && (
                     <PendingApprovalCard user={user} />
                 )}
                 
-                {/* Show role request card if user is regular user with no pending requests */}
                 {user.role === 'user' && !user.requested_role && (
                     <RoleRequestCard user={user} onRequestRole={requestRole} />
                 )}
                 
                 <DashboardHeader userData={userData} levelProgress={levelProgress} avatarStyle={avatarStyle} headerTheme={headerTheme} />
                 
-                {/* Combined Content */}
                 <div className="space-y-8">
-                    {/* Overview Section */}
-                    <OverviewTabContent dashboardData={dashboardData} />
-                    
-                    {/* Progress Section */}
+                    <OverviewTabContent dashboardData={dashboardData} onPageChange={onPageChange} />
                     <ProgressTabContent dashboardData={dashboardData} userData={userData} levelProgress={levelProgress} />
                 </div>
             </main>
-            
         </div>
     );
 };
