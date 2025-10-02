@@ -782,7 +782,7 @@ const AnalyticsTab = ({ stats, users, quests }) => {
         setAnalyticsData({
             userGrowth: Object.entries(usersByMonth),
             categoryStats: categoryStats,
-            totalEngagement: users.reduce((sum, u) => sum + (u.questsCompleted || 0), 0),
+            totalEngagement: users.reduce((sum, u) => sum + (u.questsCompleted?.length || 0), 0),
             averagePoints: users.length > 0 ? Math.round(users.reduce((sum, u) => sum + (u.points || 0), 0) / users.length) : 0
         });
     };

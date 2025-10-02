@@ -19,6 +19,7 @@ export default function HomePage({ onPageChange }) {
     totalPoints: 0
   });
   const [featuredQuests, setFeaturedQuests] = useState([]);
+  const [challenge, setChallenge] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -45,6 +46,17 @@ export default function HomePage({ onPageChange }) {
       // Get featured quests (first 3 active quests)
       const activeQuests = questsData.filter(q => q.isActive).slice(0, 3);
       setFeaturedQuests(activeQuests);
+
+      // Fetch community challenge
+      try {
+        const challengeRes = await fetch('http://localhost:5000/api/challenges');
+        const challengesData = await challengeRes.json();
+        if (challengesData.length > 0) {
+          setChallenge(challengesData[0]); // Get the first active challenge
+        }
+      } catch (error) {
+        console.error('Error fetching challenge:', error);
+      }
       
       setLoading(false);
     } catch (error) {
@@ -183,6 +195,107 @@ export default function HomePage({ onPageChange }) {
           )}
         </div>
       </section>
+
+      {/* Community Challenge Section */}
+      {challenge && (
+        <section className="py-20 px-6 bg-gradient-to-br from-green-50 to-blue-50">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="text-6xl mb-4">🌳</div>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 text-green-800">
+                {challenge.title}
+              </h2>
+              <p className="text-gray-700 text-lg max-w-2xl mx-auto">
+                {challenge.description}
+              </p>
+            </div>
+
+            <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
+              {/* Progress Bar */}
+              <div className="mb-8">
+                <div className="flex justify-between text-sm font-semibold mb-3">
+                  <span className="text-green-700">Trees Planted</span>
+                  <span className="text-green-700">{challenge.currentProgress} / {challenge.goal}</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-green-500 to-green-600 h-6 rounded-full transition-all duration-500 flex items-center justify-end pr-3"
+                    style={{ width: `${Math.min((challenge.currentProgress / challenge.goal) * 100, 100)}%` }}
+                  >
+                    <span className="text-white text-xs font-bold">
+                      {Math.round((challenge.currentProgress / challenge.goal) * 100)}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="text-center p-6 bg-green-50 rounded-xl">
+                  <div className="text-4xl font-bold text-green-600 mb-2">
+                    {challenge.participants?.length || 0}
+                  </div>
+                  <div className="text-sm text-gray-600 font-semibold">Eco-Warriors</div>
+                </div>
+                <div className="text-center p-6 bg-blue-50 rounded-xl">
+                  <div className="text-4xl font-bold text-blue-600 mb-2">
+                    {challenge.goal - challenge.currentProgress}
+                  </div>
+                  <div className="text-sm text-gray-600 font-semibold">Trees to Go</div>
+                </div>
+                <div className="text-center p-6 bg-yellow-50 rounded-xl">
+                  <div className="text-4xl mb-2">🏆</div>
+                  <div className="text-sm text-gray-600 font-semibold">Tree Master Badge</div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                {user ? (
+                  user.role === 'user' ? (
+                    <>
+                      <button 
+                        onClick={() => onPageChange('community')}
+                        className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-4 rounded-full shadow-lg transition transform hover:scale-105"
+                      >
+                        🌱 Join Challenge & Earn Badge
+                      </button>
+                      <button 
+                        onClick={() => onPageChange('community')}
+                        className="bg-white hover:bg-gray-50 text-green-600 font-bold px-8 py-4 rounded-full shadow-lg border-2 border-green-600 transition transform hover:scale-105"
+                      >
+                        📊 View Challenge
+                      </button>
+                    </>
+                  ) : (
+                    <button 
+                      onClick={() => onPageChange('community')}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-4 rounded-full shadow-lg transition transform hover:scale-105"
+                    >
+                      👁️ View Challenge Progress
+                    </button>
+                  )
+                ) : (
+                  <>
+                    <button 
+                      onClick={() => onPageChange('signup')}
+                      className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-4 rounded-full shadow-lg transition transform hover:scale-105"
+                    >
+                      Sign Up to Join
+                    </button>
+                    <button 
+                      onClick={() => onPageChange('login')}
+                      className="bg-white hover:bg-gray-50 text-green-600 font-bold px-8 py-4 rounded-full shadow-lg border-2 border-green-600 transition transform hover:scale-105"
+                    >
+                      Login
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Call to Action */}
       <section className="py-20 px-6 bg-white text-center">
