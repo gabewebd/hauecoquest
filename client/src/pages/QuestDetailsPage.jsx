@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
     ChevronLeft, TreePine, Award, Clock, Users, MapPin, CheckCircle, Upload, XCircle, Heart,
-    ClipboardList, Camera, AlertTriangle, UploadCloud, FileText, Sprout
+    ClipboardList, Camera, AlertTriangle, UploadCloud, FileText, Sprout, Eye
 } from 'lucide-react';
 
 // --- HELPER COMPONENTS ---

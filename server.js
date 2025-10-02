@@ -45,6 +45,7 @@ try {
   app.use('/api/posts', require('./routes/posts'));
   app.use('/api/daily', require('./routes/daily'));
   app.use('/api/badges', require('./routes/badges'));
+  app.use('/api/challenges', require('./routes/challenges'));
   console.log('✅ All routes loaded successfully');
 } catch (error) {
   console.error('❌ Error loading routes:', error);
