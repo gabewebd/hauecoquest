@@ -492,7 +492,7 @@ const CommunityPage = ({ onPageChange }) => {
         </div>
 
         <div className="max-w-6xl mx-auto text-center border-t border-green-600 mt-8 pt-6 text-green-200 text-sm">
-          <p>© 2024 HAU Eco-Quest. All rights reserved. Built with ❤️ for a sustainable future.</p>
+          <p>© 2025 HAU Eco-Quest. All rights reserved. Built with for a sustainable future.</p>
         </div>
       </footer>
     </div>
