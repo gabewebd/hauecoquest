@@ -3,6 +3,9 @@ import React, { useState, useEffect } from "react";
 // Import icons needed for the Hero section buttons
 import { Swords, BookOpen, BarChart } from "lucide-react";
 import { questAPI, userAPI } from "../utils/api";
+import FacebookIcon from '../img/Facebook.png';
+import InstagramIcon from '../img/Instagram.png';
+import TiktokIcon from '../img/Tiktok.png';
 // 1. Import useUser to check if an account is logged in
 import { useUser } from '../context/UserContext';
 
@@ -343,7 +346,6 @@ export default function HomePage({ onPageChange }) {
             <h4 className="font-bold mb-4">Adventure Paths</h4>
             <ul className="space-y-2 text-sm text-green-100">
               <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Browse Epic Quests</button></li>
-              <li><button onClick={() => onPageChange('events')} className="hover:text-white">Upcoming Events</button></li>
               <li><button onClick={() => onPageChange('community')} className="hover:text-white">Hero Community</button></li>
               <li><button onClick={() => onPageChange('leaderboard')} className="hover:text-white">Hall of Fame</button></li>
             </ul>
@@ -355,8 +357,6 @@ export default function HomePage({ onPageChange }) {
             <ul className="space-y-2 text-sm text-green-100">
               <li><button className="hover:text-white">Contact Quest Masters</button></li>
               <li><button className="hover:text-white">Alliance Partners</button></li>
-              <li><button className="hover:text-white">Help Center</button></li>
-              <li><button className="hover:text-white">Quest Rules</button></li>
             </ul>
           </div>
 
@@ -368,9 +368,9 @@ export default function HomePage({ onPageChange }) {
               <p>+63 (2) 123-4567</p>
               <p>HAU Main Campus</p>
               <div className="flex gap-4 mt-4">
-                <div className="w-6 h-6 bg-green-500 rounded-full"></div>
-                <div className="w-6 h-6 bg-green-500 rounded-full"></div>
-                <div className="w-6 h-6 bg-green-500 rounded-full"></div>
+                <a href="#"><img src={FacebookIcon} alt="Facebook" className="w-6 h-6" /></a>
+                <a href="#"><img src={InstagramIcon} alt="Instagram" className="w-6 h-6" /></a>
+                <a href="#"><img src={TiktokIcon} alt="Instagram" className="w-6 h-6" /></a>
               </div>
             </div>
           </div>

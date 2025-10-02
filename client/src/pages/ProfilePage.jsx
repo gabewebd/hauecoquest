@@ -9,6 +9,9 @@ import {
   Trash2,
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
+import FacebookIcon from '../img/Facebook.png';
+import InstagramIcon from '../img/Instagram.png';
+import TiktokIcon from '../img/Tiktok.png';
 
 const ProfilePage = ({ onPageChange }) => {
   const { user, updateUser, deleteAccount } = useUser();
@@ -503,38 +506,58 @@ const ProfilePage = ({ onPageChange }) => {
       {/* Footer */}
       <footer className="bg-green-700 text-white pt-16 pb-8 px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
+          {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="h-8 w-8 bg-white rounded-full flex items-center justify-center text-2xl">🌱</div>
+              <img
+                src="/vite.svg"
+                alt="HAU Eco-Quest Logo"
+                className="h-8 w-8 bg-white rounded-full p-1"
+              />
               <h3 className="text-2xl font-bold">HAU Eco-Quest</h3>
             </div>
             <p className="text-sm text-green-100">
               Empowering students to become environmental champions through
-              engaging sustainability adventures.
+              engaging sustainability adventures. Join the movement to save our
+              planet!
             </p>
           </div>
+
+          {/* Adventure Paths */}
           <div>
             <h4 className="font-bold mb-4">Adventure Paths</h4>
             <ul className="space-y-2 text-sm text-green-100">
-              <li><a href="#" className="hover:text-white">Browse Epic Quests</a></li>
-              <li><a href="#" className="hover:text-white">Upcoming Events</a></li>
+              <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Browse Epic Quests</button></li>
+              <li><button onClick={() => onPageChange('community')} className="hover:text-white">Hero Community</button></li>
+              <li><button onClick={() => onPageChange('leaderboard')} className="hover:text-white">Hall of Fame</button></li>
             </ul>
           </div>
+
+          {/* Support Guild */}
           <div>
             <h4 className="font-bold mb-4">Support Guild</h4>
             <ul className="space-y-2 text-sm text-green-100">
-              <li><a href="#" className="hover:text-white">Contact Quest Masters</a></li>
-              <li><a href="#" className="hover:text-white">Help Center</a></li>
+              <li><button className="hover:text-white">Contact Quest Masters</button></li>
+              <li><button className="hover:text-white">Alliance Partners</button></li>
             </ul>
           </div>
+
+          {/* Connect */}
           <div>
             <h4 className="font-bold mb-4">Connect with Us</h4>
             <div className="bg-green-600 p-4 rounded-lg text-sm">
               <p>eco-quest@hau.edu.ph</p>
               <p>+63 (2) 123-4567</p>
+              <p>HAU Main Campus</p>
+              <div className="flex gap-4 mt-4">
+                <a href="#"><img src={FacebookIcon} alt="Facebook" className="w-6 h-6" /></a>
+                <a href="#"><img src={InstagramIcon} alt="Instagram" className="w-6 h-6" /></a>
+                <a href="#"><img src={TiktokIcon} alt="Instagram" className="w-6 h-6" /></a>
+              </div>
             </div>
           </div>
         </div>
+
         <div className="max-w-6xl mx-auto text-center border-t border-green-600 mt-8 pt-6 text-green-200 text-sm">
           <p>© 2025 HAU Eco-Quest. All rights reserved. Built with for a sustainable future.</p>
         </div>
