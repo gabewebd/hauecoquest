@@ -241,5 +241,34 @@ router.post('/:id/comment', auth, async (req, res) => {
   }
 });
 
+// @route   PUT /api/posts/:id/pin
+// @desc    Pin/unpin a post (Admin only)
+// @access  Private (Admin only)
+router.put('/:id/pin', [auth, roleCheck('admin')], async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).json({ msg: 'Post not found' });
+    }
+
+    // Toggle pin status
+    post.isPinned = !post.isPinned;
+    post.pinnedBy = post.isPinned ? req.user.id : null;
+    post.pinnedAt = post.isPinned ? new Date() : null;
+
+    await post.save();
+
+    const populatedPost = await Post.findById(post._id)
+      .populate('author', 'username role')
+      .populate('pinnedBy', 'username');
+
+    res.json(populatedPost);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 module.exports = router;
 

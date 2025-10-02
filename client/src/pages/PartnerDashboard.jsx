@@ -4,7 +4,7 @@ import { useUser } from '../context/UserContext';
 import { 
     BookOpen, BarChart, Users, TrendingUp, Plus, Edit, Trash2, 
     Search, Calendar, MapPin, Award, Target, CheckCircle, Clock,
-    FileText, Share2, Eye, MessageCircle, Heart, X, Save
+    FileText, Share2, Eye, MessageCircle, Heart, X, Save, Camera
 } from 'lucide-react';
 
 // --- HELPER COMPONENTS ---
@@ -54,10 +54,22 @@ const QuestModal = ({ quest, onClose, onSave }) => {
         maxParticipants: 50,
         requirements: ''
     });
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(quest?.image_url || null);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            const reader = new FileReader();
+            reader.onload = (e) => setPreviewUrl(e.target.result);
+            reader.readAsDataURL(file);
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave(formData);
+        onSave({ ...formData, photo: selectedFile });
     };
 
     return (
@@ -185,6 +197,42 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             rows="3"
                             placeholder="List any requirements or materials needed..."
                         />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Quest Image</label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className="hidden"
+                                id="quest-image-upload"
+                            />
+                            <label 
+                                htmlFor="quest-image-upload" 
+                                className="cursor-pointer block text-center"
+                            >
+                                {previewUrl ? (
+                                    <div className="space-y-2">
+                                        <img 
+                                            src={previewUrl} 
+                                            alt="Quest preview" 
+                                            className="max-h-32 mx-auto rounded-lg"
+                                        />
+                                        <p className="text-sm text-green-600">Click to change image</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <div className="w-12 h-12 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
+                                            <Camera className="w-6 h-6 text-gray-400" />
+                                        </div>
+                                        <p className="text-sm text-gray-600">Click to upload quest image</p>
+                                        <p className="text-xs text-gray-400">PNG, JPG up to 10MB</p>
+                                    </div>
+                                )}
+                            </label>
+                        </div>
                     </div>
 
                     <div className="flex gap-3 pt-4">
@@ -442,45 +490,74 @@ const QuestsTab = ({ quests, setQuests }) => {
     const handleSaveQuest = async (questData) => {
         try {
             const token = localStorage.getItem('token');
-            const payload = {
-                title: questData.title,
-                description: questData.description,
-                category: questData.category,
-                difficulty: questData.difficulty,
-                points: questData.points,
-                duration: questData.date,
-                location: questData.location,
-                objectives: [questData.description],
-                submissionRequirements: questData.requirements ? [questData.requirements] : ['Photo proof required'],
-                maxParticipants: questData.maxParticipants
-            };
+            
+            // Use FormData if there's a photo, otherwise use JSON
+            if (questData.photo) {
+                const formData = new FormData();
+                formData.append('title', questData.title);
+                formData.append('description', questData.description);
+                formData.append('category', questData.category);
+                formData.append('difficulty', questData.difficulty);
+                formData.append('points', questData.points);
+                formData.append('duration', questData.date);
+                formData.append('location', questData.location);
+                formData.append('objectives', JSON.stringify([questData.description]));
+                formData.append('submissionRequirements', JSON.stringify(questData.requirements ? [questData.requirements] : ['Photo proof required']));
+                formData.append('maxParticipants', questData.maxParticipants);
+                formData.append('photo', questData.photo);
 
-            if (editingQuest) {
-                const response = await fetch(`http://localhost:5000/api/quests/${editingQuest._id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-auth-token': token
-                    },
-                    body: JSON.stringify(payload)
-                });
-                
-                if (!response.ok) throw new Error('Failed to update quest');
-                const updatedQuest = await response.json();
-                setQuests(quests.map(q => q._id === editingQuest._id ? updatedQuest : q));
-            } else {
                 const response = await fetch('http://localhost:5000/api/quests', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'x-auth-token': token
                     },
-                    body: JSON.stringify(payload)
+                    body: formData
                 });
                 
                 if (!response.ok) throw new Error('Failed to create quest');
                 const newQuest = await response.json();
                 setQuests([newQuest, ...quests]);
+            } else {
+                const payload = {
+                    title: questData.title,
+                    description: questData.description,
+                    category: questData.category,
+                    difficulty: questData.difficulty,
+                    points: questData.points,
+                    duration: questData.date,
+                    location: questData.location,
+                    objectives: [questData.description],
+                    submissionRequirements: questData.requirements ? [questData.requirements] : ['Photo proof required'],
+                    maxParticipants: questData.maxParticipants
+                };
+
+                if (editingQuest) {
+                    const response = await fetch(`http://localhost:5000/api/quests/${editingQuest._id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-auth-token': token
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to update quest');
+                    const updatedQuest = await response.json();
+                    setQuests(quests.map(q => q._id === editingQuest._id ? updatedQuest : q));
+                } else {
+                    const response = await fetch('http://localhost:5000/api/quests', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-auth-token': token
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to create quest');
+                    const newQuest = await response.json();
+                    setQuests([newQuest, ...quests]);
+                }
             }
             
             setShowModal(false);

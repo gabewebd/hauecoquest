@@ -88,7 +88,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/quests
 // @desc    Create a new quest
 // @access  Private (Partner/Admin only)
-router.post('/', [auth, checkRole('partner', 'admin'), upload.single('image')], async (req, res) => {
+router.post('/', [auth, checkRole('partner', 'admin'), upload.single('photo')], async (req, res) => {
   try {
     const {
       title,
@@ -103,6 +103,10 @@ router.post('/', [auth, checkRole('partner', 'admin'), upload.single('image')], 
       maxParticipants
     } = req.body;
 
+    // Parse JSON fields if they come from FormData
+    const parsedObjectives = typeof objectives === 'string' ? JSON.parse(objectives) : objectives;
+    const parsedSubmissionRequirements = typeof submissionRequirements === 'string' ? JSON.parse(submissionRequirements) : submissionRequirements;
+
     const newQuest = new Quest({
       title,
       description,
@@ -111,8 +115,8 @@ router.post('/', [auth, checkRole('partner', 'admin'), upload.single('image')], 
       points,
       duration,
       location: location || 'HAU Campus',
-      objectives,
-      submissionRequirements,
+      objectives: parsedObjectives,
+      submissionRequirements: parsedSubmissionRequirements,
       maxParticipants: maxParticipants || 100,
       createdBy: req.user.id,
       isActive: true,

@@ -19,6 +19,9 @@ const PostSchema = new mongoose.Schema({
   }],
   views: { type: Number, default: 0 },
   isDailyChallenge: { type: Boolean, default: false },
+  isPinned: { type: Boolean, default: false },
+  pinnedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  pinnedAt: { type: Date },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }
 });

@@ -8,7 +8,7 @@ import { postAPI, questAPI, userAPI } from '../utils/api';
 import { useUser } from '../context/UserContext';
 
 // Reusable component for each post in the community feed
-const PostCard = ({ avatar, name, title, time, text, quest, image, likes, comments, shares, onLike, onComment, onShare, postId, user, onPageChange }) => {
+const PostCard = ({ avatar, name, title, time, text, quest, image, likes, comments, onLike, onComment, postId, user, onPageChange, isPinned, onPin }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(likes);
   const [showCommentInput, setShowCommentInput] = useState(false);
@@ -69,13 +69,25 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
           <div className="flex items-center gap-1">
             <h4 className="font-bold text-gray-800">{name}</h4>
             <span className="text-blue-500">✔️</span>
+            {isPinned && (
+              <span className="text-xs bg-yellow-500 text-white px-2 py-1 rounded ml-2">
+                📌 Pinned by Admin
+              </span>
+            )}
           </div>
           <p className="text-sm text-gray-500">{title} • {time}</p>
         </div>
       </div>
       <div className="flex items-center gap-2 text-gray-400">
-        <Flag className="w-4 h-4 cursor-pointer hover:text-red-500" />
-        <MoreHorizontal className="w-5 h-5 cursor-pointer hover:text-gray-800" />
+        {/* Admin can pin posts */}
+        {user && user.role === 'admin' && (
+          <button 
+            onClick={() => onPin && onPin(postId)}
+            className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+          >
+            Pin Post
+          </button>
+        )}
       </div>
     </div>
     <p className="my-4 text-gray-700">{text}</p>
@@ -98,12 +110,6 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
           className="flex items-center gap-2 hover:text-blue-500"
         >
           <MessageCircle className="w-5 h-5" /> {commentCount}
-        </button>
-        <button 
-          onClick={handleShare}
-          className="flex items-center gap-2 hover:text-green-500"
-        >
-          <Share2 className="w-5 h-5" /> {shares}
         </button>
       </div>
       {/* FIXED: Replaced text-primary-green with text-green-600 */}
@@ -139,6 +145,185 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
   );
 };
 
+// Create Post Modal Component
+const CreatePostModal = ({ isOpen, onClose, onSubmit, user }) => {
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    category: 'Updates',
+    tags: ''
+  });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => setPreviewUrl(e.target.result);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    try {
+      const postData = {
+        ...formData,
+        photo: selectedFile,
+        tags: formData.tags.split(',').map(t => t.trim()).filter(t => t)
+      };
+      
+      await onSubmit(postData);
+      
+      // Reset form
+      setFormData({ title: '', content: '', category: 'Updates', tags: '' });
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      onClose();
+    } catch (error) {
+      console.error('Error creating post:', error);
+      alert('Failed to create post. Please try again.');
+    }
+    setLoading(false);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+          <h3 className="text-2xl font-bold">Create New Post</h3>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-semibold mb-2">Post Title</label>
+            <input
+              type="text"
+              required
+              value={formData.title}
+              onChange={(e) => setFormData({...formData, title: e.target.value})}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="What's your environmental story?"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2">Category</label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({...formData, category: e.target.value})}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="Updates">Updates</option>
+              <option value="Environmental Tips">Environmental Tips</option>
+              <option value="Success Stories">Success Stories</option>
+              <option value="Events">Events</option>
+              <option value="News">News</option>
+              <option value="Community Challenge">Community Challenge</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2">Content</label>
+            <textarea
+              required
+              value={formData.content}
+              onChange={(e) => setFormData({...formData, content: e.target.value})}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              rows="6"
+              placeholder="Share your environmental journey, tips, or achievements..."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2">Tags (comma-separated)</label>
+            <input
+              type="text"
+              value={formData.tags}
+              onChange={(e) => setFormData({...formData, tags: e.target.value})}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="e.g., recycling, sustainability, tips"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2">Post Image (Optional)</label>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+                id="post-image-upload"
+              />
+              <label 
+                htmlFor="post-image-upload" 
+                className="cursor-pointer block text-center"
+              >
+                {previewUrl ? (
+                  <div className="space-y-2">
+                    <img 
+                      src={previewUrl} 
+                      alt="Post preview" 
+                      className="max-h-32 mx-auto rounded-lg"
+                    />
+                    <p className="text-sm text-green-600">Click to change image</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="w-12 h-12 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
+                      <Camera className="w-6 h-6 text-gray-400" />
+                    </div>
+                    <p className="text-sm text-gray-600">Click to upload image</p>
+                    <p className="text-xs text-gray-400">PNG, JPG up to 5MB</p>
+                  </div>
+                )}
+              </label>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 transition font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <FileText className="w-4 h-4" />
+                  Create Post
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 const CommunityPage = ({ onPageChange }) => {
   const { user } = useUser();
   const [posts, setPosts] = useState([]);
@@ -152,6 +337,7 @@ const CommunityPage = ({ onPageChange }) => {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('Recent Activity');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showCreatePostModal, setShowCreatePostModal] = useState(false);
 
   useEffect(() => {
     fetchCommunityData();
@@ -175,12 +361,24 @@ const CommunityPage = ({ onPageChange }) => {
     }
   };
 
-  const handleShare = async (postId) => {
+  const handlePin = async (postId) => {
     try {
-      // You could implement actual share functionality here
-      console.log('Shared post:', postId);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/pin`, {
+        method: 'PUT',
+        headers: {
+          'x-auth-token': token
+        }
+      });
+      
+      if (response.ok) {
+        // Refresh posts to show updated pin status
+        fetchCommunityData();
+        alert('Post pinned successfully!');
+      }
     } catch (error) {
-      console.error('Error sharing post:', error);
+      console.error('Error pinning post:', error);
+      alert('Failed to pin post');
     }
   };
 
@@ -290,6 +488,57 @@ const CommunityPage = ({ onPageChange }) => {
     setSearchTerm(e.target.value);
   };
 
+  const handleCreatePost = async (postData) => {
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Use FormData if there's a photo, otherwise use JSON
+      if (postData.photo) {
+        const formData = new FormData();
+        formData.append('title', postData.title);
+        formData.append('content', postData.content);
+        formData.append('category', postData.category);
+        formData.append('tags', JSON.stringify(postData.tags));
+        formData.append('image', postData.photo);
+
+        const response = await fetch('http://localhost:5000/api/posts', {
+          method: 'POST',
+          headers: {
+            'x-auth-token': token
+          },
+          body: formData
+        });
+        
+        if (!response.ok) throw new Error('Failed to create post');
+      } else {
+        const payload = {
+          title: postData.title,
+          content: postData.content,
+          category: postData.category,
+          tags: postData.tags
+        };
+
+        const response = await fetch('http://localhost:5000/api/posts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-auth-token': token
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!response.ok) throw new Error('Failed to create post');
+      }
+      
+      // Refresh the posts
+      fetchCommunityData();
+      alert('Post created successfully!');
+    } catch (error) {
+      console.error('Error creating post:', error);
+      throw error;
+    }
+  };
+
   return (
     <div className="font-sans bg-app-bg text-gray-800">
       <main className="pt-24 pb-12">
@@ -356,7 +605,18 @@ const CommunityPage = ({ onPageChange }) => {
 
         {/* Community Feed */}
         <section className="container mx-auto px-4">
-          <h3 className="text-2xl font-bold mb-4">Community Feed</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-2xl font-bold">Community Feed</h3>
+            {user && (
+              <button 
+                onClick={() => setShowCreatePostModal(true)}
+                className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+              >
+                <FileText className="w-4 h-4" />
+                Create Post
+              </button>
+            )}
+          </div>
           <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div className="flex flex-wrap gap-2">
               {['Recent Activity', 'Most Popular'].map((filter) => (
@@ -405,10 +665,11 @@ const CommunityPage = ({ onPageChange }) => {
                     {...post} 
                     onLike={handleLike}
                     onComment={handleComment}
-                    onShare={handleShare}
+                    onPin={handlePin}
                     postId={post.id || index}
                     user={user}
                     onPageChange={onPageChange}
+                    isPinned={post.isPinned}
                   />
                 ))}
               </div>
@@ -495,6 +756,14 @@ const CommunityPage = ({ onPageChange }) => {
                 <p>© 2025 HAU Eco-Quest. All rights reserved. Built with for a sustainable future.</p>
               </div>
             </footer>
+
+        {/* Create Post Modal */}
+        <CreatePostModal
+          isOpen={showCreatePostModal}
+          onClose={() => setShowCreatePostModal(false)}
+          onSubmit={handleCreatePost}
+          user={user}
+        />
     </div>
   );
 }

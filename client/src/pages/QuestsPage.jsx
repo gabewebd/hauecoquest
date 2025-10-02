@@ -27,11 +27,17 @@ const QuestCard = ({ icon, title, description, difficulty, points, duration, par
   };
   const activeColor = colorVariants[color] || colorVariants.green;
 
+  // Check if quest is full
+  const currentParticipants = questData?.completions?.length || participants || 0;
+  const maxParticipants = questData?.maxParticipants || 100;
+  const isQuestFull = currentParticipants >= maxParticipants;
+
   // Determine button text and style based on submission status
   const getButtonText = () => {
     if (!user) return 'Login to Start';
     // Admin and Partner can only view, not participate
     if (user.role === 'admin' || user.role === 'partner') return 'View Quest';
+    if (isQuestFull) return 'QUEST FULL';
     if (questData.existingSubmission) {
       if (questData.existingSubmission.status === 'pending') return 'IN PROGRESS';
       if (questData.existingSubmission.status === 'approved') return 'COMPLETED';
@@ -41,6 +47,10 @@ const QuestCard = ({ icon, title, description, difficulty, points, duration, par
   };
 
   const getButtonColor = () => {
+    // Quest is full - disabled state
+    if (isQuestFull && user && user.role === 'user') {
+      return 'bg-gray-400 cursor-not-allowed';
+    }
     // Admin and Partner view mode
     if (user && (user.role === 'admin' || user.role === 'partner')) {
       return 'bg-blue-500 hover:bg-blue-600';
@@ -84,7 +94,12 @@ const QuestCard = ({ icon, title, description, difficulty, points, duration, par
       <button 
             // 🔑 Action: Pass the full quest object to the handler
             onClick={() => onViewDetails(questData)}
-            className={`mt-auto w-full ${getButtonColor()} text-white font-bold py-2.5 px-4 rounded-xl transition-transform transform hover:scale-105`}
+            disabled={isQuestFull && user && user.role === 'user'}
+            className={`mt-auto w-full ${getButtonColor()} text-white font-bold py-2.5 px-4 rounded-xl transition-transform ${
+              isQuestFull && user && user.role === 'user' 
+                ? 'cursor-not-allowed' 
+                : 'transform hover:scale-105'
+            }`}
         >
         {getButtonText()}
       </button>
