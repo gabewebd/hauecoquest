@@ -309,8 +309,13 @@ const LeaderboardPage = ({ onPageChange }) => {
                     <h2 className="text-3xl font-bold text-gray-800 mb-2">Climb the Eco-Hero Rankings!</h2>
                     <p className="text-gray-600 max-w-lg mx-auto mb-6">Complete quests, attend events, and make environmental impact to earn points and climb the leaderboard. Every action counts towards a sustainable future!</p>
                     <div className="flex gap-4">
-                        {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
-                        <button className="bg-green-500 text-white font-bold py-3 px-6 rounded-full">Start New Quest</button>
+                        {/* --- CHANGE: Made this button functional --- */}
+                        <button 
+                          onClick={() => onPageChange('quests')}
+                          className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
+                        >
+                          Start New Quest
+                        </button>
                     </div>
                 </div>
             </section>
@@ -365,7 +370,7 @@ const LeaderboardPage = ({ onPageChange }) => {
                 </div>
             </div>
             <div className="max-w-6xl mx-auto text-center border-t border-green-600 mt-8 pt-6 text-green-200 text-sm">
-                <p>© 2024 HAU Eco-Quest. All rights reserved. Built with ❤️ for a sustainable future.</p>
+                <p>© 2025 HAU Eco-Quest. All rights reserved. Built with for a sustainable future.</p>
             </div>
         </footer>
     </div>

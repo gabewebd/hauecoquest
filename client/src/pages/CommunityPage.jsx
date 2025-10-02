@@ -182,6 +182,7 @@ const CommunityPage = ({ onPageChange }) => {
   };
 
   const fetchCommunityData = async () => {
+   
     try {
       // Fetch posts
       const postsData = await postAPI.getAllPosts();
@@ -297,8 +298,17 @@ const CommunityPage = ({ onPageChange }) => {
               <h2 className="text-4xl font-extrabold text-green-900 mb-2">Community Hub</h2>
               <p className="text-gray-600 max-w-lg">Connect with fellow eco-heroes, share your environmental journey, and inspire others to make a positive impact on our planet!</p>
               <div className="flex items-center gap-4 mt-6">
-                {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
-                <button className="flex items-center gap-2 bg-green-500 text-white font-bold py-3 px-6 rounded-full transition-transform transform hover:scale-105"><UserPlus className="w-5 h-5"/> Join Community</button>
+                
+                {/* Only show the "Join Community" button if the user is NOT logged in */}
+                {!user && (
+                  <button 
+                    onClick={() => onPageChange('signup')}
+                    className="flex items-center gap-2 bg-green-500 text-white font-bold py-3 px-6 rounded-full transition-transform transform hover:scale-105"
+                  >
+                    <UserPlus className="w-5 h-5"/> Join Community
+                  </button>
+                )}
+
               </div>
             </div>
             <div className="bg-green-50 p-6 rounded-2xl text-center">
@@ -482,7 +492,7 @@ const CommunityPage = ({ onPageChange }) => {
         </div>
 
         <div className="max-w-6xl mx-auto text-center border-t border-green-600 mt-8 pt-6 text-green-200 text-sm">
-          <p>© 2024 HAU Eco-Quest. All rights reserved. Built with ❤️ for a sustainable future.</p>
+          <p>© 2025 HAU Eco-Quest. All rights reserved. Built with for a sustainable future.</p>
         </div>
       </footer>
     </div>
@@ -490,3 +500,4 @@ const CommunityPage = ({ onPageChange }) => {
 }
 
 export default CommunityPage;
+
