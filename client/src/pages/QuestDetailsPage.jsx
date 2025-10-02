@@ -192,12 +192,15 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission 
 
 // --- MAIN PAGE COMPONENT ---
 
-const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess }) => {
+const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
     // Fallback and Destructuring with Mock Data from QuestsPage
     const { 
         title, description, difficulty, points, duration, participants, 
         color, icon, category: propCategory, location: propLocation 
     } = quest;
+    
+    // Check if user is admin or partner (view-only mode)
+    const isViewOnly = userRole === 'admin' || userRole === 'partner';
 
     const category = propCategory || "General Quest";
     const location = propLocation || "HAU Campus";
@@ -351,13 +354,34 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess }) => {
                             </ul>
                         </div>
                         
-                        {/* 3. Quest Submission Form (Moved to the very bottom) */}
+                        {/* 3. Quest Submission Form or View-Only Message */}
                         <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-100">
-                            <QuestSubmissionForm 
-                                questId={quest._id} 
-                                onSubmissionSuccess={onSubmissionSuccess}
-                                existingSubmission={quest.existingSubmission}
-                            />
+                            {isViewOnly ? (
+                                <div className="bg-blue-50 border border-blue-200 p-6 rounded-xl text-center">
+                                    <Eye className="w-12 h-12 text-blue-600 mx-auto mb-3" />
+                                    <h4 className="text-xl font-bold text-blue-800 mb-2">View Only Mode</h4>
+                                    <p className="text-blue-700">
+                                        As {userRole === 'admin' ? 'an administrator' : 'a partner'}, you can view this quest but cannot participate. 
+                                        Your role is to monitor progress and {userRole === 'admin' ? 'approve submissions' : 'create quests'}.
+                                    </p>
+                                    <div className="mt-4 grid grid-cols-2 gap-4">
+                                        <div className="bg-white p-3 rounded-lg">
+                                            <p className="text-2xl font-bold text-blue-600">{participants || 0}</p>
+                                            <p className="text-sm text-gray-600">Total Participants</p>
+                                        </div>
+                                        <div className="bg-white p-3 rounded-lg">
+                                            <p className="text-2xl font-bold text-green-600">{points}</p>
+                                            <p className="text-sm text-gray-600">Points Reward</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <QuestSubmissionForm 
+                                    questId={quest._id} 
+                                    onSubmissionSuccess={onSubmissionSuccess}
+                                    existingSubmission={quest.existingSubmission}
+                                />
+                            )}
                         </div>
                     </div>
 

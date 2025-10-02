@@ -237,11 +237,18 @@ router.post('/:id/submit', [auth, upload.single('photo')], async (req, res) => {
     });
 
     await submission.save();
+    console.log(`Quest submission created: User ${user.username} submitted quest ${quest.title} with status: ${submission.status}`);
 
     // If admin, immediately award points
     if (isAdmin) {
-      user.points += quest.points;
-      user.eco_score += quest.points;
+      // Ensure we're adding to existing points, not replacing
+      const currentPoints = user.points || 0;
+      const currentEcoScore = user.eco_score || 0;
+      
+      user.points = currentPoints + quest.points;
+      user.eco_score = currentEcoScore + quest.points;
+      
+      console.log(`Admin auto-approval: Adding ${quest.points} points to ${user.username}. Previous: ${currentPoints}, New: ${user.points}`);
       
       if (!user.questsCompleted.includes(quest._id)) {
         user.questsCompleted.push(quest._id);
@@ -249,12 +256,15 @@ router.post('/:id/submit', [auth, upload.single('photo')], async (req, res) => {
       
       await user.save();
 
-      // Update quest completions
-      quest.completions.push({
-        user: user._id,
-        proof: submission.photo_url
-      });
-      await quest.save();
+      // Update quest completions (check for duplicates)
+      const alreadyCompleted = quest.completions.some(c => c.user.toString() === user._id.toString());
+      if (!alreadyCompleted) {
+        quest.completions.push({
+          user: user._id,
+          proof: submission.photo_url
+        });
+        await quest.save();
+      }
     }
     
     res.json({ 
@@ -294,10 +304,11 @@ router.get('/submissions/all', [auth, checkRole('admin')], async (req, res) => {
       .populate('reviewed_by', 'username')
       .sort({ submitted_at: -1 });
     
+    console.log(`Found ${submissions.length} total submissions for admin dashboard`);
     res.json(submissions);
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ msg: 'Server error' });
+    console.error('Error fetching all submissions:', err.message);
+    res.status(500).json({ msg: 'Server error', error: err.message });
   }
 });
 
@@ -329,12 +340,20 @@ router.put('/submissions/:id/review', [auth, checkRole('admin')], async (req, re
       return res.status(400).json({ msg: 'Invalid status' });
     }
 
-    const submission = await QuestSubmission.findById(req.params.id);
+    const submission = await QuestSubmission.findById(req.params.id)
+      .populate('user_id')
+      .populate('quest_id');
     
     if (!submission) {
       return res.status(404).json({ msg: 'Submission not found' });
     }
 
+    // Prevent re-approving already approved submissions
+    if (submission.status === 'approved' && status === 'approved') {
+      return res.status(400).json({ msg: 'Submission already approved' });
+    }
+
+    const previousStatus = submission.status;
     submission.status = status;
     submission.reviewed_by = req.user.id;
     submission.reviewed_at = Date.now();
@@ -345,13 +364,23 @@ router.put('/submissions/:id/review', [auth, checkRole('admin')], async (req, re
 
     await submission.save();
 
-    // If approved, award points to user
-    if (status === 'approved') {
-      const user = await User.findById(submission.user_id);
-      const quest = await Quest.findById(submission.quest_id);
+    // If approved, award points to user (only if not previously approved)
+    if (status === 'approved' && previousStatus !== 'approved') {
+      const user = submission.user_id;
+      const quest = submission.quest_id;
       
-      user.points += quest.points;
-      user.eco_score += quest.points;
+      if (!user || !quest) {
+        return res.status(404).json({ msg: 'User or Quest not found' });
+      }
+
+      // Add points to existing points
+      const currentPoints = user.points || 0;
+      const currentEcoScore = user.eco_score || 0;
+      
+      user.points = currentPoints + quest.points;
+      user.eco_score = currentEcoScore + quest.points;
+      
+      console.log(`Adding ${quest.points} points to user ${user.username}. Previous: ${currentPoints}, New: ${user.points}`);
       
       if (!user.questsCompleted.includes(quest._id)) {
         user.questsCompleted.push(quest._id);
@@ -359,18 +388,21 @@ router.put('/submissions/:id/review', [auth, checkRole('admin')], async (req, re
       
       await user.save();
 
-      // Update quest completions
-      quest.completions.push({
-        user: user._id,
-        proof: submission.photo_url
-      });
-      await quest.save();
+      // Update quest completions (check for duplicates)
+      const alreadyCompleted = quest.completions.some(c => c.user.toString() === user._id.toString());
+      if (!alreadyCompleted) {
+        quest.completions.push({
+          user: user._id,
+          proof: submission.photo_url
+        });
+        await quest.save();
+      }
     }
 
     res.json({ msg: `Submission ${status}`, submission });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ msg: 'Server error' });
+    console.error('Error in review endpoint:', err.message);
+    res.status(500).json({ msg: 'Server error', error: err.message });
   }
 });
 
