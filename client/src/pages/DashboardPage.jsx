@@ -637,6 +637,7 @@ const DashboardPage = () => {
                     <ProgressTabContent dashboardData={dashboardData} userData={userData} levelProgress={levelProgress} />
                 </div>
             </main>
+            
         </div>
     );
 };
