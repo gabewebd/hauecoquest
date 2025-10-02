@@ -1,11 +1,15 @@
 // Josh Andrei Aguiluz
 import React, { useState, useEffect } from "react";
 // Import icons needed for the Hero section buttons
-import { Swords, BookOpen } from "lucide-react";
+import { Swords, BookOpen, BarChart } from "lucide-react";
 import { questAPI, userAPI } from "../utils/api";
+// 1. Import useUser to check if an account is logged in
+import { useUser } from '../context/UserContext';
 
 
 export default function HomePage({ onPageChange }) {
+  // 2. Get the user object from the context
+  const { user } = useUser();
   const [stats, setStats] = useState({
     totalQuests: 0,
     totalUsers: 0,
@@ -45,6 +49,14 @@ export default function HomePage({ onPageChange }) {
       setLoading(false);
     }
   };
+  
+  const handleJoinQuest = () => {
+    if (user) {
+      onPageChange('quests');
+    } else {
+      onPageChange('login');
+    }
+  };
 
   return (
     <div className="font-sans bg-green-50 text-gray-800">
@@ -57,20 +69,38 @@ export default function HomePage({ onPageChange }) {
             Track your impact, complete challenges, and become an environmental hero!
           </p>
           <div className="flex justify-center gap-4">
-            <button
-              onClick={() => onPageChange('signup')}
-              className="bg-white text-green-700 font-semibold px-6 py-3 rounded-lg shadow hover:bg-green-100 flex items-center gap-2 transition"
-            >
-              <Swords className="w-5 h-5" />
-              Start Questing
-            </button>
-            <a
-              href="#quests"
-              className="bg-green-500 font-semibold px-6 py-3 rounded-lg shadow hover:bg-green-600 flex items-center gap-2 transition text-white"
-            >
-              <BookOpen className="w-5 h-5" />
-              Learn More
-            </a>
+            
+            {/* --- CHANGE START: HERO BUTTONS --- */}
+            {/* 3. Check if 'user' exists. If not, show the original buttons. */}
+            {!user ? (
+              <>
+                <button
+                  onClick={() => onPageChange('signup')}
+                  className="bg-white text-green-700 font-semibold px-6 py-3 rounded-lg shadow hover:bg-green-100 flex items-center gap-2 transition"
+                >
+                  <Swords className="w-5 h-5" />
+                  Start Questing
+                </button>
+                <a
+                  href="#quests"
+                  className="bg-green-500 font-semibold px-6 py-3 rounded-lg shadow hover:bg-green-600 flex items-center gap-2 transition text-white"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Learn More
+                </a>
+              </>
+            ) : (
+              // If 'user' exists, show a button to the dashboard instead.
+              <button
+                onClick={() => onPageChange('dashboard')}
+                className="bg-white text-green-700 font-semibold px-6 py-3 rounded-lg shadow hover:bg-green-100 flex items-center gap-2 transition"
+              >
+                <BarChart className="w-5 h-5" />
+                Go to Your Dashboard
+              </button>
+            )}
+            {/* --- CHANGE END --- */}
+
           </div>
         </div>
       </section>
@@ -141,7 +171,7 @@ export default function HomePage({ onPageChange }) {
                       {quest.difficulty}
                     </span>
                   </div>
-                  <button onClick={() => onPageChange('signup')} className="text-green-600 font-semibold hover:underline">
+                  <button onClick={handleJoinQuest} className="text-green-600 font-semibold hover:underline">
                     Join Quest →
                   </button>
                 </div>
@@ -162,12 +192,19 @@ export default function HomePage({ onPageChange }) {
             Join thousands of students making a real environmental impact. Start your
             journey today and earn rewards while saving the planet!
           </p>
-          <button 
-            onClick={() => onPageChange('login')}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-4 rounded-full shadow-lg transition"
-          >
-            Continue Your Journey
-          </button>
+          
+          {/* --- CHANGE START: CTA BUTTON --- */}
+          {/* 4. Only show this button if the user is NOT logged in. */}
+          {!user && (
+            <button 
+              onClick={() => onPageChange('signup')}
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-4 rounded-full shadow-lg transition"
+            >
+              Continue Your Journey
+            </button>
+          )}
+          {/* --- CHANGE END --- */}
+
         </div>
       </section>
 
@@ -195,10 +232,10 @@ export default function HomePage({ onPageChange }) {
           <div>
             <h4 className="font-bold mb-4">Adventure Paths</h4>
             <ul className="space-y-2 text-sm text-green-100">
-              <li><a href="#" className="hover:text-white">Browse Epic Quests</a></li>
-              <li><a href="#" className="hover:text-white">Upcoming Events</a></li>
-              <li><a href="#" className="hover:text-white">Hero Community</a></li>
-              <li><a href="#" className="hover:text-white">Hall of Fame</a></li>
+              <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Browse Epic Quests</button></li>
+              <li><button onClick={() => onPageChange('events')} className="hover:text-white">Upcoming Events</button></li>
+              <li><button onClick={() => onPageChange('community')} className="hover:text-white">Hero Community</button></li>
+              <li><button onClick={() => onPageChange('leaderboard')} className="hover:text-white">Hall of Fame</button></li>
             </ul>
           </div>
 
@@ -206,10 +243,10 @@ export default function HomePage({ onPageChange }) {
           <div>
             <h4 className="font-bold mb-4">Support Guild</h4>
             <ul className="space-y-2 text-sm text-green-100">
-              <li><a href="#" className="hover:text-white">Contact Quest Masters</a></li>
-              <li><a href="#" className="hover:text-white">Alliance Partners</a></li>
-              <li><a href="#" className="hover:text-white">Help Center</a></li>
-              <li><a href="#" className="hover:text-white">Quest Rules</a></li>
+              <li><button className="hover:text-white">Contact Quest Masters</button></li>
+              <li><button className="hover:text-white">Alliance Partners</button></li>
+              <li><button className="hover:text-white">Help Center</button></li>
+              <li><button className="hover:text-white">Quest Rules</button></li>
             </ul>
           </div>
 
@@ -230,7 +267,7 @@ export default function HomePage({ onPageChange }) {
         </div>
 
         <div className="max-w-6xl mx-auto text-center border-t border-green-600 mt-8 pt-6 text-green-200 text-sm">
-          <p>© 2024 HAU Eco-Quest. All rights reserved. Built with ❤️ for a sustainable future.</p>
+          <p>© 2025 HAU Eco-Quest. All rights reserved. Built with ❤️ for a sustainable future.</p>
         </div>
       </footer>
     </div>
