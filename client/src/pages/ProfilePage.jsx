@@ -2,31 +2,104 @@
 import React, { useState, useEffect } from "react";
 import {
   Award,
-  Users,
   Edit,
-  Settings,
   Trophy,
   User,
   UserCircle,
+  Trash2,
 } from "lucide-react";
-import { useUser } from "./UserContext";
+import { useUser } from "../context/UserContext";
 
-const ProfilePage = () => {
-  const { user, updateUser } = useUser();
+const ProfilePage = ({ onPageChange }) => {
+  const { user, updateUser, deleteAccount } = useUser();
   
   const [activeTab, setActiveTab] = useState("Activity");
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editTab, setEditTab] = useState("avatar");
-  const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || "Girl Avatar 1");
-  const [headerTheme, setHeaderTheme] = useState(user?.headerTheme || "orange");
+  const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar_theme || "Girl Avatar 1");
+  const [headerTheme, setHeaderTheme] = useState(user?.header_theme || "orange");
+  const [editedUsername, setEditedUsername] = useState(user?.username || "");
+  
+  // Data states
+  const [userActivity, setUserActivity] = useState([]);
+  const [userQuests, setUserQuests] = useState([]);
+  const [userAchievements, setUserAchievements] = useState([]);
+  const [userPhotos, setUserPhotos] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // ADD THIS: Update local state when user context changes
+  // Update local state when user context changes
   useEffect(() => {
     if (user) {
-      setSelectedAvatar(user.avatar);
-      setHeaderTheme(user.headerTheme);
+      setSelectedAvatar(user.avatar_theme || "Girl Avatar 1");
+      setHeaderTheme(user.header_theme || "orange");
+      setEditedUsername(user.username || "");
     }
   }, [user]);
+
+  // Fetch user data when component mounts or user changes
+  useEffect(() => {
+    if (user) {
+      fetchUserData();
+    }
+  }, [user]);
+
+    const fetchUserData = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            
+            // Fetch user's quest submissions
+            const questsRes = await fetch('http://localhost:5000/api/quests/submissions/my', {
+                headers: { 'x-auth-token': token }
+            });
+            const questsData = await questsRes.json();
+            setUserQuests(questsData);
+
+            // Fetch user's posts/activity
+            const postsRes = await fetch('http://localhost:5000/api/posts', {
+                headers: { 'x-auth-token': token }
+            });
+            const postsData = await postsRes.json();
+            const userPosts = postsData.filter(post => post.author?._id === user._id || post.author === user._id);
+            setUserActivity(userPosts);
+
+            // Fetch user's badges/achievements
+            const badgesRes = await fetch('http://localhost:5000/api/badges/my', {
+                headers: { 'x-auth-token': token }
+            });
+            const badgesData = await badgesRes.json();
+            setUserAchievements(badgesData);
+
+            // Fetch user's photo history
+            const photosRes = await fetch('http://localhost:5000/api/users/photos', {
+                headers: { 'x-auth-token': token }
+            });
+            const photosData = await photosRes.json();
+            setUserPhotos(photosData);
+
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+  const generateAchievements = (quests) => {
+    const achievements = [];
+    const completedQuests = quests.filter(q => q.status === 'approved').length;
+    
+    if (completedQuests >= 1) {
+      achievements.push({ name: 'First Steps', description: 'Complete your first quest', icon: '🌱' });
+    }
+    if (completedQuests >= 5) {
+      achievements.push({ name: 'Quest Master', description: 'Complete 5 quests', icon: '🏆' });
+    }
+    if (completedQuests >= 10) {
+      achievements.push({ name: 'Eco Champion', description: 'Complete 10 quests', icon: '👑' });
+    }
+    
+    return achievements;
+  };
 
   // Rest of your code stays the same...
 
@@ -44,27 +117,46 @@ const ProfilePage = () => {
     blue: "from-blue-400 to-indigo-500",
   };
 
-  const handleSaveChanges = () => {
-    updateUser({
-      avatar: selectedAvatar,
-      headerTheme: headerTheme,
+  const handleSaveChanges = async () => {
+    const result = await updateUser({
+      username: editedUsername,
+      avatar_theme: selectedAvatar,
+      header_theme: headerTheme,
     });
-    setIsEditOpen(false);
+    
+    if (result.success) {
+      setIsEditOpen(false);
+    } else {
+      alert('Failed to update profile. Please try again.');
+    }
   };
 
   const handleCancelEdit = () => {
-    setSelectedAvatar(user?.avatar || "Girl Avatar 1");
-    setHeaderTheme(user?.headerTheme || "orange");
+    setSelectedAvatar(user?.avatar_theme || "Girl Avatar 1");
+    setHeaderTheme(user?.header_theme || "orange");
+    setEditedUsername(user?.username || "");
     setIsEditOpen(false);
   };
 
-  const currentAvatar = avatars.find((a) => a.name === (user?.avatar || selectedAvatar));
-  const level = Math.floor((user?.points || 450) / 100) + 1;
+  const handleDeleteAccount = async () => {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      const result = await deleteAccount();
+      if (result.success) {
+        alert('Account deleted successfully');
+        onPageChange('home');
+      } else {
+        alert('Failed to delete account. Please try again.');
+      }
+    }
+  };
+
+  const currentAvatar = avatars.find((a) => a.name === (user?.avatar_theme || selectedAvatar));
+  const level = Math.floor((user?.points || 0) / 100) + 1;
 
   return (
     <div className="pt-20 flex flex-col min-h-screen">
       {/* Banner */}
-      <div className={`h-48 bg-gradient-to-r ${headerThemes[user?.headerTheme || headerTheme]} relative`}>
+      <div className={`h-48 bg-gradient-to-r ${headerThemes[user?.header_theme || headerTheme]} relative`}>
         {/* Profile Card */}
         <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-20 w-full max-w-4xl px-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 flex items-center relative">
@@ -80,8 +172,19 @@ const ProfilePage = () => {
 
             {/* Info */}
             <div className="ml-6 flex-1">
-              <h2 className="text-2xl font-bold">{user?.username || "Maria Student"}</h2>
-              <p className="text-gray-600">HAU Student</p>
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-2xl font-bold">{user?.username || "Guest"}</h2>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                  user?.role === 'admin' 
+                    ? 'bg-red-100 text-red-700' 
+                    : user?.role === 'partner'
+                    ? 'bg-purple-100 text-purple-700'
+                    : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {user?.role === 'admin' ? 'Admin' : user?.role === 'partner' ? 'Partner' : 'Student'}
+                </span>
+              </div>
+              <p className="text-gray-600">{user?.hau_affiliation || "HAU Student"}</p>
               <p className="text-sm text-gray-500 mt-1">
                 Environmental science student passionate about making a
                 difference on campus.
@@ -90,16 +193,10 @@ const ProfilePage = () => {
               {/* Stats */}
               <div className="flex gap-6 mt-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
-                  <Trophy className="w-4 h-4 text-yellow-500" /> {user?.points || 450} points
+                  <Trophy className="w-4 h-4 text-yellow-500" /> {user?.points || 0} points
                 </div>
                 <div className="flex items-center gap-1">
-                  <Award className="w-4 h-4 text-orange-500" /> {user?.badges || 2} badges
-                </div>
-                <div className="flex items-center gap-1">
-<<<<<<< HEAD
-                  <Users className="w-4 h-4 text-green-500" /> {user?.friends || 3} friends
-=======
->>>>>>> e698dd07d690e4e8e3510973666b0fe8ab544f27
+                  <Award className="w-4 h-4 text-orange-500" /> {user?.questsCompleted?.length || 0} quests completed
                 </div>
               </div>
             </div>
@@ -108,17 +205,15 @@ const ProfilePage = () => {
             <div className="flex gap-2 absolute top-4 right-4">
               <button
                 onClick={() => { 
-                  setSelectedAvatar(user?.avatar || "Girl Avatar 1");
-                  setHeaderTheme(user?.headerTheme || "orange");
-                  setEditTab("avatar"); 
+                  setSelectedAvatar(user?.avatar_theme || "Girl Avatar 1");
+                  setHeaderTheme(user?.header_theme || "orange");
+                  setEditedUsername(user?.username || "");
+                  setEditTab("profile"); 
                   setIsEditOpen(true); 
                 }}
                 className="px-3 py-1 bg-gray-100 rounded-lg text-sm flex items-center gap-1 hover:bg-gray-200"
               >
-                <Edit className="w-4 h-4" /> Edit
-              </button>
-              <button className="px-3 py-1 bg-gray-100 rounded-lg text-sm flex items-center gap-1 hover:bg-gray-200">
-                <Settings className="w-4 h-4" /> Settings
+                <Edit className="w-4 h-4" /> Edit Profile
               </button>
             </div>
           </div>
@@ -144,8 +239,142 @@ const ProfilePage = () => {
         </div>
 
         {/* Content */}
-        <div className="py-10 text-center text-gray-500">
-          <p>No posts yet</p>
+        <div className="py-10">
+          {loading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
+            <>
+              {activeTab === "Activity" && (
+                <div className="space-y-4">
+                  {userActivity.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500">
+                      <p>No activity yet</p>
+                    </div>
+                  ) : (
+                    userActivity.map((post, index) => (
+                      <div key={index} className="bg-white p-6 rounded-xl shadow-md border">
+                        <h3 className="font-bold text-lg mb-2">{post.title}</h3>
+                        <p className="text-gray-600 mb-3">{post.content}</p>
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                          <span>{post.likes?.length || 0} likes</span>
+                          <span>{post.comments?.length || 0} comments</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {activeTab === "Quests" && (
+                <div className="space-y-4">
+                  {userQuests.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500">
+                      <p>No quest submissions yet</p>
+                    </div>
+                  ) : (
+                    userQuests.map((quest, index) => (
+                      <div key={index} className="bg-white p-6 rounded-xl shadow-md border">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-bold text-lg">{quest.quest?.title || 'Quest Submission'}</h3>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            quest.status === 'approved' ? 'bg-green-100 text-green-700' :
+                            quest.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
+                          }`}>
+                            {quest.status}
+                          </span>
+                        </div>
+                        <p className="text-gray-600 mb-3">{quest.quest?.description || 'Quest description'}</p>
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <span>Submitted: {new Date(quest.submittedAt).toLocaleDateString()}</span>
+                          <span>{quest.quest?.points || 0} points</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {activeTab === "Photo History" && (
+                <div className="space-y-4">
+                  {userPhotos.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500">
+                      <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                        📷
+                      </div>
+                      <p>No photos uploaded yet. Complete quests to build your photo history!</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {userPhotos.map((photo, index) => (
+                        <div key={index} className="bg-white rounded-xl shadow-md border overflow-hidden">
+                          <div className="aspect-square bg-gray-100 flex items-center justify-center">
+                            {photo.photo_url ? (
+                              <img 
+                                src={`http://localhost:5000/${photo.photo_url.replace(/\\/g, '/')}`}
+                                alt={`Quest: ${photo.quest_title}`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div className="w-full h-full flex items-center justify-center text-gray-400" style={{display: 'none'}}>
+                              📷 Photo not available
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <h3 className="font-bold text-sm mb-1">{photo.quest_title}</h3>
+                            <p className="text-xs text-gray-500 mb-2">{photo.quest_category}</p>
+                            <div className="flex items-center justify-between">
+                              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                photo.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                photo.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                {photo.status}
+                              </span>
+                              <span className="text-xs text-gray-400">
+                                {new Date(photo.submitted_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === "Achievements" && (
+                <div className="space-y-4">
+                  {userAchievements.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500">
+                      <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <p>No achievements yet. Complete quests to earn badges!</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {userAchievements.map((userBadge, index) => (
+                        <div key={index} className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-xl shadow-md border border-yellow-200 text-center">
+                          <div className="text-4xl mb-3">{userBadge.badge_id?.image_url || '🏆'}</div>
+                          <h3 className="font-bold text-lg mb-2 text-yellow-800">{userBadge.badge_id?.name || 'Achievement'}</h3>
+                          <p className="text-yellow-600 text-sm mb-2">{userBadge.badge_id?.description || 'Great job!'}</p>
+                          <p className="text-xs text-yellow-500">
+                            Earned: {new Date(userBadge.earned_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
 
@@ -155,6 +384,16 @@ const ProfilePage = () => {
           <div className="bg-white rounded-2xl p-8 w-full max-w-2xl relative shadow-lg">
             {/* Header Tabs */}
             <div className="flex mb-6 border-b">
+              <button
+                onClick={() => setEditTab("profile")}
+                className={`flex-1 py-2 ${
+                  editTab === "profile"
+                    ? "border-b-2 border-green-500 font-semibold"
+                    : "text-gray-500"
+                }`}
+              >
+                Edit Profile
+              </button>
               <button
                 onClick={() => setEditTab("avatar")}
                 className={`flex-1 py-2 ${
@@ -173,9 +412,26 @@ const ProfilePage = () => {
                     : "text-gray-500"
                 }`}
               >
-                Choose Header Theme
+                Header Theme
               </button>
             </div>
+
+            {/* Profile Tab */}
+            {editTab === "profile" && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-2">Username</label>
+                  <input
+                    type="text"
+                    value={editedUsername}
+                    onChange={(e) => setEditedUsername(e.target.value)}
+                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Enter your username"
+                  />
+                </div>
+                
+              </div>
+            )}
 
             {/* Avatar Tab */}
             {editTab === "avatar" && (

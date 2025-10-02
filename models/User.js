@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true, // No two users can have the same email
+    unique: true,
     trim: true,
     lowercase: true,
   },
@@ -19,19 +19,50 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  // You can add more fields here to save what users do, like points, quests completed, etc.
+  role: {
+    type: String,
+    enum: ['user', 'partner', 'admin'],
+    default: 'user'
+  },
+  eco_score: {
+    type: Number,
+    default: 0
+  },
   points: {
     type: Number,
     default: 0
   },
+  profile_picture_url: {
+    type: String,
+    default: ''
+  },
+  hau_affiliation: {
+    type: String,
+    default: ''
+  },
+  avatar_theme: {
+    type: String,
+    default: 'Girl Avatar 1'
+  },
+  header_theme: {
+    type: String,
+    default: 'orange'
+  },
+  is_approved: {
+    type: Boolean,
+    default: false
+  },
   questsCompleted: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Quest' // We can create a 'Quest' model later
-  }]
+    ref: 'Quest'
+  }],
+  created_at: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-// IMPORTANT: This part runs BEFORE a user is saved to the database.
-// It "hashes" the password so you never store plain-text passwords. This is essential for security!
+// Hash password before saving
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) {
     return next();
@@ -41,7 +72,7 @@ userSchema.pre('save', async function(next) {
   next();
 });
 
-// This adds a helper method to our user model to compare passwords during login
+// Compare password method
 userSchema.methods.comparePassword = function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };

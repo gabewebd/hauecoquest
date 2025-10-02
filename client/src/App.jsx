@@ -9,8 +9,10 @@ import CommunityPage from './pages/CommunityPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import DashboardPage from './pages/DashboardPage';
 import ProfilePage from './pages/ProfilePage';
+import PartnerDashboard from './pages/PartnerDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 
-import { UserProvider } from './pages/UserContext';
+import { UserProvider } from './context/UserContext';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -23,23 +25,27 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <HomePage />;
-      case 'quests':
-        return <QuestsPage />;
-      case 'community':
-        return <CommunityPage />;
-      case 'leaderboard':
-        return <LeaderboardPage />;
-      case 'profile':
-        return <ProfilePage />;
-      case 'dashboard':
-        return <DashboardPage />;
+        return <HomePage onPageChange={handlePageChange} />;
       case 'login':
         return <LoginPage onPageChange={handlePageChange} />;
       case 'signup':
         return <SignUp onPageChange={handlePageChange} />;
+      case 'quests':
+        return <QuestsPage onPageChange={handlePageChange} />;
+      case 'community':
+        return <CommunityPage onPageChange={handlePageChange} />;
+      case 'leaderboard':
+        return <LeaderboardPage onPageChange={handlePageChange} />;
+      case 'profile':
+        return <ProfilePage onPageChange={handlePageChange} />;
+      case 'dashboard':
+        return <DashboardPage onPageChange={handlePageChange} />;
+      case 'partner-dashboard':
+        return <PartnerDashboard onPageChange={handlePageChange} />;
+      case 'admin-dashboard':
+        return <AdminDashboard onPageChange={handlePageChange} />;
       default:
-        return <HomePage />;
+        return <HomePage onPageChange={handlePageChange} />;
     }
   };
 

@@ -2,16 +2,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Menu, X, User, LogOut, Shield, Award, Star, Trophy, Zap, Calendar, 
-  Users, Home, BookOpen, MessageCircle, Crown, Settings, ChevronDown 
+  Users, Home, BookOpen, MessageCircle, Crown, ChevronDown, Trash2, Settings 
 } from 'lucide-react';
-import { useUser } from "../pages/UserContext";
+import { useUser } from "../context/UserContext";
 
 export function Navigation({ currentPage, onPageChange }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   // ✅ Safe destructure (prevents "user is null" crash)
-  const { user, logout: userLogout } = useUser() || {};
+  const { user, logout: userLogout, deleteAccount } = useUser() || {};
+
+  const handleDeleteAccount = async () => {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      const result = await deleteAccount();
+      if (result.success) {
+        alert('Account deleted successfully');
+        onPageChange('home');
+      } else {
+        alert('Failed to delete account');
+      }
+    }
+  };
 
   const dropdownRef = useRef(null);
 
@@ -25,7 +37,11 @@ export function Navigation({ currentPage, onPageChange }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const navItems = [
+  const navItems = user ? [
+    { id: 'quests', label: 'Quests', icon: BookOpen },
+    { id: 'community', label: 'Community', icon: MessageCircle },
+    { id: 'leaderboard', label: 'Leaderboard', icon: Crown },
+  ] : [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'quests', label: 'Quests', icon: BookOpen },
     { id: 'community', label: 'Community', icon: MessageCircle },
@@ -91,20 +107,22 @@ export function Navigation({ currentPage, onPageChange }) {
               <User className="w-4 h-4" /> View Profile
             </button>
 
-            <button 
-              onClick={() => { onPageChange('dashboard'); setProfileDropdownOpen(false); }} 
-              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
-            >
-              <Settings className="w-4 h-4" /> Settings
-            </button>
-
-
             <div className="border-t border-gray-100 my-1"></div>
+            
             <button 
               onClick={() => { userLogout?.(); onPageChange('home'); setProfileDropdownOpen(false); }} 
-              className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
             >
               <LogOut className="w-4 h-4" /> Logout
+            </button>
+            
+            <div className="border-t border-gray-100 my-1"></div>
+            
+            <button 
+              onClick={() => { handleDeleteAccount(); setProfileDropdownOpen(false); }} 
+              className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
+            >
+              <Trash2 className="w-4 h-4" /> Delete Account
             </button>
           </div>
         )}
@@ -147,12 +165,30 @@ export function Navigation({ currentPage, onPageChange }) {
           <div className="hidden md:flex items-center space-x-3">
             {user ? (
               <div className="flex items-center space-x-3">
-                <button 
-                  onClick={() => onPageChange('dashboard')} 
-                  className="flex items-center gap-2 bg-green-100 text-green-600 border border-green-200 hover:bg-green-200 px-4 py-2 rounded-full font-semibold transition-colors"
-                >
-                  <Zap className="w-4 h-4" /> Dashboard
-                </button>
+                {user.role === 'user' && (
+                  <button 
+                    onClick={() => onPageChange('dashboard')} 
+                    className="flex items-center gap-2 bg-green-100 text-green-600 border border-green-200 hover:bg-green-200 px-4 py-2 rounded-full font-semibold transition-colors"
+                  >
+                    <Zap className="w-4 h-4" /> Dashboard
+                  </button>
+                )}
+                {user.role === 'partner' && (
+                  <button 
+                    onClick={() => onPageChange('partner-dashboard')} 
+                    className="flex items-center gap-2 bg-purple-100 text-purple-600 border border-purple-200 hover:bg-purple-200 px-4 py-2 rounded-full font-semibold transition-colors"
+                  >
+                    <Shield className="w-4 h-4" /> Partner
+                  </button>
+                )}
+                {user.role === 'admin' && (
+                  <button 
+                    onClick={() => onPageChange('admin-dashboard')} 
+                    className="flex items-center gap-2 bg-red-100 text-red-600 border border-red-200 hover:bg-red-200 px-4 py-2 rounded-full font-semibold transition-colors"
+                  >
+                    <Shield className="w-4 h-4" /> Admin
+                  </button>
+                )}
                 {getProfileDropdown()}
               </div>
             ) : (

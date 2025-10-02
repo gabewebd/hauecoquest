@@ -1,9 +1,10 @@
 //Josh Andrei Aguiluz
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Crown, Award, Shield, Sprout, Recycle, Zap, Users, Swords, Users2, Leaf, Rocket } from 'lucide-react';
+import { userAPI } from '../utils/api';
 
 // Helper component for the Top 3 champions
-const TopChampionCard = ({ user, rank }) => {
+const TopChampionCard = ({ user, rank, onPageChange }) => {
   const rankStyles = {
     1: { bg: 'bg-yellow-100', border: 'border-yellow-300', text: 'text-yellow-600', crown: true },
     2: { bg: 'bg-gray-200', border: 'border-gray-300', text: 'text-gray-600' },
@@ -21,7 +22,12 @@ const TopChampionCard = ({ user, rank }) => {
         </div>
         <div className="absolute -bottom-1 -right-1 bg-white text-sm font-bold w-8 h-8 rounded-full border-2 flex items-center justify-center border-yellow-300">{user.level}</div>
       </div>
-      <h4 className="font-bold text-lg text-gray-800">{user.name}</h4>
+      <button 
+        onClick={() => onPageChange('profile', { userId: user.id })}
+        className="font-bold text-lg text-gray-800 hover:text-green-600 hover:underline cursor-pointer"
+      >
+        {user.name}
+      </button>
       <p className={`text-sm font-semibold ${style.text} mb-2`}>{user.title}</p>
       {/* FIXED: Replaced text-dark-green with text-green-900 */}
       <p className="text-2xl font-bold text-green-900">{user.points.toLocaleString()}</p>
@@ -30,7 +36,7 @@ const TopChampionCard = ({ user, rank }) => {
 };
 
 // Helper component for the rest of the leaderboard rows (4th place and below)
-const LeaderboardRow = ({ user, rank }) => (
+const LeaderboardRow = ({ user, rank, onPageChange }) => (
   <div className="flex items-center bg-white p-3 rounded-xl mb-2 hover:bg-green-50/50 transition-colors">
     <div className="w-8 text-center font-bold text-gray-500 text-lg">#{rank}</div>
     <div className="flex items-center gap-3 flex-1 ml-4">
@@ -39,7 +45,12 @@ const LeaderboardRow = ({ user, rank }) => (
         <div className="absolute -bottom-0 -right-0 bg-white text-xs font-bold w-5 h-5 rounded-full border flex items-center justify-center">{user.level}</div>
       </div>
       <div>
-        <p className="font-bold text-gray-800">{user.name}</p>
+        <button 
+          onClick={() => onPageChange('profile', { userId: user.id })}
+          className="font-bold text-gray-800 hover:text-green-600 hover:underline cursor-pointer"
+        >
+          {user.name}
+        </button>
         <p className="text-sm text-gray-500">{user.title}</p>
       </div>
     </div>
@@ -53,18 +64,109 @@ const LeaderboardRow = ({ user, rank }) => (
   </div>
 );
 
-const LeaderboardPage = () => {
-    // Mock data for the leaderboard
-    const users = [
-        { name: 'Ana Reyes', title: 'Sustainability Champion', points: 2847, level: 15, avatarInitial: 'AR' },
-        { name: 'Maria Santos', title: 'Eco-Warrior', points: 2654, level: 14, avatarInitial: 'MS' },
-        { name: 'Carlos Mendoza', title: 'Green Guardian', points: 2589, level: 14, avatarInitial: 'CM' },
-        { name: 'Lisa Garcia', title: 'Nature Defender', points: 2234, level: 12, avatarInitial: 'LG' },
-        { name: 'John Dela Cruz', title: 'Green Guardian', points: 1987, level: 10, avatarInitial: 'JD' },
-        { name: 'Sarah Kim', title: 'Eco-Enthusiast', points: 1823, level: 9, avatarInitial: 'SK' },
-        { name: 'Miguel Torres', title: 'Sustainability Student', points: 1756, level: 8, avatarInitial: 'MT' },
-        { name: 'Elena Rodriguez', title: 'Green Rookie', points: 1634, level: 8, avatarInitial: 'ER' },
-    ];
+const LeaderboardPage = ({ onPageChange }) => {
+    const { user } = useUser();
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [stats, setStats] = useState({
+        totalUsers: 0,
+        totalQuests: 0,
+        totalPoints: 0
+    });
+    const [timeFilter, setTimeFilter] = useState('All Time');
+    const [categoryFilter, setCategoryFilter] = useState('Overall Points');
+
+    useEffect(() => {
+        fetchLeaderboard();
+    }, []);
+
+    const fetchLeaderboard = async () => {
+        try {
+            const leaderboardData = await userAPI.getLeaderboard();
+            
+            // Transform data for display
+            const transformedUsers = leaderboardData.map(user => ({
+                id: user._id,
+                name: user.username,
+                title: getRoleTitle(user.role, user.questsCompleted),
+                points: user.eco_score || user.points || 0,
+                level: Math.floor((user.eco_score || user.points || 0) / 100) + 1,
+                avatarInitial: getInitials(user.username),
+                questsCompleted: user.questsCompleted
+            }));
+
+            setUsers(transformedUsers);
+            
+            // Calculate stats
+            setStats({
+                totalUsers: leaderboardData.length,
+                totalQuests: leaderboardData.reduce((sum, u) => sum + u.questsCompleted, 0),
+                totalPoints: leaderboardData.reduce((sum, u) => sum + (u.eco_score || u.points || 0), 0)
+            });
+            
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching leaderboard:', error);
+            setLoading(false);
+        }
+    };
+
+    const getInitials = (name) => {
+        return name
+            .split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase()
+            .substring(0, 2);
+    };
+
+    const getRoleTitle = (role, questsCompleted) => {
+        if (role === 'admin') return 'Quest Master';
+        if (role === 'partner') return 'Environmental Partner';
+        
+        // Based on quests completed
+        if (questsCompleted >= 20) return 'Sustainability Champion';
+        if (questsCompleted >= 15) return 'Eco-Warrior';
+        if (questsCompleted >= 10) return 'Green Guardian';
+        if (questsCompleted >= 5) return 'Nature Defender';
+        if (questsCompleted >= 3) return 'Eco-Enthusiast';
+        return 'Green Rookie';
+    };
+
+    // Filter users based on selected filters
+    const getFilteredUsers = () => {
+        let filtered = [...users];
+        
+        // Apply time filter (for now, we'll show all users but this could be enhanced)
+        if (timeFilter !== 'All Time') {
+            // This would need backend support to filter by time periods
+            // For now, we'll just return all users
+        }
+        
+        // Apply category filter
+        if (categoryFilter === 'Quest Master') {
+            // Sort by quests completed instead of points
+            filtered.sort((a, b) => (b.questsCompleted || 0) - (a.questsCompleted || 0));
+        } else {
+            // Sort by points (default)
+            filtered.sort((a, b) => b.points - a.points);
+        }
+        
+        return filtered;
+    };
+
+    const filteredUsers = getFilteredUsers();
+
+    if (loading) {
+        return (
+            <div className="font-sans bg-app-bg text-gray-800 min-h-screen flex items-center justify-center pt-24">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading leaderboard...</p>
+                </div>
+            </div>
+        );
+    }
 
   return (
     <div className="font-sans bg-app-bg text-gray-800">
@@ -78,8 +180,35 @@ const LeaderboardPage = () => {
                         <p className="text-gray-600 max-w-lg">Celebrate our environmental champions and see how you rank among the eco-heroes making a real difference in the world!</p>
                         <div className="flex items-center gap-4 mt-6">
                             {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
-                            <button className="bg-green-500 text-white font-bold py-3 px-6 rounded-full">View Rankings</button>
-                            <button className="font-bold text-gray-700 py-3 px-6">My Progress</button>
+                            <button 
+                                onClick={() => {
+                                    const leaderboardSection = document.querySelector('#leaderboard-section');
+                                    if (leaderboardSection) {
+                                        leaderboardSection.scrollIntoView({ behavior: 'smooth' });
+                                    }
+                                }}
+                                className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
+                            >
+                                View Rankings
+                            </button>
+                            <button 
+                                onClick={() => {
+                                    if (user) {
+                                        if (user.role === 'admin') {
+                                            onPageChange('admin-dashboard');
+                                        } else if (user.role === 'partner') {
+                                            onPageChange('partner-dashboard');
+                                        } else {
+                                            onPageChange('dashboard');
+                                        }
+                                    } else {
+                                        onPageChange('login');
+                                    }
+                                }}
+                                className="font-bold text-gray-700 py-3 px-6 hover:text-green-600 transition"
+                            >
+                                My Progress
+                            </button>
                         </div>
                     </div>
                     <div className="bg-green-50 p-6 rounded-2xl text-center">
@@ -90,26 +219,53 @@ const LeaderboardPage = () => {
 
             {/* Stats Bar */}
             <section className="container mx-auto px-4 mb-12 grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Users className="w-8 h-8 text-blue-500 mx-auto mb-2"/><p className="text-2xl font-bold">1,248</p><p className="text-sm text-gray-500">Active Champions</p></div>
-                <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Swords className="w-8 h-8 text-yellow-500 mx-auto mb-2"/><p className="text-2xl font-bold">3,891</p><p className="text-sm text-gray-500">Quests Completed</p></div>
-                <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Users2 className="w-8 h-8 text-purple-500 mx-auto mb-2"/><p className="text-2xl font-bold">2,156</p><p className="text-sm text-gray-500">Green Participants</p></div>
-                <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Leaf className="w-8 h-8 text-green-500 mx-auto mb-2"/><p className="text-2xl font-bold">45.2 tons</p><p className="text-sm text-gray-500">CO₂ saved</p></div>
+                <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Users className="w-8 h-8 text-blue-500 mx-auto mb-2"/><p className="text-2xl font-bold">{stats.totalUsers}</p><p className="text-sm text-gray-500">Active Champions</p></div>
+                <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Swords className="w-8 h-8 text-yellow-500 mx-auto mb-2"/><p className="text-2xl font-bold">{stats.totalQuests}</p><p className="text-sm text-gray-500">Quests Completed</p></div>
+                <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Users2 className="w-8 h-8 text-purple-500 mx-auto mb-2"/><p className="text-2xl font-bold">{stats.totalUsers}</p><p className="text-sm text-gray-500">Green Participants</p></div>
+                <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Leaf className="w-8 h-8 text-green-500 mx-auto mb-2"/><p className="text-2xl font-bold">{stats.totalPoints}</p><p className="text-sm text-gray-500">Total Points</p></div>
             </section>
 
             {/* Leaderboard Section */}
-            <section className="container mx-auto px-4">
+            <section id="leaderboard-section" className="container mx-auto px-4">
                 {/* Filters */}
                 <div className="bg-white p-6 rounded-2xl shadow-lg border mb-8">
                     <h3 className="font-bold mb-4">Leaderboard Filters</h3>
                     <div className="flex flex-wrap gap-4">
                         <div>
                             <p className="text-sm font-semibold text-gray-600 mb-2">Time Period</p>
-                            {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
-                            <div className="flex gap-2"><button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm">This Week</button><button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm">This Month</button><button className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold">All Time</button></div>
+                            <div className="flex gap-2">
+                                {['This Week', 'This Month', 'All Time'].map((period) => (
+                                    <button 
+                                        key={period}
+                                        onClick={() => setTimeFilter(period)}
+                                        className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                                            timeFilter === period 
+                                                ? 'bg-green-500 text-white' 
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {period}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                         <div>
                             <p className="text-sm font-semibold text-gray-600 mb-2">Category</p>
-                            <div className="flex gap-2"><button className="bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-semibold">Overall Points</button><button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full text-sm">Quest Master</button></div>
+                            <div className="flex gap-2">
+                                {['Overall Points', 'Quest Master'].map((category) => (
+                                    <button 
+                                        key={category}
+                                        onClick={() => setCategoryFilter(category)}
+                                        className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                                            categoryFilter === category 
+                                                ? 'bg-orange-500 text-white' 
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        }`}
+                                    >
+                                        {category}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -118,19 +274,30 @@ const LeaderboardPage = () => {
                 <div className="text-center mb-8">
                     <h2 className="text-3xl font-bold">🏆 Top Environmental Champions 🏆</h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                    <TopChampionCard user={users[1]} rank={2} />
-                    <TopChampionCard user={users[0]} rank={1} />
-                    <TopChampionCard user={users[2]} rank={3} />
-                </div>
+                
+                {filteredUsers.length >= 3 ? (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                            <TopChampionCard user={filteredUsers[1]} rank={2} onPageChange={onPageChange} />
+                            <TopChampionCard user={filteredUsers[0]} rank={1} onPageChange={onPageChange} />
+                            <TopChampionCard user={filteredUsers[2]} rank={3} onPageChange={onPageChange} />
+                        </div>
 
-                {/* Complete Leaderboard */}
-                <div className="bg-white p-6 rounded-2xl shadow-xl border">
-                  <h3 className="text-2xl font-bold mb-4">Complete Leaderboard</h3>
-                  {users.slice(3).map((user, index) => (
-                      <LeaderboardRow key={user.name} user={user} rank={index + 4} />
-                  ))}
-                </div>
+                        {/* Complete Leaderboard */}
+                        <div className="bg-white p-6 rounded-2xl shadow-xl border">
+                          <h3 className="text-2xl font-bold mb-4">Complete Leaderboard</h3>
+                          {filteredUsers.slice(3).map((user, index) => (
+                              <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={index + 4} onPageChange={onPageChange} />
+                          ))}
+                        </div>
+                    </>
+                ) : (
+                    <div className="bg-white p-12 rounded-2xl shadow-xl border text-center">
+                        <Sprout className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                        <h3 className="text-xl font-bold text-gray-600 mb-2">No Champions Yet</h3>
+                        <p className="text-gray-500">Be the first to complete quests and climb the leaderboard!</p>
+                    </div>
+                )}
             </section>
 
              {/* CTA */}
@@ -165,20 +332,20 @@ const LeaderboardPage = () => {
                 <div>
                     <h4 className="font-bold mb-4">Adventure Paths</h4>
                     <ul className="space-y-2 text-sm text-green-100">
-                        <li><a href="#" className="hover:text-white">Browse Epic Quests</a></li>
-                        <li><a href="#" className="hover:text-white">Upcoming Events</a></li>
-                        <li><a href="#" className="hover:text-white">Hero Community</a></li>
-                        <li><a href="#" className="hover:text-white">Hall of Fame</a></li>
+                        <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Browse Epic Quests</button></li>
+                        <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Upcoming Events</button></li>
+                        <li><button onClick={() => onPageChange('community')} className="hover:text-white">Hero Community</button></li>
+                        <li><button onClick={() => onPageChange('leaderboard')} className="hover:text-white">Hall of Fame</button></li>
                     </ul>
                 </div>
                 {/* Support Guild */}
                 <div>
                     <h4 className="font-bold mb-4">Support Guild</h4>
                     <ul className="space-y-2 text-sm text-green-100">
-                        <li><a href="#" className="hover:text-white">Contact Quest Masters</a></li>
-                        <li><a href="#" className="hover:text-white">Alliance Partners</a></li>
-                        <li><a href="#" className="hover:text-white">Help Center</a></li>
-                        <li><a href="#" className="hover:text-white">Quest Rules</a></li>
+                        <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Contact Quest Masters</button></li>
+                        <li><button onClick={() => onPageChange('community')} className="hover:text-white">Alliance Partners</button></li>
+                        <li><button onClick={() => onPageChange('community')} className="hover:text-white">Help Center</button></li>
+                        <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Quest Rules</button></li>
                     </ul>
                 </div>
                 {/* Connect */}

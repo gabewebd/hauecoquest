@@ -73,7 +73,7 @@ const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
     );
 };
 
-const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAgreedToTerms, goToStep, handleSubmit }) => {
+const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAgreedToTerms, goToStep, handleSubmit, loading }) => {
     const RoleCard = ({ role, title, icon, features, requiresApproval = false }) => {
         const isSelected = selectedRole === role;
         const baseClasses = "border-2 p-4 rounded-xl cursor-pointer transition-all duration-200 flex items-start gap-4";
@@ -129,7 +129,7 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
             <h3 className="font-bold text-lg mb-4 text-gray-800">Select Your Role</h3>
             <div className="space-y-4 mb-6">
                 <RoleCard
-                    role="Eco-Hero Student"
+                    role="user"
                     title="Eco-Hero Student"
                     icon={<Sprout className="w-5 h-5" />}
                     features={{
@@ -138,7 +138,7 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
                     }}
                 />
                 <RoleCard
-                    role="Environmental Partner"
+                    role="partner"
                     title="Environmental Partner"
                     icon={<Users className="w-5 h-5" />}
                     features={{
@@ -148,7 +148,7 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
                     requiresApproval
                 />
                 <RoleCard
-                    role="Quest Master Admin"
+                    role="admin"
                     title="Quest Master Admin"
                     icon={<Crown className="w-5 h-5" />}
                     features={{
@@ -185,10 +185,19 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
                 <button
                     type="submit"
                     className="w-2/3 flex justify-center items-center gap-2 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold py-3 rounded-full shadow-lg hover:opacity-90 transition disabled:opacity-50"
-                    disabled={!agreedToTerms || !selectedRole}
+                    disabled={!agreedToTerms || !selectedRole || loading}
                 >
-                    <Check className="w-5 h-5 mr-1" />
-                    Join the Adventure!
+                    {loading ? (
+                        <>
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Creating Account...
+                        </>
+                    ) : (
+                        <>
+                            <Check className="w-5 h-5 mr-1" />
+                            Join the Adventure!
+                        </>
+                    )}
                 </button>
             </div>
         </form>
@@ -198,9 +207,9 @@ const RoleSelectionForm = ({ selectedRole, setSelectedRole, agreedToTerms, setAg
 
 // --- Main SignUp Component ---
 const SignUp = ({ onPageChange }) => {
-    const { login } = useUser();
+    const { signup, user } = useUser();
     const [step, setStep] = useState(1);
-    const [selectedRole, setSelectedRole] = useState("Eco-Hero Student");
+    const [selectedRole, setSelectedRole] = useState("user");
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
@@ -209,6 +218,7 @@ const SignUp = ({ onPageChange }) => {
         confirmPassword: ''
     });
     const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const handleInputChange = (e) => {
         setFormData({
@@ -220,39 +230,55 @@ const SignUp = ({ onPageChange }) => {
     const handleFinalSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
+        setLoading(true);
 
         if (formData.password !== formData.confirmPassword) {
             setMessage("Passwords do not match!");
+            setLoading(false);
             return;
         }
 
         try {
-            const userData = {
-                username: formData.username,
-                email: formData.email,
-                password: formData.password,
-                role: selectedRole
-            };
-            await axios.post('http://localhost:5000/api/auth/signup', userData);
+            const result = await signup(
+                formData.username,
+                formData.email,
+                formData.password,
+                selectedRole
+            );
 
-            setMessage("Sign up successful! Logging you in...");
-
-            await login(formData.email, formData.password);
-            
-            setTimeout(() => {
-                if(onPageChange) {
-                    onPageChange('dashboard');
+            if (result.success && result.user) {
+                setMessage(result.message || "Sign up successful! Redirecting...");
+                
+                // Redirect based on role from the returned user data
+                const userRole = result.user.role;
+                
+                if (userRole === 'admin') {
+                    setTimeout(() => onPageChange('admin-dashboard'), 1000);
+                } else if (userRole === 'partner') {
+                    // Partner needs approval
+                    if (!result.user.is_approved) {
+                        setMessage('Partner request submitted. Awaiting admin approval.');
+                        setTimeout(() => onPageChange('home'), 2000);
+                    } else {
+                        setTimeout(() => onPageChange('partner-dashboard'), 1000);
+                    }
+                } else {
+                    setTimeout(() => onPageChange('dashboard'), 1000);
                 }
-            }, 1000);
+            } else {
+                setMessage(result.error || "Sign up failed. Please try again.");
+                setLoading(false);
+            }
 
         } catch (error) {
-            if (error.response && error.response.data.error) {
-                setMessage(error.response.data.error);
-            } else {
-                setMessage("An error occurred during sign up. Please try again.");
-            }
+            setMessage("An error occurred during sign up. Please try again.");
+            setLoading(false);
             console.error("Signup error:", error);
         }
+    };
+
+    const handleLoginClick = () => {
+        onPageChange('login');
     };
 
     const isStep1 = step === 1;
@@ -277,10 +303,14 @@ const SignUp = ({ onPageChange }) => {
         ? "Create your account and start making a positive environmental impact today"
         : "Select the role that best describes your environmental journey";
 
+    const containerClass = "min-h-screen bg-gradient-to-b from-white to-green-50 flex flex-col";
+    const mainClass = "flex-grow flex items-center justify-center px-4 py-12";
+
     return (
-        <div className="min-h-screen bg-gradient-to-b from-white to-green-50 flex flex-col"> 
-            <main className="flex-grow flex items-center justify-center px-4 py-12">
-                <div className="bg-white rounded-3xl shadow-lg max-w-lg w-full p-8"> 
+        <div className={containerClass}> 
+            <div className={mainClass}>
+                <div className="bg-white rounded-3xl shadow-lg max-w-lg w-full p-8 relative">
+                    
                     <div className="text-center mb-6">
                         <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
                             <GraduationCap className="w-8 h-8 text-green-600" />
@@ -319,17 +349,18 @@ const SignUp = ({ onPageChange }) => {
                             setAgreedToTerms={setAgreedToTerms}
                             goToStep={setStep}
                             handleSubmit={handleFinalSubmit}
+                            loading={loading}
                         />
                     )}
 
                     <p className="text-center text-sm mt-6 text-gray-600">
                         Already part of the eco-community?{" "}
-                        <a href="#" className="text-green-600 font-semibold hover:underline">
+                        <button onClick={handleLoginClick} className="text-green-600 font-semibold hover:underline">
                             Sign In Here
-                        </a>
+                        </button>
                     </p>
                 </div>
-            </main>
+            </div>
         </div> 
 
         

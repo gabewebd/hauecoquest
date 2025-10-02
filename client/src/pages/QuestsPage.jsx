@@ -1,16 +1,19 @@
 //Josh Andrei Aguiluz
-import React from 'react';
-import { Search, Droplets, TreePine, Recycle, Sun, Leaf, Building, Clock, Users, Award, Lightbulb, BookOpen, Smile, Camera, Handshake } from 'lucide-react'; // Added Smile, Camera, Handshake icons
+import React, { useState, useEffect } from 'react';
+import { Search, Droplets, TreePine, Recycle, Sun, Leaf, Building, Clock, Users, Award, Lightbulb, BookOpen, Smile, Camera, Handshake } from 'lucide-react';
+import QuestDetailsPage from './QuestDetailsPage'; 
+import { questAPI } from '../utils/api';
+import { useUser } from '../context/UserContext';
 
-// Reusable component for Quest Cards, styled to match your design
-const QuestCard = ({ icon, title, description, difficulty, points, duration, participants, progress, color }) => {
+// --- QUEST CARD COMPONENT (Modified) ---
+
+const QuestCard = ({ icon, title, description, difficulty, points, duration, participants, progress, color, onViewDetails, questData, user }) => {
   const difficultyStyles = {
     Easy: 'bg-green-100 text-green-600',
     Medium: 'bg-yellow-100 text-yellow-600',
     Hard: 'bg-red-100 text-red-600',
   };
   
-  // This object helps Tailwind "see" the full class names so it can generate them properly.
   const colorVariants = {
     green: { bg: 'bg-green-500', hover: 'hover:bg-green-600', iconBg: 'bg-green-100' },
     yellow: { bg: 'bg-yellow-500', hover: 'hover:bg-yellow-600', iconBg: 'bg-yellow-100' },
@@ -49,34 +52,177 @@ const QuestCard = ({ icon, title, description, difficulty, points, duration, par
         </div>
       </div>
 
-      <button className={`mt-auto w-full ${activeColor.bg} text-white font-bold py-2.5 px-4 rounded-xl transition-transform transform hover:scale-105 ${activeColor.hover}`}>
-        Start Quest
-      </button>
+      <button 
+            // 🔑 Action: Pass the full quest object to the handler
+            onClick={() => onViewDetails(questData)}
+            className={`mt-auto w-full ${activeColor.bg} text-white font-bold py-2.5 px-4 rounded-xl transition-transform transform hover:scale-105 ${activeColor.hover}`}
+        >
+        {user ? 'Start Quest' : 'Login to Start'}
+      </button>
     </div>
   );
 };
 
-const QuestsPage = () => {
-    // Mock data for the quests based on your image
-    const quests = [
-        { icon: <TreePine className="w-6 h-6 text-green-700"/>, title: "Campus Tree Planting Initiative", description: "Plant native trees around campus and learn about sustainable forestry practices while creating lasting environmental impact.", difficulty: "Medium", points: 300, duration: "2-3 weeks", participants: "45/100", progress: 45, color: "green" },
-        { icon: <Sun className="w-6 h-6 text-yellow-600"/>, title: "Solar Panel Installation Project", description: "Help install solar panels on campus buildings and learn about renewable energy systems and their environmental benefits.", difficulty: "Hard", points: 500, duration: "1 month", participants: "23/50", progress: 46, color: "yellow" },
-        { icon: <Recycle className="w-6 h-6 text-blue-700"/>, title: "Campus Recycling Program", description: "Organize and implement comprehensive recycling systems across campus facilities to reduce waste and promote a circular economy.", difficulty: "Easy", points: 200, duration: "2 weeks", participants: "78/150", progress: 52, color: "blue" },
-        { icon: <Droplets className="w-6 h-6 text-cyan-700"/>, title: "Rainwater Harvesting System", description: "Design and build rainwater collection systems for campus irrigation and learn about water conservation techniques.", difficulty: "Medium", points: 350, duration: "3 weeks", participants: "34/80", progress: 43, color: "cyan" },
-        { icon: <Leaf className="w-6 h-6 text-lime-700"/>, title: "Campus Biodiversity Survey", description: "Document local flora and fauna, create a biodiversity database, and develop conservation strategies for campus ecosystems.", difficulty: "Medium", points: 250, duration: "1 month", participants: "56/120", progress: 46, color: "lime" },
-        { icon: <Building className="w-6 h-6 text-indigo-700"/>, title: "Green Building Certification", description: "Work towards LEED certification for campus buildings by implementing sustainable practices and energy-efficient solutions.", difficulty: "Hard", points: 800, duration: "2 months", participants: "19/40", progress: 48, color: "indigo" },
-    ];
+// New component for the guideline cards
+const GuidelineCard = ({ icon, title, description, iconColor }) => (
+    <div className="text-center p-4">
+        <div className={`mx-auto w-12 h-12 flex items-center justify-center rounded-full mb-4 text-3xl`} style={{ color: iconColor }}>
+            {icon}
+        </div>
+        <h4 className="font-bold text-gray-800 mb-2">{title}</h4>
+        <p className="text-sm text-gray-600">{description}</p>
+    </div>
+);
 
-    // New component for the guideline cards
-    const GuidelineCard = ({ icon, title, description, iconColor }) => (
-        <div className="text-center p-4">
-            <div className={`mx-auto w-12 h-12 flex items-center justify-center rounded-full mb-4 text-3xl`} style={{ color: iconColor }}>
-                {icon}
+// --- MAIN PAGE COMPONENT (Modified) ---
+
+const QuestsPage = ({ onPageChange }) => {
+    const { user } = useUser();
+    const [selectedQuest, setSelectedQuest] = useState(null);
+    const [quests, setQuests] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedDifficulty, setSelectedDifficulty] = useState('All');
+    const [todayQuest, setTodayQuest] = useState(null);
+
+    useEffect(() => {
+        fetchQuests();
+    }, [user]);
+
+    const fetchQuests = async () => {
+        try {
+            const questsData = await questAPI.getAllQuests();
+            
+            // Fetch user's submissions to check status
+            let userSubmissions = [];
+            if (user) {
+                try {
+                    const token = localStorage.getItem('token');
+                    const submissionsRes = await fetch('http://localhost:5000/api/quests/submissions/my', {
+                        headers: { 'x-auth-token': token }
+                    });
+                    userSubmissions = await submissionsRes.json();
+                } catch (error) {
+                    console.error('Error fetching user submissions:', error);
+                }
+            }
+            
+            // Transform quest data to match QuestCard component props
+            const transformedQuests = questsData.map(quest => {
+                const userSubmission = userSubmissions.find(sub => sub.quest_id?._id === quest._id);
+                
+                return {
+                    ...quest,
+                    id: quest._id,
+                    icon: getCategoryIcon(quest.category),
+                    color: getCategoryColor(quest.category),
+                    participants: quest.completions?.length || 0,
+                    progress: ((quest.completions?.length || 0) / (quest.maxParticipants || 50)) * 100,
+                    submissionStatus: userSubmission?.status || null
+                };
+            });
+            
+            setQuests(transformedQuests);
+            
+            // Fetch today's daily quest from API
+            try {
+                const dailyQuestRes = await fetch('http://localhost:5000/api/daily/quest');
+                const dailyQuestData = await dailyQuestRes.json();
+                if (dailyQuestData.quest) {
+                    const transformedDailyQuest = {
+                        ...dailyQuestData.quest,
+                        id: dailyQuestData.quest._id,
+                        icon: getCategoryIcon(dailyQuestData.quest.category),
+                        color: getCategoryColor(dailyQuestData.quest.category),
+                        participants: dailyQuestData.quest.completions?.length || 0,
+                        progress: ((dailyQuestData.quest.completions?.length || 0) / (dailyQuestData.quest.maxParticipants || 50)) * 100,
+                        isDailyQuest: true
+                    };
+                    setTodayQuest(transformedDailyQuest);
+                }
+            } catch (error) {
+                console.error('Error fetching daily quest:', error);
+                // Fallback to first active quest
+                const activeQuests = transformedQuests.filter(q => q.isActive);
+                if (activeQuests.length > 0) {
+                    setTodayQuest(activeQuests[0]);
+                }
+            }
+            
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching quests:', error);
+            setLoading(false);
+        }
+    };
+
+    const getCategoryIcon = (category) => {
+        const icons = {
+            'Gardening & Planting': <TreePine className="w-6 h-6 text-green-700"/>,
+            'Recycling & Waste': <Recycle className="w-6 h-6 text-blue-700"/>,
+            'Energy Conservation': <Sun className="w-6 h-6 text-yellow-600"/>,
+            'Water Conservation': <Droplets className="w-6 h-6 text-cyan-700"/>,
+            'Education & Awareness': <BookOpen className="w-6 h-6 text-purple-700"/>,
+            'Transportation': <Building className="w-6 h-6 text-indigo-700"/>
+        };
+        return icons[category] || <Leaf className="w-6 h-6 text-lime-700"/>;
+    };
+
+    const getCategoryColor = (category) => {
+        const colors = {
+            'Gardening & Planting': 'green',
+            'Recycling & Waste': 'blue',
+            'Energy Conservation': 'yellow',
+            'Water Conservation': 'cyan',
+            'Education & Awareness': 'purple',
+            'Transportation': 'indigo'
+        };
+        return colors[category] || 'green';
+    };
+
+    const handleViewDetails = (questData) => {
+        if (!user) {
+            onPageChange('login');
+            return;
+        }
+        setSelectedQuest(questData);
+    };
+
+    const handleBack = () => {
+        setSelectedQuest(null);
+    };
+
+    const handleQuestSubmission = () => {
+        // Refresh quests data to show updated status
+        fetchQuests();
+        // You could also show a success message here
+        console.log('Quest submitted successfully!');
+    };
+
+    // Filter quests
+    const filteredQuests = quests.filter(quest => {
+        const matchesSearch = quest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             quest.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = selectedCategory === 'All' || quest.category === selectedCategory;
+        const matchesDifficulty = selectedDifficulty === 'All' || quest.difficulty === selectedDifficulty;
+        return matchesSearch && matchesCategory && matchesDifficulty;
+    });
+
+    if (loading) {
+        return (
+            <div className="font-sans bg-app-bg text-gray-800 min-h-screen flex items-center justify-center pt-24">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading quests...</p>
+                </div>
             </div>
-            <h4 className="font-bold text-gray-800 mb-2">{title}</h4>
-            <p className="text-sm text-gray-600">{description}</p>
-        </div>
-    );
+        );
+    }
+
+    if (selectedQuest) {
+        return <QuestDetailsPage quest={selectedQuest} onBack={handleBack} onSubmissionSuccess={handleQuestSubmission} />;
+    }
 
   return (
     <div className="font-sans bg-app-bg text-gray-800">
@@ -96,94 +242,138 @@ const QuestsPage = () => {
             </div>
         </section>
 
-        {/* Today's Quest */}
-        <section className="container mx-auto px-4 mb-12">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    <span className="text-yellow-500">⭐</span> Today's Quest
-                </h3>
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <Droplets className="w-8 h-8 text-blue-500" />
-                        <div>
-                            <h4 className="font-bold text-blue-800">Water Conservation Challenge</h4>
-                            <p className="text-sm text-blue-700">Save water by taking shorter showers today. Track your progress and earn +20 bonus points.</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                         <button className="bg-green-500 text-white font-bold py-2 px-5 rounded-full transition-transform transform hover:scale-105">Accept Challenge</button>
-                         <button className="text-sm text-gray-600 hover:underline">View Details</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+        {/* Today's Quest (Modified) */}
+        {todayQuest && (
+            <section className="container mx-auto px-4 mb-12">
+                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100 relative">
+                    <div className="absolute -top-2 -right-2 bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-bold z-10">
+                        DAILY
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span className="text-yellow-500">⭐</span> Today's Quest
+                    </h3>
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                            {todayQuest.icon}
+                            <div>
+                                <h4 className="font-bold text-blue-800">{todayQuest.title}</h4>
+                                <p className="text-sm text-blue-700">{todayQuest.description?.substring(0, 100)}...</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button 
+                                onClick={() => handleViewDetails(todayQuest)}
+                                className="bg-green-500 text-white font-bold py-2 px-5 rounded-full transition-transform transform hover:scale-105"
+                            >
+                                {user ? 'Accept Challenge' : 'Login to Accept'}
+                            </button>
+                            <button 
+                                onClick={() => handleViewDetails(todayQuest)}
+                                className="text-sm text-gray-600 hover:underline"
+                            >
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        )}
 
         {/* Filters and Quest Grid */}
         <section className="container mx-auto px-4">
-            {/* Search and Filters */}
-            <div className="bg-white p-4 rounded-2xl shadow-md border border-gray-100 mb-8">
-                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="relative">
-                        <input type="text" placeholder="Search quests..." className="w-full pl-10 pr-4 py-2 border rounded-xl" />
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    </div>
-                     <div>
-                        {/* Simplified filter buttons for demonstration */}
-                        <div className="flex flex-wrap gap-2">
-                           <button className="bg-primary-green text-white px-4 py-2 rounded-xl text-sm font-semibold">All Quests</button>
-                           <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-xl text-sm font-semibold">Recycling</button>
-                           <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-xl text-sm font-semibold">Energy</button>
-                        </div>
-                    </div>
-                    <div>
-                        <select className="w-full border rounded-xl px-4 py-2 bg-white">
-                            <option>All Difficulty Levels</option>
-                            <option>Easy</option>
-                            <option>Medium</option>
-                            <option>Hard</option>
-                        </select>
-                    </div>
-                 </div>
-            </div>
+            {/* Search and Filters */}
+            <div className="bg-white p-4 rounded-2xl shadow-md border border-gray-100 mb-8">
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="relative">
+                        <input 
+                            type="text" 
+                            placeholder="Search quests..." 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border rounded-xl" 
+                        />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    </div>
+                     <div>
+                        <div className="flex flex-wrap gap-2">
+                           {['All', 'Gardening & Planting', 'Recycling & Waste', 'Energy Conservation', 'Water Conservation'].map((category) => (
+                               <button 
+                                   key={category}
+                                   onClick={() => setSelectedCategory(category)}
+                                   className={`px-4 py-2 rounded-xl text-sm font-semibold ${
+                                       selectedCategory === category 
+                                           ? 'bg-green-500 text-white' 
+                                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                   }`}
+                               >
+                                   {category === 'All' ? 'All Quests' : category.split(' ')[0]}
+                               </button>
+                           ))}
+                        </div>
+                    </div>
+                    <div>
+                        <select 
+                            value={selectedDifficulty}
+                            onChange={(e) => setSelectedDifficulty(e.target.value)}
+                            className="w-full border rounded-xl px-4 py-2 bg-white"
+                        >
+                            <option value="All">All Difficulty Levels</option>
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                 </div>
+            </div>
 
-            {/* Quest Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {quests.map((quest, index) => <QuestCard key={index} {...quest} />)}
-            </div>
+            {/* Quest Grid */}
+            {filteredQuests.length === 0 ? (
+                <div className="bg-white p-12 rounded-2xl shadow-lg border text-center">
+                    <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-gray-600 mb-2">No Quests Found</h3>
+                    <p className="text-gray-500">
+                        {searchTerm || selectedCategory !== 'All' 
+                            ? 'Try adjusting your filters' 
+                            : 'No quests have been created yet. Check back soon!'}
+                    </p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {filteredQuests.map((quest) => (
+                        <QuestCard key={quest.id} {...quest} onViewDetails={handleViewDetails} questData={quest} user={user} />
+                    ))}
+                </div>
+            )}
         </section>
         
         {/* QUEST GUIDELINES SECTION (Refactored) */}
         <section className="container mx-auto px-4 mt-24 text-center">
-            {/* White card with shadow, mimicking the Community Guidelines page */}
             <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col items-center">
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Quest Guidelines</h2>
                 <p className="text-gray-600 max-w-lg mb-8">
-                    To ensure the integrity of your environmental impact, please follow these core principles when completing quests.
-                </p>
+                    To ensure the integrity of your environmental impact, please follow these core principles when completing quests.
+                </p>
 
-                {/* Three-column layout for guidelines */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl">
-                    <GuidelineCard
-                        icon={<Lightbulb className="w-8 h-8"/>} // Changed icon to be different from the one removed
-                        title="Real Impact"
-                        description="Ensure your actions are genuine and contribute directly to the quest's stated environmental goal."
-                        iconColor="#10b981" // Green
-                    />
-                    <GuidelineCard
-                        icon={<Camera className="w-8 h-8"/>}
-                        title="Verify Progress"
-                        description="Always document your proof of completion clearly (photos/videos) for verification by a Quest Master."
-                        iconColor="#3b82f6" // Blue
-                    />
-                    <GuidelineCard
-                        icon={<Handshake className="w-8 h-8"/>}
-                        title="Collaborate Fairly"
-                        description="If the quest is collaborative, ensure all team members contribute equally to the final outcome."
-                        iconColor="#ef4444" // Red/Green for diversity
-                    />
-                </div>
-              
-
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl">
+                    <GuidelineCard
+                        icon={<Lightbulb className="w-8 h-8"/>}
+                        title="Real Impact"
+                        description="Ensure your actions are genuine and contribute directly to the quest's stated environmental goal."
+                        iconColor="#10b981" 
+                    />
+                    <GuidelineCard
+                        icon={<Camera className="w-8 h-8"/>}
+                        title="Verify Progress"
+                        description="Always document your proof of completion clearly (photos/videos) for verification by a Quest Master."
+                        iconColor="#3b82f6" 
+                    />
+                    <GuidelineCard
+                        icon={<Handshake className="w-8 h-8"/>}
+                        title="Collaborate Fairly"
+                        description="If the quest is collaborative, ensure all team members contribute equally to the final outcome."
+                        iconColor="#ef4444" 
+                    />
+                </div>
             </div>
         </section>
       </main>

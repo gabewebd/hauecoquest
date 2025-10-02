@@ -1,6 +1,6 @@
 //Josh Andrei Aguiluz
-import React, { useState } from 'react';
-import { useUser } from "../pages/UserContext";
+import React, { useState, useEffect } from 'react';
+import { useUser } from "../context/UserContext";
 import { BookOpen, PlusCircle, User, Settings, BarChart, TreePine, Recycle, Droplets, Sun, Zap, Activity, Badge, Trophy, CheckCircle, Clock, List, ChevronRight, Award, UserCircle } from 'lucide-react';
 
 // --- ALL HELPER COMPONENTS ARE NOW DEFINED AT THE TOP LEVEL ---
@@ -27,36 +27,31 @@ const ImpactCard = ({ icon, value, label, color }) => (
     <div className={`p-4 rounded-xl text-center ${color}`}><div className="mx-auto w-fit mb-1">{icon}</div><p className="text-xl font-bold">{value}</p><p className="text-xs">{label}</p></div>
 );
 
-const ImpactSection = () => (
-    <div className="bg-white p-6 rounded-2xl shadow-lg border">
-        <h3 className="text-xl font-bold mb-4">Environmental Impact</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
-            <ImpactCard icon={<TreePine/>} value="8" label="Trees Planted" color="bg-green-100 text-green-800" />
-            <ImpactCard icon={<Recycle/>} value="15.2" label="kg Waste Collected" color="bg-blue-100 text-blue-800" />
-            <ImpactCard icon={<Sun/>} value="42.5" label="kWh Energy Saved" color="bg-yellow-100 text-yellow-800" />
-            <ImpactCard icon={<Droplets/>} value="156" label="L Water Saved" color="bg-cyan-100 text-cyan-800" />
-            <ImpactCard icon={<Zap/>} value="23.8" label="kg CO₂ Reduced" color="bg-gray-200 text-gray-800" />
-        </div>
-        <div className="bg-green-50 text-green-800 p-4 rounded-lg text-center text-sm">
-            <strong>Your Environmental Contribution:</strong> Amazing work! Your actions have made a real difference for our planet.
-        </div>
-    </div>
-);
-const AchievementSection = () => (
+const AchievementSection = ({ achievements }) => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="bg-white p-6 rounded-2xl shadow-lg border">
             <h3 className="text-xl font-bold mb-4">Recent Achievements</h3>
             <div className="space-y-3">
-                <ActivityItem icon={<Badge className="text-green-500"/>} title="Tree Hugger" subtitle="Plant 5 trees" time="3 days ago" />
-                <ActivityItem icon={<Trophy className="text-yellow-500"/>} title="Recycling Champion" subtitle="Complete 5 recycling quests" time="1 week ago" />
-                <ActivityItem icon={<Clock className="text-orange-500"/>} title="Week Warrior" subtitle="Complete quests for 7 consecutive days" time="3 days ago" />
+                {achievements.length > 0 ? (
+                    achievements.slice(0, 3).map((achievement, index) => (
+                        <ActivityItem 
+                            key={index}
+                            icon={<Badge className="text-green-500"/>} 
+                            title={achievement.badge_id?.name || 'Achievement'} 
+                            subtitle={achievement.badge_id?.description || 'Great job!'} 
+                            time={new Date(achievement.earned_at).toLocaleDateString()} 
+                        />
+                    ))
+                ) : (
+                    <p className="text-gray-500 text-sm">No achievements yet. Complete quests to earn badges!</p>
+                )}
             </div>
             <button className="font-semibold text-green-600 mt-4 text-sm hover:underline">View All Badges</button>
         </div>
         <div className="bg-white p-6 rounded-2xl shadow-lg border">
             <h3 className="text-xl font-bold mb-4">Badge Collection</h3>
             <div className="bg-purple-50 text-purple-800 p-6 rounded-xl text-center">
-                <p className="text-5xl font-bold">0</p>
+                <p className="text-5xl font-bold">{achievements.length}</p>
                 <p className="font-semibold">Badges Earned</p>
                 <p className="text-xs">Out of 35 available badges</p>
             </div>
@@ -69,19 +64,18 @@ const AchievementSection = () => (
     </div>
 );
 
-const OverviewTabContent = () => (
+const OverviewTabContent = ({ dashboardData }) => (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <StatCard icon={<CheckCircle className="w-8 h-8 text-green-500" />} value="12" label="Quests Completed" change="+1 this month" />
-                <StatCard icon={<Award className="w-8 h-8 text-orange-500" />} value="0" label="Badges Earned" change="+0 new" />
-                <StatCard icon={<Trophy className="w-8 h-8 text-yellow-500" />} value="0" label="Eco Points" change="+150 this week" />
+                <StatCard icon={<CheckCircle className="w-8 h-8 text-green-500" />} value={dashboardData.questsCompleted} label="Quests Completed" change="+1 this month" />
+                <StatCard icon={<Award className="w-8 h-8 text-orange-500" />} value={dashboardData.badgesEarned} label="Badges Earned" change="+0 new" />
+                <StatCard icon={<Trophy className="w-8 h-8 text-yellow-500" />} value={dashboardData.ecoPoints} label="Eco Points" change="+150 this week" />
             </div>
             <div className="bg-white p-6 rounded-2xl shadow-lg border">
                 <h3 className="text-xl font-bold mb-4">Quick Adventures</h3>
                 <div className="space-y-3">
                     <QuickLink icon={<BookOpen className="w-5 h-5 text-blue-500" />} title="Browse Quests" subtitle="Discover new adventures" />
-                    <QuickLink icon={<PlusCircle className="w-5 h-5 text-purple-500" />} title="Submit Proposal" subtitle="Pitch your own quest ideas" />
                     <QuickLink icon={<User className="w-5 h-5 text-green-500" />} title="View Community" subtitle="Connect with Eco-Heroes" />
                 </div>
             </div>
@@ -89,46 +83,93 @@ const OverviewTabContent = () => (
         <div className="bg-white p-6 rounded-2xl shadow-lg border">
             <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
             <div className="space-y-4">
-                <ActivityItem icon={<CheckCircle className="w-5 h-5 text-green-500" />} title="Completed 'Campus Tree Planting'" subtitle="You earned the Tree Hugger badge" time="2 hours ago" points="+50 points" />
-                <ActivityItem icon={<User className="w-5 h-5 text-blue-500" />} title="Maria Santos is now your friend" subtitle="You can now see each other's progress" time="1 day ago" />
+                {dashboardData.recentActivity.length > 0 ? (
+                    dashboardData.recentActivity.map((activity, index) => (
+                        <ActivityItem 
+                            key={index}
+                            icon={activity.icon} 
+                            title={activity.title} 
+                            subtitle={activity.subtitle} 
+                            time={activity.time} 
+                            points={activity.points} 
+                        />
+                    ))
+                ) : (
+                    <p className="text-gray-500 text-sm">No recent activity</p>
+                )}
             </div>
         </div>
     </div>
 );
 
-const ProgressTabContent = () => (
+const ProgressTabContent = ({ dashboardData, userData, levelProgress }) => (
     <div className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1 space-y-8">
                 <div className="bg-white p-6 rounded-2xl shadow-lg border text-center">
-                    <h3 className="text-xl font-bold mb-2">Level 1</h3>
+                    <h3 className="text-xl font-bold mb-2">Level {userData.level}</h3>
                     <p className="text-gray-500 text-sm mb-4">Environmental Champion</p>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2"><div className="bg-green-500 h-2.5 rounded-full" style={{ width: '0%' }}></div></div>
-                    <p className="text-xs text-gray-500">100 more points needed</p>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                        <div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${levelProgress}%` }}></div>
+                    </div>
+                    <p className="text-xs text-gray-500">{userData.pointsToNextLevel - (userData.points % userData.pointsToNextLevel)} more points needed</p>
                 </div>
                 <div className="bg-white p-6 rounded-2xl shadow-lg border">
                     <h3 className="text-xl font-bold mb-4">Streaks & Goals</h3>
-                    <GoalItem title="Day Streak" value="7" progress={7/15 * 100} label="Longest Streak: 15 days" />
-                    <GoalItem title="Weekly Goal" value="112/150" progress={112/150 * 100} label="Earn 150 eco-points this week" />
-                    <GoalItem title="Monthly Goal" value="2/3" progress={2/3 * 100} label="Complete 3 new quests this month" />
+                    <GoalItem 
+                        title="Day Streak" 
+                        value={dashboardData.currentStreak || 0} 
+                        progress={(dashboardData.currentStreak || 0) / 30 * 100} 
+                        label={`Longest Streak: ${dashboardData.longestStreak || 0} days`} 
+                    />
+                    <GoalItem 
+                        title="Weekly Goal" 
+                        value={`${dashboardData.weeklyPoints || 0}/150`} 
+                        progress={(dashboardData.weeklyPoints || 0) / 150 * 100} 
+                        label="Earn 150 eco-points this week" 
+                    />
+                    <GoalItem 
+                        title="Monthly Goal" 
+                        value={`${dashboardData.monthlyQuests || 0}/3`} 
+                        progress={(dashboardData.monthlyQuests || 0) / 3 * 100} 
+                        label="Complete 3 new quests this month" 
+                    />
                 </div>
             </div>
             <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-lg border">
                 <h3 className="text-xl font-bold mb-4">Quest Progress</h3>
                 <div className="grid grid-cols-3 gap-4 mb-8 text-center">
-                    <QuestStat icon={<CheckCircle className="w-8 h-8 text-green-500" />} value="12" label="Completed" />
-                    <QuestStat icon={<Clock className="w-8 h-8 text-blue-500" />} value="3" label="In Progress" />
-                    <QuestStat icon={<List className="w-8 h-8 text-gray-500" />} value="25" label="Available" />
+                    <QuestStat icon={<CheckCircle className="w-8 h-8 text-green-500" />} value={dashboardData.questsCompleted} label="Completed" />
+                    <QuestStat icon={<Clock className="w-8 h-8 text-blue-500" />} value={dashboardData.questsInProgress} label="In Progress" />
+                    <QuestStat icon={<List className="w-8 h-8 text-gray-500" />} value={dashboardData.availableQuests} label="Available" />
                 </div>
                 <h4 className="font-semibold mb-4">Progress by Category</h4>
-                <CategoryProgress icon={<Recycle className="w-5 h-5 text-blue-500"/>} title="Recycling & Waste" value="4 of 8 quests" progress={50} />
-                <CategoryProgress icon={<Sun className="w-5 h-5 text-yellow-500"/>} title="Energy Conservation" value="3 of 6 quests" progress={50} />
-                <CategoryProgress icon={<Droplets className="w-5 h-5 text-cyan-500"/>} title="Water Conservation" value="2 of 5 quests" progress={40} />
-                <CategoryProgress icon={<TreePine className="w-5 h-5 text-green-500"/>} title="Gardening & Planting" value="3 of 4 quests" progress={75} />
+                {Object.entries(dashboardData.categoryProgress).map(([category, progress]) => {
+                    const progressPercent = progress.total > 0 ? (progress.completed / progress.total) * 100 : 0;
+                    const getCategoryIcon = (cat) => {
+                        const icons = {
+                            'Recycling & Waste': <Recycle className="w-5 h-5 text-blue-500"/>,
+                            'Energy Conservation': <Sun className="w-5 h-5 text-yellow-500"/>,
+                            'Water Conservation': <Droplets className="w-5 h-5 text-cyan-500"/>,
+                            'Gardening & Planting': <TreePine className="w-5 h-5 text-green-500"/>,
+                            'Education & Awareness': <BookOpen className="w-5 h-5 text-purple-500"/>,
+                            'Transportation': <Building className="w-5 h-5 text-indigo-500"/>
+                        };
+                        return icons[cat] || <TreePine className="w-5 h-5 text-green-500"/>;
+                    };
+                    return (
+                        <CategoryProgress 
+                            key={category}
+                            icon={getCategoryIcon(category)} 
+                            title={category} 
+                            value={`${progress.completed} of ${progress.total} quests`} 
+                            progress={progressPercent} 
+                        />
+                    );
+                })}
             </div>
         </div>
-        <ImpactSection />
-        <AchievementSection />
+        <AchievementSection achievements={dashboardData.achievements} />
     </div>
 );
 
@@ -181,7 +222,12 @@ const DashboardHeader = ({ userData, levelProgress, avatarStyle, headerTheme }) 
                 </div>
             </div>
             <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-3xl font-bold text-white">Welcome back, {userData.name}! 👋</h2>
+                <div className="flex items-center gap-3 mb-2">
+                    <h2 className="text-3xl font-bold text-white">Welcome back, {userData.name}! 👋</h2>
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-white/20 text-white">
+                        Student
+                    </span>
+                </div>
                 <p className="text-white/90">{userData.title}</p>
                 <div className="mt-4">
                     <div className="flex justify-between text-xs text-white/80 mb-1">
@@ -199,11 +245,194 @@ const DashboardHeader = ({ userData, levelProgress, avatarStyle, headerTheme }) 
 
 // --- Main Dashboard Component ---
 const DashboardPage = () => {
-    const [activeTab, setActiveTab] = useState('overview');
     const { user } = useUser();
+    const [dashboardData, setDashboardData] = useState({
+        questsCompleted: 0,
+        badgesEarned: 0,
+        ecoPoints: 0,
+        questsInProgress: 0,
+        availableQuests: 0,
+        recentActivity: [],
+        achievements: [],
+        categoryProgress: {},
+        currentStreak: 0,
+        longestStreak: 0,
+        weeklyPoints: 0,
+        monthlyQuests: 0
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (user) {
+            fetchDashboardData();
+        }
+    }, [user]);
+
+    const calculateCurrentStreak = (questsData) => {
+        const completedQuests = questsData
+            .filter(q => q.status === 'approved')
+            .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
+        
+        if (completedQuests.length === 0) return 0;
+        
+        let streak = 0;
+        let currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+        
+        for (let quest of completedQuests) {
+            const questDate = new Date(quest.submitted_at);
+            questDate.setHours(0, 0, 0, 0);
+            
+            const daysDiff = Math.floor((currentDate - questDate) / (1000 * 60 * 60 * 24));
+            
+            if (daysDiff === streak) {
+                streak++;
+                currentDate.setDate(currentDate.getDate() - 1);
+            } else if (daysDiff > streak) {
+                break;
+            }
+        }
+        
+        return streak;
+    };
+
+    const calculateLongestStreak = (questsData) => {
+        const completedQuests = questsData
+            .filter(q => q.status === 'approved')
+            .sort((a, b) => new Date(a.submitted_at) - new Date(b.submitted_at));
+        
+        if (completedQuests.length === 0) return 0;
+        
+        let longestStreak = 0;
+        let currentStreak = 1;
+        
+        for (let i = 1; i < completedQuests.length; i++) {
+            const prevDate = new Date(completedQuests[i - 1].submitted_at);
+            const currDate = new Date(completedQuests[i].submitted_at);
+            
+            prevDate.setHours(0, 0, 0, 0);
+            currDate.setHours(0, 0, 0, 0);
+            
+            const daysDiff = Math.floor((currDate - prevDate) / (1000 * 60 * 60 * 24));
+            
+            if (daysDiff === 1) {
+                currentStreak++;
+            } else {
+                longestStreak = Math.max(longestStreak, currentStreak);
+                currentStreak = 1;
+            }
+        }
+        
+        return Math.max(longestStreak, currentStreak);
+    };
+
+    const fetchDashboardData = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const headers = { 'x-auth-token': token };
+
+            // Fetch user's quest submissions
+            const questsRes = await fetch('http://localhost:5000/api/quests/submissions/my', { headers });
+            const questsData = await questsRes.json();
+
+            // Fetch user's badges
+            const badgesRes = await fetch('http://localhost:5000/api/badges/my', { headers });
+            const badgesData = await badgesRes.json();
+
+            // Fetch all quests for stats
+            const allQuestsRes = await fetch('http://localhost:5000/api/quests', { headers });
+            const allQuestsData = await allQuestsRes.json();
+
+            // Fetch user's posts for activity
+            const postsRes = await fetch('http://localhost:5000/api/posts/my', { headers });
+            const postsData = await postsRes.json();
+
+            // Calculate stats
+            const completedQuests = questsData.filter(q => q.status === 'approved').length;
+            const inProgressQuests = questsData.filter(q => q.status === 'pending').length;
+            const availableQuests = allQuestsData.filter(q => q.isActive).length;
+
+            // Calculate category progress
+            const categoryProgress = {};
+            allQuestsData.forEach(quest => {
+                if (!categoryProgress[quest.category]) {
+                    categoryProgress[quest.category] = { completed: 0, total: 0 };
+                }
+                categoryProgress[quest.category].total++;
+                if (questsData.some(q => q.quest_id === quest._id && q.status === 'approved')) {
+                    categoryProgress[quest.category].completed++;
+                }
+            });
+
+            // Recent activity
+            const recentActivity = [
+                ...questsData.slice(0, 3).map(q => ({
+                    icon: <CheckCircle className="w-5 h-5 text-green-500" />,
+                    title: `Completed '${q.quest_id?.title || 'Quest'}'`,
+                    subtitle: `You earned ${q.points_earned || 0} points`,
+                    time: new Date(q.submitted_at).toLocaleDateString(),
+                    points: `+${q.points_earned || 0} points`
+                })),
+                ...postsData.slice(0, 2).map(p => ({
+                    icon: <User className="w-5 h-5 text-blue-500" />,
+                    title: `Posted: ${p.title}`,
+                    subtitle: 'Shared with the community',
+                    time: new Date(p.created_at).toLocaleDateString()
+                }))
+            ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);
+
+            // Calculate streaks and goals
+            const now = new Date();
+            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+            // Weekly points (from approved quests in last 7 days)
+            const weeklyQuests = questsData.filter(q => 
+                q.status === 'approved' && new Date(q.submitted_at) >= oneWeekAgo
+            );
+            const weeklyPoints = weeklyQuests.reduce((sum, q) => sum + (q.quest_id?.points || 0), 0);
+
+            // Monthly quests (approved in last 30 days)
+            const monthlyQuests = questsData.filter(q => 
+                q.status === 'approved' && new Date(q.submitted_at) >= oneMonthAgo
+            ).length;
+
+            // Calculate current streak (consecutive days with activity)
+            const currentStreak = calculateCurrentStreak(questsData);
+            const longestStreak = calculateLongestStreak(questsData);
+
+            setDashboardData({
+                questsCompleted: completedQuests,
+                badgesEarned: badgesData.length,
+                ecoPoints: user.points || 0,
+                questsInProgress: inProgressQuests,
+                availableQuests: availableQuests,
+                recentActivity: recentActivity,
+                achievements: badgesData,
+                categoryProgress: categoryProgress,
+                currentStreak: currentStreak,
+                longestStreak: longestStreak,
+                weeklyPoints: weeklyPoints,
+                monthlyQuests: monthlyQuests
+            });
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching dashboard data:', error);
+            setLoading(false);
+        }
+    };
 
     if (!user) {
         return <div className="pt-24 text-center">Loading Dashboard...</div>;
+    }
+
+    if (loading) {
+        return (
+            <div className="pt-24 text-center">
+                <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading dashboard data...</p>
+            </div>
+        );
     }
 
     const userData = {
@@ -222,12 +451,15 @@ const DashboardPage = () => {
         <div className="font-sans bg-gray-50 text-gray-800 min-h-screen">
             <main className="container mx-auto px-4 pt-24 pb-12">
                 <DashboardHeader userData={userData} levelProgress={levelProgress} avatarStyle={avatarStyle} headerTheme={headerTheme} />
-                <div className="bg-white p-2 rounded-full shadow-md border border-gray-100 inline-flex items-center gap-2 mb-8">
-                    <TabButton id="overview" label="Overview" icon={<Activity className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
-                    <TabButton id="progress" label="Progress" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
+                
+                {/* Combined Content */}
+                <div className="space-y-8">
+                    {/* Overview Section */}
+                    <OverviewTabContent dashboardData={dashboardData} />
+                    
+                    {/* Progress Section */}
+                    <ProgressTabContent dashboardData={dashboardData} userData={userData} levelProgress={levelProgress} />
                 </div>
-                {activeTab === 'overview' && <OverviewTabContent />}
-                {activeTab === 'progress' && <ProgressTabContent />}
             </main>
         </div>
     );

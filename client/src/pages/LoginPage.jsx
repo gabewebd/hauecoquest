@@ -6,7 +6,8 @@ import { Mail, Lock, Eye, EyeOff, Sprout, GraduationCap, User } from 'lucide-rea
 const LoginPage = ({ onPageChange }) => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
-    const { login } = useUser();
+    const [loading, setLoading] = useState(false);
+    const { login, user } = useUser();
 
     const { email, password } = formData;
 
@@ -15,19 +16,43 @@ const LoginPage = ({ onPageChange }) => {
     const onSubmit = async e => {
         e.preventDefault();
         setError('');
+        setLoading(true);
+        
         try {
-            await login(email, password);
-            onPageChange('dashboard');
+            const result = await login(email, password);
+            
+            if (result.success && result.user) {
+                // Redirect based on role from the returned user data
+                const userRole = result.user.role;
+                if (userRole === 'admin') {
+                    onPageChange('admin-dashboard');
+                } else if (userRole === 'partner') {
+                    onPageChange('partner-dashboard');
+                } else {
+                    onPageChange('dashboard');
+                }
+            } else {
+                setError(result.error || 'Login failed. Please try again.');
+                setLoading(false);
+            }
         } catch (err) {
             setError('Invalid Credentials. Please try again.');
+            setLoading(false);
             console.error(err);
         }
     };
+
+    const handleSignupClick = () => {
+        onPageChange('signup');
+    };
+    
+    const containerClass = "font-sans bg-app-bg text-gray-800 flex items-center justify-center min-h-screen pt-24 pb-12 px-4";
     
     return (
-        <div className="font-sans bg-app-bg text-gray-800 flex items-center justify-center min-h-screen pt-24 pb-12 px-4">
+        <div className={containerClass}>
             <div className="w-full max-w-lg">
-                <div className="bg-white/90 backdrop-blur-sm p-8 sm:p-12 rounded-3xl shadow-xl border border-gray-100">
+                <div className="bg-white/90 backdrop-blur-sm p-8 sm:p-12 rounded-3xl shadow-xl border border-gray-100 relative">
+                    
                     <div className="text-center mb-8">
                         <div className="inline-block bg-green-100 p-3 rounded-2xl mb-4">
                             <GraduationCap className="w-8 h-8 text-green-500" />
@@ -74,16 +99,29 @@ const LoginPage = ({ onPageChange }) => {
                             <a href="#" className="text-sm font-semibold text-green-600 hover:underline">Forgot password?</a>
                         </div>
                         
-                        <button type="submit" className="w-full flex justify-center items-center gap-2 bg-green-500 text-white font-bold py-3 rounded-full text-lg shadow-lg hover:bg-green-600 transition-colors">
-                            <User className="w-6 h-6" />
-                            Enter Quest Hall
+                        <button 
+                            type="submit" 
+                            disabled={loading}
+                            className="w-full flex justify-center items-center gap-2 bg-green-500 text-white font-bold py-3 rounded-full text-lg shadow-lg hover:bg-green-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Logging in...
+                                </>
+                            ) : (
+                                <>
+                                    <User className="w-6 h-6" />
+                                    Enter Quest Hall
+                                </>
+                            )}
                         </button>
                     </form>
 
                     <div className="text-center my-6 text-xs text-gray-400">or continue with</div>
 
                     <p className="text-center text-sm text-gray-600 mt-8">
-                        New to the environmental realm? <a href="#" className="font-bold text-green-600 hover:underline">Begin Your Journey</a>
+                        New to the environmental realm? <button onClick={handleSignupClick} className="font-bold text-green-600 hover:underline">Begin Your Journey</button>
                     </p>
                 </div>
             </div>
