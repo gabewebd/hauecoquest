@@ -538,7 +538,7 @@ const ProfilePage = ({ onPageChange }) => {
             <h4 className="font-bold mb-4">Support Guild</h4>
             <ul className="space-y-2 text-sm text-green-100">
               <li><button onClick={() => onPageChange('contactquestmasters')} className="hover:text-white">Contact Quest Masters</button></li>
-              <li><button className="hover:text-white">Alliance Partners</button></li>
+              <li><button onClick={() => onPageChange('alliancepartners')} className="hover:text-white">Alliance Partners</button></li>
             </ul>
           </div>
 
