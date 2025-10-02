@@ -23,7 +23,8 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess }) => {
     const [reflection, setReflection] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const MIN_WORDS = 50;
+    
+    // --- CHANGE: Minimum word count constant removed ---
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
@@ -32,11 +33,8 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        if (reflection.split(/\s+/).filter(word => word.length > 0).length < MIN_WORDS) {
-            alert('Please write at least 50 words in your reflection.');
-            return;
-        }
-
+        // --- CHANGE: Minimum word count validation removed ---
+        
         if (!file) {
             alert('Please upload a photo as proof of completion.');
             return;
@@ -76,7 +74,8 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess }) => {
         }
     };
 
-    const isSubmissionReady = reflection.split(/\s+/).filter(word => word.length > 0).length >= MIN_WORDS && file;
+    // --- CHANGE: Submission is ready if reflection has any content and a file is present ---
+    const isSubmissionReady = reflection.trim().length > 0 && file;
 
     if (isSubmitted) {
         return (
@@ -101,10 +100,11 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess }) => {
                 Proof Submission
             </h3>
 
-            {/* 1. Reflection Textarea (Moved to be above File Upload) */}
+            {/* 1. Reflection Textarea */}
             <div>
+                {/* --- CHANGE: Updated label to remove word count mention --- */}
                 <label htmlFor="reflection" className="block text-sm font-semibold mb-2 text-gray-700">
-                    Reflection on Reforestation (Min {MIN_WORDS} words)
+                    Reflection on Reforestation
                 </label>
                 <textarea
                     id="reflection"
@@ -116,12 +116,10 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess }) => {
                     className="w-full p-3 border rounded-xl focus:ring-green-500 focus:border-green-500"
                     required
                 ></textarea>
-                <p className={`text-xs mt-1 ${reflection.split(/\s+/).filter(word => word.length > 0).length < MIN_WORDS ? 'text-red-500' : 'text-green-600'}`}>
-                    {reflection.split(/\s+/).filter(word => word.length > 0).length} / {MIN_WORDS} words minimum
-                </p>
+                {/* --- CHANGE: Word count display removed --- */}
             </div>
             
-            {/* 2. File Upload (Moved to be below Reflection) */}
+            {/* 2. File Upload */}
             <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">
                     Upload Photo/Video Proof (Geo-tagged evidence)
