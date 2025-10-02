@@ -1,7 +1,7 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import { Users, BookOpen, BarChart, Shield, CheckCircle, XCircle, Edit, Trash2, Plus, Search, Filter, Calendar, MapPin, Award, X, Save } from 'lucide-react';
+import { Users, BookOpen, BarChart, Shield, CheckCircle, XCircle, Edit, Trash2, Plus, Search, Filter, Calendar, MapPin, Award, X, Save, Clock, Eye, FileCheck } from 'lucide-react';
 
 // --- HELPER COMPONENTS ---
 
@@ -1209,6 +1209,320 @@ const DailyQuestModal = ({ onClose, onSave }) => {
     );
 };
 
+// --- SUBMISSIONS TAB ---
+const SubmissionsTab = ({ onApprove, onReject }) => {
+    const [submissions, setSubmissions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState('pending');
+    const [selectedSubmission, setSelectedSubmission] = useState(null);
+
+    useEffect(() => {
+        fetchSubmissions();
+    }, []);
+
+    const fetchSubmissions = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/quests/submissions/all', {
+                headers: { 'x-auth-token': token }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setSubmissions(data);
+            }
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching submissions:', error);
+            setLoading(false);
+        }
+    };
+
+    const handleApprove = async (submissionId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/quests/submissions/${submissionId}/review`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify({ status: 'approved' })
+            });
+
+            if (response.ok) {
+                fetchSubmissions();
+                setSelectedSubmission(null);
+                alert('Submission approved successfully!');
+            } else {
+                const error = await response.json();
+                alert(error.msg || 'Failed to approve submission');
+            }
+        } catch (error) {
+            console.error('Error approving submission:', error);
+            alert('Network error. Please try again.');
+        }
+    };
+
+    const handleReject = async (submissionId) => {
+        const reason = prompt('Please provide a reason for rejection:');
+        if (!reason) return;
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/quests/submissions/${submissionId}/review`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify({ 
+                    status: 'rejected',
+                    rejection_reason: reason
+                })
+            });
+
+            if (response.ok) {
+                fetchSubmissions();
+                setSelectedSubmission(null);
+                alert('Submission rejected.');
+            } else {
+                const error = await response.json();
+                alert(error.msg || 'Failed to reject submission');
+            }
+        } catch (error) {
+            console.error('Error rejecting submission:', error);
+            alert('Network error. Please try again.');
+        }
+    };
+
+    const filteredSubmissions = submissions.filter(s => {
+        if (filter === 'all') return true;
+        return s.status === filter;
+    });
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-12">
+                <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h3 className="text-xl font-bold">Quest Submissions</h3>
+                        <p className="text-sm text-gray-500">Review and approve quest completions</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={() => setFilter('pending')}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                                filter === 'pending' 
+                                    ? 'bg-yellow-500 text-white' 
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            Pending
+                        </button>
+                        <button 
+                            onClick={() => setFilter('approved')}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                                filter === 'approved' 
+                                    ? 'bg-green-500 text-white' 
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            Approved
+                        </button>
+                        <button 
+                            onClick={() => setFilter('rejected')}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                                filter === 'rejected' 
+                                    ? 'bg-red-500 text-white' 
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            Rejected
+                        </button>
+                        <button 
+                            onClick={() => setFilter('all')}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
+                                filter === 'all' 
+                                    ? 'bg-blue-500 text-white' 
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            All
+                        </button>
+                    </div>
+                </div>
+
+                {filteredSubmissions.length === 0 ? (
+                    <div className="text-center py-12">
+                        <FileCheck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500">No {filter !== 'all' ? filter : ''} submissions found</p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {filteredSubmissions.map(submission => (
+                            <div key={submission._id} className="border rounded-xl p-5 hover:shadow-md transition">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                            <h4 className="text-lg font-bold">{submission.quest_id?.title || 'Unknown Quest'}</h4>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                submission.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                                'bg-red-100 text-red-700'
+                                            }`}>
+                                                {submission.status.toUpperCase()}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
+                                            <span className="flex items-center gap-1">
+                                                <Users className="w-4 h-4" />
+                                                {submission.user_id?.username || 'Unknown User'}
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Award className="w-4 h-4" />
+                                                {submission.quest_id?.points || 0} points
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Clock className="w-4 h-4" />
+                                                {new Date(submission.submitted_at).toLocaleDateString()}
+                                            </span>
+                                            <span className="flex items-center gap-1 text-xs">
+                                                <Shield className="w-4 h-4" />
+                                                {submission.user_id?.role || 'user'}
+                                            </span>
+                                        </div>
+                                        {submission.reflection_text && (
+                                            <p className="text-sm text-gray-600 mt-2 italic">"{submission.reflection_text}"</p>
+                                        )}
+                                        {submission.status === 'rejected' && submission.rejection_reason && (
+                                            <p className="text-sm text-red-600 mt-2">
+                                                <strong>Rejection Reason:</strong> {submission.rejection_reason}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button 
+                                            onClick={() => setSelectedSubmission(submission)}
+                                            className="p-2 hover:bg-blue-50 rounded-lg transition border border-blue-200"
+                                            title="View Details"
+                                        >
+                                            <Eye className="w-5 h-5 text-blue-600" />
+                                        </button>
+                                        {submission.status === 'pending' && (
+                                            <>
+                                                <button 
+                                                    onClick={() => handleApprove(submission._id)}
+                                                    className="p-2 hover:bg-green-50 rounded-lg transition border border-green-200"
+                                                    title="Approve"
+                                                >
+                                                    <CheckCircle className="w-5 h-5 text-green-600" />
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleReject(submission._id)}
+                                                    className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
+                                                    title="Reject"
+                                                >
+                                                    <XCircle className="w-5 h-5 text-red-600" />
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Submission Details Modal */}
+            {selectedSubmission && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+                            <h3 className="text-2xl font-bold">Submission Details</h3>
+                            <button onClick={() => setSelectedSubmission(null)} className="p-2 hover:bg-gray-100 rounded-lg transition">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        
+                        <div className="p-6 space-y-4">
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-1">Quest</h4>
+                                <p className="text-lg">{selectedSubmission.quest_id?.title}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-1">Submitted By</h4>
+                                <p>{selectedSubmission.user_id?.username} ({selectedSubmission.user_id?.email})</p>
+                                <p className="text-sm text-gray-500">Role: {selectedSubmission.user_id?.role}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-1">Reflection</h4>
+                                <p className="text-gray-600">{selectedSubmission.reflection_text || 'No reflection provided'}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-semibold text-gray-700 mb-1">Proof Photo</h4>
+                                {selectedSubmission.photo_url ? (
+                                    <img 
+                                        src={`http://localhost:5000/${selectedSubmission.photo_url}`} 
+                                        alt="Quest proof" 
+                                        className="w-full max-h-96 object-contain border rounded-lg"
+                                    />
+                                ) : (
+                                    <p className="text-gray-500">No photo uploaded</p>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <h4 className="font-semibold text-gray-700">Status:</h4>
+                                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                                    selectedSubmission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                    selectedSubmission.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                    'bg-red-100 text-red-700'
+                                }`}>
+                                    {selectedSubmission.status.toUpperCase()}
+                                </span>
+                            </div>
+                            {selectedSubmission.status === 'rejected' && selectedSubmission.rejection_reason && (
+                                <div>
+                                    <h4 className="font-semibold text-gray-700 mb-1">Rejection Reason</h4>
+                                    <p className="text-red-600">{selectedSubmission.rejection_reason}</p>
+                                </div>
+                            )}
+                            
+                            {selectedSubmission.status === 'pending' && (
+                                <div className="flex gap-3 pt-4 border-t">
+                                    <button
+                                        onClick={() => handleApprove(selectedSubmission._id)}
+                                        className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2"
+                                    >
+                                        <CheckCircle className="w-5 h-5" />
+                                        Approve Submission
+                                    </button>
+                                    <button
+                                        onClick={() => handleReject(selectedSubmission._id)}
+                                        className="flex-1 bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition font-semibold flex items-center justify-center gap-2"
+                                    >
+                                        <XCircle className="w-5 h-5" />
+                                        Reject Submission
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 // --- DAILY CHALLENGE MODAL ---
 const DailyChallengeModal = ({ onClose, onSave }) => {
     const [formData, setFormData] = useState({
@@ -1453,10 +1767,11 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Navigation Tabs */}
-                <div className="bg-white p-2 rounded-xl shadow-md border inline-flex items-center gap-2 mb-8">
+                <div className="bg-white p-2 rounded-xl shadow-md border inline-flex items-center gap-2 mb-8 flex-wrap">
                     <TabButton id="overview" label="Overview" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="users" label="Users" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="quests" label="Quests" icon={<BookOpen className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <TabButton id="submissions" label="Submissions" icon={<FileCheck className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="daily" label="Daily Content" icon={<Calendar className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="analytics" label="Analytics" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
@@ -1465,6 +1780,7 @@ const AdminDashboard = () => {
                 {activeTab === 'overview' && <OverviewTab stats={stats} setActiveTab={setActiveTab} />}
                 {activeTab === 'users' && <UsersTab users={users} pendingPartners={pendingPartners} onApprove={handleApprovePartner} onReject={handleRejectPartner} onDeleteUser={handleDeleteUser} />}
                 {activeTab === 'quests' && <QuestsTab quests={quests} setQuests={setQuests} />}
+                {activeTab === 'submissions' && <SubmissionsTab />}
                 {activeTab === 'daily' && <DailyTab />}
                 {activeTab === 'analytics' && <AnalyticsTab stats={stats} users={users} quests={quests} />}
             </main>

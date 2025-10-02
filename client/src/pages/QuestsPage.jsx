@@ -8,21 +8,41 @@ import { useUser } from '../context/UserContext';
 // --- QUEST CARD COMPONENT (Modified) ---
 
 const QuestCard = ({ icon, title, description, difficulty, points, duration, participants, progress, color, onViewDetails, questData, user }) => {
-  const difficultyStyles = {
-    Easy: 'bg-green-100 text-green-600',
-    Medium: 'bg-yellow-100 text-yellow-600',
-    Hard: 'bg-red-100 text-red-600',
-  };
-  
-  const colorVariants = {
-    green: { bg: 'bg-green-500', hover: 'hover:bg-green-600', iconBg: 'bg-green-100' },
-    yellow: { bg: 'bg-yellow-500', hover: 'hover:bg-yellow-600', iconBg: 'bg-yellow-100' },
-    blue: { bg: 'bg-blue-500', hover: 'hover:bg-blue-600', iconBg: 'bg-blue-100' },
-    cyan: { bg: 'bg-cyan-500', hover: 'hover:bg-cyan-600', iconBg: 'bg-cyan-100' },
-    lime: { bg: 'bg-lime-500', hover: 'hover:bg-lime-600', iconBg: 'bg-lime-100' },
-    indigo: { bg: 'bg-indigo-500', hover: 'hover:bg-indigo-600', iconBg: 'bg-indigo-100' },
-  };
-  const activeColor = colorVariants[color] || colorVariants.green;
+  const difficultyStyles = {
+    Easy: 'bg-green-100 text-green-600',
+    Medium: 'bg-yellow-100 text-yellow-600',
+    Hard: 'bg-red-100 text-red-600',
+  };
+  
+  const colorVariants = {
+    green: { bg: 'bg-green-500', hover: 'hover:bg-green-600', iconBg: 'bg-green-100' },
+    yellow: { bg: 'bg-yellow-500', hover: 'hover:bg-yellow-600', iconBg: 'bg-yellow-100' },
+    blue: { bg: 'bg-blue-500', hover: 'hover:bg-blue-600', iconBg: 'bg-blue-100' },
+    cyan: { bg: 'bg-cyan-500', hover: 'hover:bg-cyan-600', iconBg: 'bg-cyan-100' },
+    lime: { bg: 'bg-lime-500', hover: 'hover:bg-lime-600', iconBg: 'bg-lime-100' },
+    indigo: { bg: 'bg-indigo-500', hover: 'hover:bg-indigo-600', iconBg: 'bg-indigo-100' },
+  };
+  const activeColor = colorVariants[color] || colorVariants.green;
+
+  // Determine button text and style based on submission status
+  const getButtonText = () => {
+    if (!user) return 'Login to Start';
+    if (questData.existingSubmission) {
+      if (questData.existingSubmission.status === 'pending') return 'IN PROGRESS';
+      if (questData.existingSubmission.status === 'approved') return 'COMPLETED';
+      if (questData.existingSubmission.status === 'rejected') return 'REJECTED';
+    }
+    return 'Start Quest';
+  };
+
+  const getButtonColor = () => {
+    if (questData.existingSubmission) {
+      if (questData.existingSubmission.status === 'pending') return 'bg-yellow-500 hover:bg-yellow-600';
+      if (questData.existingSubmission.status === 'approved') return 'bg-green-600 hover:bg-green-700';
+      if (questData.existingSubmission.status === 'rejected') return 'bg-red-500 hover:bg-red-600';
+    }
+    return `${activeColor.bg} ${activeColor.hover}`;
+  };
 
 
   return (
@@ -55,9 +75,9 @@ const QuestCard = ({ icon, title, description, difficulty, points, duration, par
       <button 
             // 🔑 Action: Pass the full quest object to the handler
             onClick={() => onViewDetails(questData)}
-            className={`mt-auto w-full ${activeColor.bg} text-white font-bold py-2.5 px-4 rounded-xl transition-transform transform hover:scale-105 ${activeColor.hover}`}
+            className={`mt-auto w-full ${getButtonColor()} text-white font-bold py-2.5 px-4 rounded-xl transition-transform transform hover:scale-105`}
         >
-        {user ? 'Start Quest' : 'Login to Start'}
+        {getButtonText()}
       </button>
     </div>
   );
@@ -119,7 +139,8 @@ const QuestsPage = ({ onPageChange }) => {
                     color: getCategoryColor(quest.category),
                     participants: quest.completions?.length || 0,
                     progress: ((quest.completions?.length || 0) / (quest.maxParticipants || 50)) * 100,
-                    submissionStatus: userSubmission?.status || null
+                    submissionStatus: userSubmission?.status || null,
+                    existingSubmission: userSubmission || null
                 };
             });
             

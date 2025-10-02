@@ -18,7 +18,7 @@ const StatItem = ({ icon, value, label, iconColor }) => (
 );
 
 // Quest Submission Form Component
-const QuestSubmissionForm = ({ questId, onSubmissionSuccess }) => {
+const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission }) => {
     const [file, setFile] = useState(null);
     const [reflection, setReflection] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -76,6 +76,29 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess }) => {
 
     // --- CHANGE: Submission is ready if reflection has any content and a file is present ---
     const isSubmissionReady = reflection.trim().length > 0 && file;
+
+    // Check if submission already exists
+    if (existingSubmission) {
+        const statusColors = {
+            'pending': 'bg-yellow-50 border-yellow-300 text-yellow-800',
+            'approved': 'bg-green-50 border-green-300 text-green-800',
+            'rejected': 'bg-red-50 border-red-300 text-red-800'
+        };
+        const statusColor = statusColors[existingSubmission.status] || statusColors['pending'];
+        
+        return (
+            <div className={`${statusColor} border p-6 rounded-xl text-center`}>
+                <Clock className="w-12 h-12 mx-auto mb-3" />
+                <h4 className="text-xl font-bold mb-2">Quest {existingSubmission.status === 'pending' ? 'In Progress' : existingSubmission.status === 'approved' ? 'Completed' : 'Submission Rejected'}</h4>
+                <p className="mb-2">
+                    {existingSubmission.status === 'pending' && 'Your submission is being reviewed by the Quest Master.'}
+                    {existingSubmission.status === 'approved' && 'Congratulations! Your quest has been approved and points awarded.'}
+                    {existingSubmission.status === 'rejected' && `Your submission was rejected. Reason: ${existingSubmission.rejection_reason || 'No reason provided'}`}
+                </p>
+                <p className="text-sm opacity-75">Submitted on {new Date(existingSubmission.submitted_at).toLocaleDateString()}</p>
+            </div>
+        );
+    }
 
     if (isSubmitted) {
         return (
@@ -326,7 +349,11 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess }) => {
                         
                         {/* 3. Quest Submission Form (Moved to the very bottom) */}
                         <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-100">
-                            <QuestSubmissionForm questId={quest._id} onSubmissionSuccess={onSubmissionSuccess} />
+                            <QuestSubmissionForm 
+                                questId={quest._id} 
+                                onSubmissionSuccess={onSubmissionSuccess}
+                                existingSubmission={quest.existingSubmission}
+                            />
                         </div>
                     </div>
 

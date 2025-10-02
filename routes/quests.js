@@ -221,17 +221,46 @@ router.post('/:id/submit', [auth, upload.single('photo')], async (req, res) => {
       return res.status(400).json({ msg: 'You have already submitted this quest' });
     }
 
+    // Get user to check role
+    const user = await User.findById(req.user.id);
+    
+    // Auto-approve if user is admin
+    const isAdmin = user.role === 'admin';
     const submission = new QuestSubmission({
       user_id: req.user.id,
       quest_id: req.params.id,
       photo_url: req.file ? req.file.path : '',
       reflection_text: reflection_text || '',
-      status: 'pending'
+      status: isAdmin ? 'approved' : 'pending',
+      reviewed_by: isAdmin ? req.user.id : null,
+      reviewed_at: isAdmin ? Date.now() : null
     });
 
     await submission.save();
+
+    // If admin, immediately award points
+    if (isAdmin) {
+      user.points += quest.points;
+      user.eco_score += quest.points;
+      
+      if (!user.questsCompleted.includes(quest._id)) {
+        user.questsCompleted.push(quest._id);
+      }
+      
+      await user.save();
+
+      // Update quest completions
+      quest.completions.push({
+        user: user._id,
+        proof: submission.photo_url
+      });
+      await quest.save();
+    }
     
-    res.json({ msg: 'Quest submitted successfully', submission });
+    res.json({ 
+      msg: isAdmin ? 'Quest submitted and auto-approved' : 'Quest submitted successfully', 
+      submission 
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ msg: 'Server error' });
@@ -245,6 +274,24 @@ router.get('/submissions/my', auth, async (req, res) => {
   try {
     const submissions = await QuestSubmission.find({ user_id: req.user.id })
       .populate('quest_id', 'title points category')
+      .sort({ submitted_at: -1 });
+    
+    res.json(submissions);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/quests/submissions/all
+// @desc    Get all submissions (for admin dashboard)
+// @access  Private (Admin only)
+router.get('/submissions/all', [auth, checkRole('admin')], async (req, res) => {
+  try {
+    const submissions = await QuestSubmission.find({})
+      .populate('user_id', 'username email role')
+      .populate('quest_id', 'title points category')
+      .populate('reviewed_by', 'username')
       .sort({ submitted_at: -1 });
     
     res.json(submissions);
@@ -273,7 +320,7 @@ router.get('/submissions/pending', [auth, checkRole('admin')], async (req, res) 
 
 // @route   PUT /api/quests/submissions/:id/review
 // @desc    Approve or reject a submission
-// @access  Private (Admin only)
+// @access  Private (Admin only - Partners cannot review)
 router.put('/submissions/:id/review', [auth, checkRole('admin')], async (req, res) => {
   try {
     const { status, rejection_reason } = req.body;
