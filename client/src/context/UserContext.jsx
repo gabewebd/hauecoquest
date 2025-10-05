@@ -92,23 +92,14 @@ export const UserProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, error: 'Network error' };
+      return { success: false, error: error.message || 'Network error' };
     }
   };
 
   const signup = async (username, email, password, role = 'user') => {
     try {
       console.log('Attempting signup with:', { username, email, role });
-      const response = await fetch('http://localhost:5000/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, email, password, role }),
-      });
-      
-      const data = await response.json();
-      console.log('Signup response status:', response.status);
+      const data = await authAPI.signup({ username, email, password, role });
       console.log('Signup response data:', data);
 
       if (data.success) {
@@ -126,7 +117,7 @@ export const UserProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Signup error:', error);
-      return { success: false, error: 'Network error' };
+      return { success: false, error: error.message || 'Network error' };
     }
   };
 

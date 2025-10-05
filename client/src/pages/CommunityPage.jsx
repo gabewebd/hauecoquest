@@ -1,6 +1,6 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
-import { Users, Heart, Trophy, Leaf, UserPlus, Share2, Award, Shield, Search, MessageCircle, MoreHorizontal, Flag, Smile, Camera, Users2, FileText } from 'lucide-react';
+import { Users, Heart, Trophy, Leaf, UserPlus, Share2, Award, Shield, Search, MessageCircle, MoreHorizontal, Flag, Smile, Camera, Users2, FileText, X } from 'lucide-react';
 import FacebookIcon from '../img/Facebook.png';
 import InstagramIcon from '../img/Instagram.png';
 import TiktokIcon from '../img/Tiktok.png';
@@ -67,7 +67,12 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
         <img src={avatar} alt={name} className="w-12 h-12 rounded-full" />
         <div>
           <div className="flex items-center gap-1">
-            <h4 className="font-bold text-gray-800">{name}</h4>
+            <button 
+              onClick={() => onPageChange('profile', postId)}
+              className="font-bold text-gray-800 hover:text-green-600 hover:underline"
+            >
+              {name}
+            </button>
             <span className="text-blue-500">✔️</span>
             {isPinned && (
               <span className="text-xs bg-yellow-500 text-white px-2 py-1 rounded ml-2">
@@ -113,7 +118,12 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
         </button>
       </div>
       {/* FIXED: Replaced text-primary-green with text-green-600 */}
-      <a href="#" className="text-sm font-bold text-green-600 hover:underline">View Details</a>
+      <button 
+        onClick={() => onPageChange('post-details', postId)}
+        className="text-sm font-bold text-green-600 hover:underline"
+      >
+        View Details
+      </button>
     </div>
     
     {showCommentInput && (
@@ -328,6 +338,7 @@ const CommunityPage = ({ onPageChange }) => {
   const { user } = useUser();
   const [posts, setPosts] = useState([]);
   const [allPosts, setAllPosts] = useState([]); // Store all posts for filtering
+  const [communityChallenge, setCommunityChallenge] = useState(null);
   const [stats, setStats] = useState({
     activeUsers: 0,
     totalLikes: 0,
@@ -345,8 +356,18 @@ const CommunityPage = ({ onPageChange }) => {
 
   const handleLike = async (postId) => {
     try {
-      // You could implement actual like functionality here
-      console.log('Liked post:', postId);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, {
+        method: 'POST',
+        headers: {
+          'x-auth-token': token
+        }
+      });
+      
+      if (response.ok) {
+        // Refresh posts to show updated likes
+        fetchCommunityData();
+      }
     } catch (error) {
       console.error('Error liking post:', error);
     }
@@ -354,8 +375,20 @@ const CommunityPage = ({ onPageChange }) => {
 
   const handleComment = async (postId, commentText) => {
     try {
-      // You could implement actual comment functionality here
-      console.log('Commented on post:', postId, commentText);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/posts/${postId}/comment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        },
+        body: JSON.stringify({ text: commentText })
+      });
+      
+      if (response.ok) {
+        // Refresh posts to show updated comments
+        fetchCommunityData();
+      }
     } catch (error) {
       console.error('Error commenting on post:', error);
     }
@@ -382,6 +415,33 @@ const CommunityPage = ({ onPageChange }) => {
     }
   };
 
+  const handleJoinChallenge = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/dashboard/join-challenge', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-auth-token': token
+        }
+      });
+      
+      if (response.ok) {
+        alert('Successfully joined the challenge!');
+        // Refresh challenge data
+        const challengeResponse = await fetch('http://localhost:5000/api/dashboard/community-challenge');
+        const challengeData = await challengeResponse.json();
+        setCommunityChallenge(challengeData.challenge);
+      } else {
+        const errorData = await response.json();
+        alert(errorData.msg || 'Failed to join challenge');
+      }
+    } catch (error) {
+      console.error('Error joining challenge:', error);
+      alert('Failed to join challenge');
+    }
+  };
+
   const fetchCommunityData = async () => {
    
     try {
@@ -393,6 +453,11 @@ const CommunityPage = ({ onPageChange }) => {
       
       // Fetch quests for stats
       const questsData = await questAPI.getAllQuests();
+      
+      // Fetch community challenge
+      const challengeResponse = await fetch('http://localhost:5000/api/dashboard/community-challenge');
+      const challengeData = await challengeResponse.json();
+      setCommunityChallenge(challengeData.challenge);
       
       // Calculate stats
       const totalLikes = postsData.reduce((sum, post) => sum + (post.likes?.length || 0), 0);
@@ -419,11 +484,12 @@ const CommunityPage = ({ onPageChange }) => {
           time: timeAgo,
           text: post.content,
           quest: post.category === 'Updates' ? null : post.category,
-          image: null, // Can be extended if posts have images
+          image: post.image_url ? `http://localhost:5000${post.image_url}` : null,
           likes: post.likes?.length || 0,
           comments: post.comments?.length || 0,
           shares: 0,
-          created_at: post.created_at
+          created_at: post.created_at,
+          isPinned: post.isPinned || false
         };
       });
       
@@ -490,51 +556,16 @@ const CommunityPage = ({ onPageChange }) => {
 
   const handleCreatePost = async (postData) => {
     try {
-      const token = localStorage.getItem('token');
-      
-      // Use FormData if there's a photo, otherwise use JSON
-      if (postData.photo) {
-        const formData = new FormData();
-        formData.append('title', postData.title);
-        formData.append('content', postData.content);
-        formData.append('category', postData.category);
-        formData.append('tags', JSON.stringify(postData.tags));
-        formData.append('image', postData.photo);
-
-        const response = await fetch('http://localhost:5000/api/posts', {
-          method: 'POST',
-          headers: {
-            'x-auth-token': token
-          },
-          body: formData
-        });
-        
-        if (!response.ok) throw new Error('Failed to create post');
-      } else {
-        const payload = {
-          title: postData.title,
-          content: postData.content,
-          category: postData.category,
-          tags: postData.tags
-        };
-
-        const response = await fetch('http://localhost:5000/api/posts', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-auth-token': token
-          },
-          body: JSON.stringify(payload)
-        });
-        
-        if (!response.ok) throw new Error('Failed to create post');
-      }
+      console.log('Creating post with data:', postData);
+      const result = await postAPI.createPost(postData);
+      console.log('Post creation result:', result);
       
       // Refresh the posts
       fetchCommunityData();
       alert('Post created successfully!');
     } catch (error) {
       console.error('Error creating post:', error);
+      alert(`Failed to create post: ${error.message}`);
       throw error;
     }
   };
@@ -580,26 +611,105 @@ const CommunityPage = ({ onPageChange }) => {
         </section>
         
         {/* Community Challenge */}
-        <section className="container mx-auto px-4 mb-12">
-          <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">December Community Challenge</h3>
-            <p className="text-gray-600 mb-6">Join forces to achieve our collective environmental goal!</p>
-            <div className="bg-green-50 p-6 rounded-xl border border-green-200">
-              <p className="font-bold text-green-800 mb-2">Plant 1,000 Trees Challenge</p>
-              <div className="flex justify-between text-sm text-green-700 mb-1"><span>Progress: 687 / 1,000 trees</span><span>68.7%</span></div>
-              {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
-              <div className="w-full bg-green-200 rounded-full h-3 mb-4"><div className="bg-green-500 h-3 rounded-full" style={{width: '68.7%'}}></div></div>
-              <div className="flex items-center gap-6 text-sm text-gray-600">
-                {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
-                <button 
-                  onClick={() => user ? alert('Challenge joined!') : onPageChange('login')}
-                  className="bg-green-500 text-white font-bold py-2 px-5 rounded-full"
-                >
-                  {user ? 'Join Challenge' : 'Login to Join'}
-                </button>
-                <button onClick={() => onPageChange('leaderboard')} className="font-semibold hover:underline">View Leaderboard</button>
+        <section className="container mx-auto px-4 mb-8">
+          <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl shadow-lg p-6">
+            {communityChallenge ? (
+              <>
+                <div className="text-center mb-6">
+                  <div className="text-4xl mb-3">🌳</div>
+                  <h3 className="text-2xl md:text-3xl font-bold mb-3 text-green-800">{communityChallenge.title}</h3>
+                  <p className="text-gray-700 max-w-xl mx-auto">{communityChallenge.description}</p>
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  {/* Progress Bar */}
+                  <div className="mb-8">
+                    <div className="flex justify-between text-sm font-semibold mb-3">
+                      <span className="text-green-700">Trees Planted</span>
+                      <span className="text-green-700">{communityChallenge.current_progress || 0} / {communityChallenge.target}</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
+                      <div 
+                        className="bg-gradient-to-r from-green-500 to-green-600 h-6 rounded-full transition-all duration-500 flex items-center justify-end pr-3"
+                        style={{ width: `${Math.min(((communityChallenge.current_progress || 0) / communityChallenge.target) * 100, 100)}%` }}
+                      >
+                        <span className="text-white text-xs font-bold">
+                          {Math.round(((communityChallenge.current_progress || 0) / communityChallenge.target) * 100)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stats Grid */}
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="text-center p-4 bg-green-50 rounded-lg">
+                      <div className="text-2xl font-bold text-green-600 mb-1">
+                        {communityChallenge.participants?.length || 0}
+                      </div>
+                      <div className="text-xs text-gray-600 font-semibold">Eco-Warriors</div>
+                    </div>
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                      <div className="text-2xl font-bold text-blue-600 mb-1">
+                        {communityChallenge.target - (communityChallenge.current_progress || 0)}
+                      </div>
+                      <div className="text-xs text-gray-600 font-semibold">Trees to Go</div>
+                    </div>
+                    <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                      <div className="text-2xl mb-1">🏆</div>
+                      <div className="text-xs text-gray-600 font-semibold">Tree Master Badge</div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    {!user ? (
+                      <>
+                        <button 
+                          onClick={() => onPageChange('signup')}
+                          className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-4 rounded-full shadow-lg transition transform hover:scale-105"
+                        >
+                          🌱 Sign Up to Join Challenge
+                        </button>
+                        <button 
+                          onClick={() => onPageChange('login')}
+                          className="bg-white hover:bg-gray-50 text-green-600 font-bold px-8 py-4 rounded-full shadow-lg border-2 border-green-600 transition transform hover:scale-105"
+                        >
+                          🔑 Login to Join
+                        </button>
+                      </>
+                    ) : user.role === 'user' ? (
+                      <>
+                        <button 
+                          onClick={() => onPageChange('challenge-details', communityChallenge._id)}
+                          className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-full shadow-lg transition transform hover:scale-105"
+                        >
+                          🌱 Join Challenge & Earn Badge
+                        </button>
+                        <button 
+                          onClick={() => onPageChange('challenge-details', communityChallenge._id)}
+                          className="bg-white hover:bg-gray-50 text-green-600 font-bold px-6 py-3 rounded-full shadow-lg border-2 border-green-600 transition transform hover:scale-105"
+                        >
+                          📊 View Challenge
+                        </button>
+                      </>
+                    ) : (
+                      <button 
+                        onClick={() => onPageChange('challenge-details', communityChallenge._id)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-full shadow-lg transition transform hover:scale-105"
+                      >
+                        👁️ View Challenge Progress
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <Users2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-gray-600 mb-2">No Active Challenge</h3>
+                <p className="text-gray-500">Check back later for new community challenges!</p>
               </div>
-            </div>
+            )}
           </div>
         </section>
 

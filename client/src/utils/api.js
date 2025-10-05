@@ -20,6 +20,20 @@ const getHeaders = (includeAuth = true) => {
   return headers;
 };
 
+// Helper function to handle API responses
+const handleApiResponse = async (response) => {
+  if (!response.ok) {
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch (e) {
+      errorData = { error: 'Network error' };
+    }
+    throw new Error(errorData.error || errorData.msg || `HTTP ${response.status}: ${response.statusText}`);
+  }
+  return response.json();
+};
+
 // Auth APIs
 export const authAPI = {
   signup: async (userData) => {
@@ -28,7 +42,7 @@ export const authAPI = {
       headers: getHeaders(false),
       body: JSON.stringify(userData),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   login: async (credentials) => {
@@ -37,14 +51,14 @@ export const authAPI = {
       headers: getHeaders(false),
       body: JSON.stringify(credentials),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   getCurrentUser: async () => {
     const response = await fetch(`${API_URL}/auth/me`, {
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   requestPartnerAccess: async () => {
@@ -52,7 +66,7 @@ export const authAPI = {
       method: 'POST',
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 };
 
@@ -62,7 +76,7 @@ export const userAPI = {
     const response = await fetch(`${API_URL}/users/profile`, {
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   updateProfile: async (profileData) => {
@@ -71,21 +85,21 @@ export const userAPI = {
       headers: getHeaders(),
       body: JSON.stringify(profileData),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   getLeaderboard: async () => {
     const response = await fetch(`${API_URL}/users/leaderboard`, {
       headers: getHeaders(false),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   getUserStats: async (userId) => {
     const response = await fetch(`${API_URL}/users/${userId}/stats`, {
       headers: getHeaders(false),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   deleteAccount: async () => {
@@ -94,7 +108,7 @@ export const userAPI = {
       method: 'DELETE',
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 };
 
@@ -105,14 +119,14 @@ export const questAPI = {
     const response = await fetch(`${API_URL}/quests?${params}`, {
       headers: getHeaders(false),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   getQuestById: async (questId) => {
     const response = await fetch(`${API_URL}/quests/${questId}`, {
       headers: getHeaders(false),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   createQuest: async (questData) => {
@@ -121,7 +135,7 @@ export const questAPI = {
       headers: getHeaders(),
       body: JSON.stringify(questData),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   updateQuest: async (questId, questData) => {
@@ -130,7 +144,7 @@ export const questAPI = {
       headers: getHeaders(),
       body: JSON.stringify(questData),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   deleteQuest: async (questId) => {
@@ -138,7 +152,7 @@ export const questAPI = {
       method: 'DELETE',
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   submitQuest: async (questId, formData) => {
@@ -150,21 +164,21 @@ export const questAPI = {
       },
       body: formData, // FormData for file upload
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   getMySubmissions: async () => {
     const response = await fetch(`${API_URL}/quests/submissions/my`, {
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   getPendingSubmissions: async () => {
     const response = await fetch(`${API_URL}/quests/submissions/pending`, {
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   reviewSubmission: async (submissionId, status, rejection_reason = '') => {
@@ -173,7 +187,7 @@ export const questAPI = {
       headers: getHeaders(),
       body: JSON.stringify({ status, rejection_reason }),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 };
 
@@ -184,23 +198,44 @@ export const postAPI = {
     const response = await fetch(`${API_URL}/posts?${params}`, {
       headers: getHeaders(false),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   getPostById: async (postId) => {
     const response = await fetch(`${API_URL}/posts/${postId}`, {
       headers: getHeaders(false),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   createPost: async (postData) => {
-    const response = await fetch(`${API_URL}/posts`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(postData),
-    });
-    return response.json();
+    const token = getAuthToken();
+    
+    // If there's a file, use FormData, otherwise use JSON
+    if (postData.photo) {
+      const formData = new FormData();
+      formData.append('title', postData.title);
+      formData.append('content', postData.content);
+      formData.append('category', postData.category);
+      formData.append('tags', JSON.stringify(postData.tags));
+      formData.append('image', postData.photo);
+
+      const response = await fetch(`${API_URL}/posts`, {
+        method: 'POST',
+        headers: {
+          'x-auth-token': token
+        },
+        body: formData
+      });
+      return handleApiResponse(response);
+    } else {
+      const response = await fetch(`${API_URL}/posts`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(postData),
+      });
+      return handleApiResponse(response);
+    }
   },
 
   updatePost: async (postId, postData) => {
@@ -209,7 +244,7 @@ export const postAPI = {
       headers: getHeaders(),
       body: JSON.stringify(postData),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   deletePost: async (postId) => {
@@ -217,7 +252,7 @@ export const postAPI = {
       method: 'DELETE',
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   likePost: async (postId) => {
@@ -225,7 +260,7 @@ export const postAPI = {
       method: 'POST',
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   commentOnPost: async (postId, text) => {
@@ -234,7 +269,7 @@ export const postAPI = {
       headers: getHeaders(),
       body: JSON.stringify({ text }),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 };
 
@@ -244,7 +279,7 @@ export const adminAPI = {
     const response = await fetch(`${API_URL}/admin/users`, {
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   updateUserRole: async (userId, role) => {
@@ -253,7 +288,7 @@ export const adminAPI = {
       headers: getHeaders(),
       body: JSON.stringify({ role }),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   approvePartner: async (userId) => {
@@ -261,7 +296,7 @@ export const adminAPI = {
       method: 'PUT',
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   deleteUser: async (userId) => {
@@ -269,14 +304,14 @@ export const adminAPI = {
       method: 'DELETE',
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 
   getPartnerRequests: async () => {
     const response = await fetch(`${API_URL}/admin/partner-requests`, {
       headers: getHeaders(),
     });
-    return response.json();
+    return handleApiResponse(response);
   },
 };
 

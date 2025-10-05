@@ -87,18 +87,32 @@ router.get('/:id', async (req, res) => {
 });
 
 // @route   POST /api/posts
-// @desc    Create a new post (Partner or Admin only)
+// @desc    Create a new post (All users can post)
 // @access  Private
-router.post('/', auth, roleCheck('partner', 'admin'), upload.single('image'), async (req, res) => {
+router.post('/', auth, upload.single('image'), async (req, res) => {
   try {
     const { title, content, category, tags, image_url } = req.body;
+
+    // Handle tags - they might come as string or array
+    let processedTags = [];
+    if (tags) {
+      if (typeof tags === 'string') {
+        try {
+          processedTags = JSON.parse(tags);
+        } catch (e) {
+          processedTags = tags.split(',').map(t => t.trim()).filter(t => t);
+        }
+      } else if (Array.isArray(tags)) {
+        processedTags = tags;
+      }
+    }
 
     const post = new Post({
       title,
       content,
       category: category || 'Updates',
       author: req.user.id,
-      tags: tags || [],
+      tags: processedTags,
       image_url: req.file ? `/uploads/${req.file.filename}` : (image_url || '')
     });
 
@@ -165,6 +179,11 @@ router.delete('/:id', auth, async (req, res) => {
     // Check if user is the author or admin
     if (post.author.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ msg: 'Not authorized to delete this post' });
+    }
+
+    // Log deletion reason if provided (for admin deletions)
+    if (req.body.reason && req.user.role === 'admin') {
+      console.log(`Post ${req.params.id} deleted by admin ${req.user.id}. Reason: ${req.body.reason}`);
     }
 
     await Post.findByIdAndDelete(req.params.id);

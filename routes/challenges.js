@@ -5,7 +5,7 @@ const User = require('../models/User');
 const UserBadge = require('../models/UserBadge');
 const Badge = require('../models/Badge');
 const auth = require('../middleware/auth');
-const checkRole = require('../middleware/roleCheck');
+const roleCheck = require('../middleware/roleCheck');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -83,7 +83,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/challenges
 // @desc    Create a new challenge (Admin/Partner only)
 // @access  Private
-router.post('/', [auth, checkRole('admin', 'partner')], async (req, res) => {
+router.post('/', [auth, roleCheck('admin', 'partner')], async (req, res) => {
     try {
         const {
             title,
@@ -174,7 +174,7 @@ router.post('/:id/join', [auth, upload.single('photo')], async (req, res) => {
 // @route   GET /api/challenges/:id/submissions/pending
 // @desc    Get pending challenge submissions (Admin only)
 // @access  Private
-router.get('/:id/submissions/pending', [auth, checkRole('admin')], async (req, res) => {
+router.get('/:id/submissions/pending', [auth, roleCheck('admin')], async (req, res) => {
     try {
         const challenge = await Challenge.findById(req.params.id)
             .populate('participants.user', 'username email role');
@@ -195,7 +195,7 @@ router.get('/:id/submissions/pending', [auth, checkRole('admin')], async (req, r
 // @route   PUT /api/challenges/:id/submissions/:participantId/review
 // @desc    Approve or reject a challenge submission (Admin only)
 // @access  Private
-router.put('/:id/submissions/:participantId/review', [auth, checkRole('admin')], async (req, res) => {
+router.put('/:id/submissions/:participantId/review', [auth, roleCheck('admin')], async (req, res) => {
     try {
         const { status } = req.body;
         
@@ -283,7 +283,7 @@ router.get('/:id/participants', async (req, res) => {
 // @route   PUT /api/challenges/:id
 // @desc    Update a challenge (Admin only)
 // @access  Private
-router.put('/:id', [auth, checkRole('admin')], async (req, res) => {
+router.put('/:id', [auth, roleCheck('admin')], async (req, res) => {
     try {
         const challenge = await Challenge.findById(req.params.id);
         
@@ -315,10 +315,59 @@ router.put('/:id', [auth, checkRole('admin')], async (req, res) => {
     }
 });
 
+// @route   POST /api/challenges/submit
+// @desc    Submit challenge proof (Users only)
+// @access  Private
+router.post('/submit', [auth, upload.single('photo')], async (req, res) => {
+    try {
+        const { reflection, challengeId } = req.body;
+        
+        if (!reflection || !challengeId) {
+            return res.status(400).json({ msg: 'Reflection and challenge ID are required' });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ msg: 'Photo proof is required' });
+        }
+
+        const challenge = await Challenge.findById(challengeId);
+        if (!challenge) {
+            return res.status(404).json({ msg: 'Challenge not found' });
+        }
+
+        // Check if user already participated
+        const alreadyParticipated = challenge.participants.some(
+            p => p.user.toString() === req.user.id
+        );
+
+        if (alreadyParticipated) {
+            return res.status(400).json({ msg: 'You have already submitted to this challenge' });
+        }
+
+        // Add user to participants
+        challenge.participants.push({
+            user: req.user.id,
+            contribution: 1,
+            photo_url: `/uploads/${req.file.filename}`,
+            status: 'pending'
+        });
+
+        await challenge.save();
+
+        res.json({ 
+            msg: 'Challenge submission sent for approval!', 
+            challenge 
+        });
+    } catch (err) {
+        console.error('Error submitting challenge:', err.message);
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
 // @route   DELETE /api/challenges/:id
 // @desc    Delete a challenge (Admin only)
 // @access  Private
-router.delete('/:id', [auth, checkRole('admin')], async (req, res) => {
+router.delete('/:id', [auth, roleCheck('admin')], async (req, res) => {
     try {
         const challenge = await Challenge.findById(req.params.id);
         

@@ -17,6 +17,7 @@ const ProfilePage = ({ onPageChange }) => {
   const { user, updateUser, deleteAccount } = useUser();
   
   const [activeTab, setActiveTab] = useState("Activity");
+  const [userCreatedQuests, setUserCreatedQuests] = useState([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editTab, setEditTab] = useState("avatar");
   const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar_theme || "Girl Avatar 1");
@@ -51,12 +52,22 @@ const ProfilePage = ({ onPageChange }) => {
         try {
             const token = localStorage.getItem('token');
             
-            // Fetch user's quest submissions
-            const questsRes = await fetch('http://localhost:5000/api/quests/submissions/my', {
-                headers: { 'x-auth-token': token }
-            });
-            const questsData = await questsRes.json();
-            setUserQuests(questsData);
+            // Fetch user's quest submissions (for regular users)
+            if (user.role === 'user') {
+                const questsRes = await fetch('http://localhost:5000/api/quests/submissions/my', {
+                    headers: { 'x-auth-token': token }
+                });
+                const questsData = await questsRes.json();
+                setUserQuests(questsData);
+            } else {
+                // For admin and partner, fetch quests they created
+                const questsRes = await fetch('http://localhost:5000/api/quests', {
+                    headers: { 'x-auth-token': token }
+                });
+                const questsData = await questsRes.json();
+                const createdQuests = questsData.filter(quest => quest.createdBy && quest.createdBy._id === user._id);
+                setUserCreatedQuests(createdQuests);
+            }
 
             // Fetch user's posts/activity
             const postsRes = await fetch('http://localhost:5000/api/posts', {
@@ -226,19 +237,34 @@ const ProfilePage = ({ onPageChange }) => {
       {/* Tabs Section */}
       <div className="mt-28 max-w-4xl mx-auto px-4 flex-grow">
         <div className="flex justify-center gap-8 border-b pb-2">
-          {["Activity", "Quests", "Photo History", "Achievements"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 ${
-                activeTab === tab
-                  ? "border-b-2 border-green-500 text-green-600 font-semibold"
-                  : "text-gray-600 hover:text-gray-800"
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
+          {user?.role === 'user' ? 
+            ["Activity", "Quests", "Photo History", "Achievements"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 ${
+                  activeTab === tab
+                    ? "border-b-2 border-green-500 text-green-600 font-semibold"
+                    : "text-gray-600 hover:text-gray-800"
+                }`}
+              >
+                {tab}
+              </button>
+            )) :
+            ["Activity", "Created Quests", "Photo History", "Achievements"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 ${
+                  activeTab === tab
+                    ? "border-b-2 border-green-500 text-green-600 font-semibold"
+                    : "text-gray-600 hover:text-gray-800"
+                }`}
+              >
+                {tab}
+              </button>
+            ))
+          }
         </div>
 
         {/* Content */}
@@ -291,9 +317,57 @@ const ProfilePage = ({ onPageChange }) => {
                           </span>
                         </div>
                         <p className="text-gray-600 mb-3">{quest.quest?.description || 'Quest description'}</p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>Submitted: {new Date(quest.submittedAt).toLocaleDateString()}</span>
-                          <span>{quest.quest?.points || 0} points</span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span>Submitted: {new Date(quest.submittedAt).toLocaleDateString()}</span>
+                            <span>{quest.quest?.points || 0} points</span>
+                            <span>Category: {quest.quest?.category || 'General'}</span>
+                            <span>Difficulty: {quest.quest?.difficulty || 'Medium'}</span>
+                          </div>
+                          <button 
+                            onClick={() => onPageChange('quest-details', quest.quest?._id)}
+                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition text-sm font-semibold"
+                          >
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
+              {activeTab === "Created Quests" && (
+                <div className="space-y-4">
+                  {userCreatedQuests.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500">
+                      <p>No quests created yet</p>
+                    </div>
+                  ) : (
+                    userCreatedQuests.map((quest, index) => (
+                      <div key={index} className="bg-white p-6 rounded-xl shadow-md border">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-bold text-lg">{quest.title}</h3>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            quest.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                          }`}>
+                            {quest.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+                        <p className="text-gray-600 mb-3">{quest.description}</p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span>Created: {new Date(quest.createdAt).toLocaleDateString()}</span>
+                            <span>{quest.points} points</span>
+                            <span>Category: {quest.category}</span>
+                            <span>Difficulty: {quest.difficulty}</span>
+                          </div>
+                          <button 
+                            onClick={() => onPageChange('quest-details', quest._id)}
+                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition text-sm font-semibold"
+                          >
+                            View Details
+                          </button>
                         </div>
                       </div>
                     ))

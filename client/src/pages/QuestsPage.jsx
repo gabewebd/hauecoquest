@@ -142,11 +142,7 @@ const QuestsPage = ({ onPageChange }) => {
             let userSubmissions = [];
             if (user) {
                 try {
-                    const token = localStorage.getItem('token');
-                    const submissionsRes = await fetch('http://localhost:5000/api/quests/submissions/my', {
-                        headers: { 'x-auth-token': token }
-                    });
-                    userSubmissions = await submissionsRes.json();
+                    userSubmissions = await questAPI.getMySubmissions();
                 } catch (error) {
                     console.error('Error fetching user submissions:', error);
                 }

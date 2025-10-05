@@ -257,6 +257,105 @@ const QuestModal = ({ quest, onClose, onSave }) => {
     );
 };
 
+// --- COMMUNITY CHALLENGE MODAL ---
+const ChallengeModal = ({ challenge, onClose, onSave }) => {
+    const [formData, setFormData] = useState(challenge || {
+        title: '',
+        description: '',
+        target: 1000,
+        category: 'Environmental'
+    });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+                    <h3 className="text-2xl font-bold">{challenge ? 'Edit Challenge' : 'Create Community Challenge'}</h3>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+                
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Challenge Title</label>
+                        <input
+                            type="text"
+                            required
+                            value={formData.title}
+                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            placeholder="e.g., Plant 1,000 Trees Challenge"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Description</label>
+                        <textarea
+                            required
+                            value={formData.description}
+                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            rows="4"
+                            placeholder="Describe the community challenge..."
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-semibold mb-2">Target</label>
+                            <input
+                                type="number"
+                                required
+                                value={formData.target}
+                                onChange={(e) => setFormData({...formData, target: parseInt(e.target.value)})}
+                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="1000"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold mb-2">Category</label>
+                            <select
+                                value={formData.category}
+                                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            >
+                                <option>Environmental</option>
+                                <option>Conservation</option>
+                                <option>Community</option>
+                                <option>Education</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
+                        <button
+                            type="submit"
+                            className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2"
+                        >
+                            <Save className="w-5 h-5" />
+                            {challenge ? 'Update Challenge' : 'Create Challenge'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-6 py-3 border rounded-lg hover:bg-gray-50 transition font-semibold"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
 // --- COMMUNITY POST MODAL ---
 const PostModal = ({ post, onClose, onSave }) => {
     const [formData, setFormData] = useState(post || {
@@ -720,6 +819,7 @@ const QuestsTab = ({ quests, setQuests }) => {
 // --- COMMUNITY TAB ---
 const CommunityTab = ({ posts, setPosts }) => {
     const [showModal, setShowModal] = useState(false);
+    const [showChallengeModal, setShowChallengeModal] = useState(false);
     const [editingPost, setEditingPost] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -801,6 +901,32 @@ const CommunityTab = ({ posts, setPosts }) => {
         }
     };
 
+    const handleSaveChallenge = async (challengeData) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/challenges', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify({
+                    ...challengeData,
+                    isActive: true,
+                    current_progress: 0,
+                    participants: []
+                })
+            });
+            
+            if (!response.ok) throw new Error('Failed to create challenge');
+            alert('Community challenge created successfully!');
+            setShowChallengeModal(false);
+        } catch (error) {
+            console.error('Error creating challenge:', error);
+            alert('Failed to create challenge. Please try again.');
+        }
+    };
+
     const filteredPosts = posts.filter(p => 
         p.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -813,16 +939,25 @@ const CommunityTab = ({ posts, setPosts }) => {
                         <h3 className="text-xl font-bold">Community Content</h3>
                         <p className="text-sm text-gray-500">Manage your blog posts and community updates</p>
                     </div>
-                    <button 
-                        onClick={() => {
-                            setEditingPost(null);
-                            setShowModal(true);
-                        }}
-                        className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition font-semibold"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Create Post
-                    </button>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={() => {
+                                setEditingPost(null);
+                                setShowModal(true);
+                            }}
+                            className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition font-semibold"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Create Post
+                        </button>
+                        <button 
+                            onClick={() => setShowChallengeModal(true)}
+                            className="flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition font-semibold"
+                        >
+                            <Users className="w-4 h-4" />
+                            Create Challenge
+                        </button>
+                    </div>
                 </div>
 
                 <div className="mb-4">
@@ -916,6 +1051,13 @@ const CommunityTab = ({ posts, setPosts }) => {
                         setEditingPost(null);
                     }}
                     onSave={handleSavePost}
+                />
+            )}
+
+            {showChallengeModal && (
+                <ChallengeModal
+                    onClose={() => setShowChallengeModal(false)}
+                    onSave={handleSaveChallenge}
                 />
             )}
         </div>
@@ -1018,6 +1160,134 @@ const AnalyticsTab = ({ quests }) => {
                             </div>
                         ))}
                 </div>
+            </div>
+        </div>
+    );
+};
+
+// --- NOTIFICATIONS TAB ---
+const NotificationsTab = () => {
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    const fetchNotifications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/notifications', {
+                headers: { 'x-auth-token': token }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setNotifications(data);
+            }
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+            setLoading(false);
+        }
+    };
+
+    const markAsRead = async (notificationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+                method: 'PUT',
+                headers: { 'x-auth-token': token }
+            });
+            fetchNotifications();
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    };
+
+    const deleteNotification = async (notificationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
+                method: 'DELETE',
+                headers: { 'x-auth-token': token }
+            });
+            fetchNotifications();
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-12">
+                <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold">Notifications</h3>
+                    <button 
+                        onClick={() => {
+                            const token = localStorage.getItem('token');
+                            fetch('http://localhost:5000/api/notifications/read-all', {
+                                method: 'PUT',
+                                headers: { 'x-auth-token': token }
+                            }).then(() => fetchNotifications());
+                        }}
+                        className="text-sm text-green-600 hover:underline"
+                    >
+                        Mark all as read
+                    </button>
+                </div>
+
+                {notifications.length === 0 ? (
+                    <div className="text-center py-12">
+                        <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500">No notifications yet</p>
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {notifications.map(notification => (
+                            <div 
+                                key={notification._id} 
+                                className={`p-4 rounded-lg border transition ${
+                                    notification.is_read ? 'bg-gray-50' : 'bg-white shadow-sm'
+                                }`}
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold text-sm">{notification.title}</h4>
+                                        <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                                        <p className="text-xs text-gray-400 mt-2">
+                                            {new Date(notification.created_at).toLocaleString()}
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-2 ml-4">
+                                        {!notification.is_read && (
+                                            <button 
+                                                onClick={() => markAsRead(notification._id)}
+                                                className="text-xs text-green-600 hover:underline"
+                                            >
+                                                Mark as read
+                                            </button>
+                                        )}
+                                        <button 
+                                            onClick={() => deleteNotification(notification._id)}
+                                            className="text-xs text-red-600 hover:underline"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -1299,7 +1569,7 @@ const PartnerDashboard = () => {
                     <TabButton id="overview" label="Overview" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="quests" label="My Quests" icon={<BookOpen className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} badge={quests.filter(q => q.isActive).length} />
                     <TabButton id="community" label="Community" icon={<FileText className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
-                    <TabButton id="daily" label="Daily Content" icon={<Calendar className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <TabButton id="notifications" label="Notifications" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="analytics" label="Analytics" icon={<TrendingUp className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
 
@@ -1307,7 +1577,7 @@ const PartnerDashboard = () => {
                 {activeTab === 'overview' && <OverviewTab quests={quests} posts={posts} setActiveTab={setActiveTab} />}
                 {activeTab === 'quests' && <QuestsTab quests={quests} setQuests={setQuests} />}
                 {activeTab === 'community' && <CommunityTab posts={posts} setPosts={setPosts} />}
-                {activeTab === 'daily' && <DailyTab />}
+                {activeTab === 'notifications' && <NotificationsTab />}
                 {activeTab === 'analytics' && <AnalyticsTab quests={quests} />}
             </main>
         </div>

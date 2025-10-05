@@ -1,7 +1,7 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import { Users, BookOpen, BarChart, Shield, CheckCircle, XCircle, Edit, Trash2, Plus, Search, Filter, Calendar, MapPin, Award, X, Save, Clock, Eye, FileCheck } from 'lucide-react';
+import { Users, BookOpen, BarChart, Shield, CheckCircle, XCircle, Edit, Trash2, Plus, Search, Filter, Calendar, MapPin, Award, X, Save, Clock, Eye, FileCheck, Heart, MessageCircle, FileText } from 'lucide-react';
 
 // --- HELPER COMPONENTS ---
 
@@ -927,6 +927,387 @@ const AnalyticsTab = ({ stats, users, quests }) => {
     );
 };
 
+// --- COMMUNITY TAB ---
+const CommunityTab = ({ posts, setPosts }) => {
+    const [showModal, setShowModal] = useState(false);
+    const [showChallengeModal, setShowChallengeModal] = useState(false);
+    const [editingPost, setEditingPost] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    const handleSavePost = async (postData) => {
+        try {
+            const token = localStorage.getItem('token');
+            
+            if (editingPost) {
+                const payload = {
+                    title: postData.title,
+                    content: postData.content,
+                    category: postData.category,
+                    tags: postData.tags.split(',').map(t => t.trim()).filter(t => t)
+                };
+
+                const response = await fetch(`http://localhost:5000/api/posts/${editingPost._id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) throw new Error('Failed to update post');
+                const updatedPost = await response.json();
+                setPosts(posts.map(p => p._id === editingPost._id ? updatedPost : p));
+            } else {
+                const formData = new FormData();
+                formData.append('title', postData.title);
+                formData.append('content', postData.content);
+                formData.append('category', postData.category);
+                formData.append('tags', JSON.stringify(postData.tags.split(',').map(t => t.trim()).filter(t => t)));
+                
+                if (postData.image) {
+                    formData.append('image', postData.image);
+                }
+
+                const response = await fetch('http://localhost:5000/api/posts', {
+                    method: 'POST',
+                    headers: {
+                        'x-auth-token': token
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.msg || 'Failed to create post');
+                }
+                const newPost = await response.json();
+                setPosts([newPost, ...posts]);
+            }
+            
+            setShowModal(false);
+            setEditingPost(null);
+        } catch (error) {
+            console.error('Error saving post:', error);
+            alert(`Failed to save post: ${error.message}`);
+        }
+    };
+
+    const handleSaveChallenge = async (challengeData) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/challenges', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify({
+                    ...challengeData,
+                    isActive: true,
+                    current_progress: 0,
+                    participants: []
+                })
+            });
+            
+            if (!response.ok) throw new Error('Failed to create challenge');
+            alert('Community challenge created successfully!');
+            setShowChallengeModal(false);
+        } catch (error) {
+            console.error('Error creating challenge:', error);
+            alert('Failed to create challenge. Please try again.');
+        }
+    };
+
+    const handleDeletePost = async (postId) => {
+        const reason = prompt('Please provide a reason for deleting this post:');
+        if (!reason) return;
+        
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/posts/${postId}`, {
+                method: 'DELETE',
+                headers: { 
+                    'x-auth-token': token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ reason })
+            });
+            
+            if (!response.ok) throw new Error('Failed to delete post');
+            setPosts(posts.filter(p => p._id !== postId));
+            alert('Post deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting post:', error);
+            alert('Failed to delete post. You may not have permission.');
+        }
+    };
+
+    const filteredPosts = posts.filter(p => 
+        p.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h3 className="text-xl font-bold">Community Content</h3>
+                        <p className="text-sm text-gray-500">Manage community posts and challenges</p>
+                    </div>
+                    <div className="flex gap-2">
+                        <button 
+                            onClick={() => {
+                                setEditingPost(null);
+                                setShowModal(true);
+                            }}
+                            className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition font-semibold"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Create Post
+                        </button>
+                        <button 
+                            onClick={() => setShowChallengeModal(true)}
+                            className="flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition font-semibold"
+                        >
+                            <Users className="w-4 h-4" />
+                            Create Challenge
+                        </button>
+                    </div>
+                </div>
+
+                <div className="mb-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search posts..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    {filteredPosts.length === 0 ? (
+                        <div className="text-center py-12">
+                            <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                            <p className="text-gray-500">No posts found. Create your first post!</p>
+                        </div>
+                    ) : (
+                        filteredPosts.map(post => (
+                            <div key={post._id} className="border rounded-xl p-5 hover:shadow-md transition">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                            <h4 className="text-lg font-bold">{post.title}</h4>
+                                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                                                {post.category}
+                                            </span>
+                                        </div>
+                                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.content}</p>
+                                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                            <span className="flex items-center gap-1">
+                                                <Calendar className="w-4 h-4" />
+                                                {new Date(post.created_at).toLocaleDateString()}
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Eye className="w-4 h-4" />
+                                                {post.views} views
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Heart className="w-4 h-4" />
+                                                {post.likes?.length || 0} likes
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <MessageCircle className="w-4 h-4" />
+                                                {post.comments?.length || 0} comments
+                                            </span>
+                                        </div>
+                                        {post.tags && post.tags.length > 0 && (
+                                            <div className="flex gap-2 mt-2 flex-wrap">
+                                                {post.tags.map((tag, idx) => (
+                                                    <span key={idx} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                                        #{tag}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button 
+                                            onClick={() => {
+                                                setEditingPost({...post, tags: post.tags?.join(', ') || ''});
+                                                setShowModal(true);
+                                            }}
+                                            className="p-2 hover:bg-blue-50 rounded-lg transition border border-blue-200"
+                                        >
+                                            <Edit className="w-5 h-5 text-blue-600" />
+                                        </button>
+                                        <button 
+                                            onClick={() => handleDeletePost(post._id)}
+                                            className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
+                                        >
+                                            <Trash2 className="w-5 h-5 text-red-600" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+
+            {showModal && (
+                <PostModal
+                    post={editingPost}
+                    onClose={() => {
+                        setShowModal(false);
+                        setEditingPost(null);
+                    }}
+                    onSave={handleSavePost}
+                />
+            )}
+
+            {showChallengeModal && (
+                <ChallengeModal
+                    onClose={() => setShowChallengeModal(false)}
+                    onSave={handleSaveChallenge}
+                />
+            )}
+        </div>
+    );
+};
+
+// --- NOTIFICATIONS TAB ---
+const NotificationsTab = () => {
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    const fetchNotifications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/notifications', {
+                headers: { 'x-auth-token': token }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setNotifications(data);
+            }
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+            setLoading(false);
+        }
+    };
+
+    const markAsRead = async (notificationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+                method: 'PUT',
+                headers: { 'x-auth-token': token }
+            });
+            fetchNotifications();
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    };
+
+    const deleteNotification = async (notificationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
+                method: 'DELETE',
+                headers: { 'x-auth-token': token }
+            });
+            fetchNotifications();
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-12">
+                <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold">Notifications</h3>
+                    <button 
+                        onClick={() => {
+                            const token = localStorage.getItem('token');
+                            fetch('http://localhost:5000/api/notifications/read-all', {
+                                method: 'PUT',
+                                headers: { 'x-auth-token': token }
+                            }).then(() => fetchNotifications());
+                        }}
+                        className="text-sm text-green-600 hover:underline"
+                    >
+                        Mark all as read
+                    </button>
+                </div>
+
+                {notifications.length === 0 ? (
+                    <div className="text-center py-12">
+                        <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500">No notifications yet</p>
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {notifications.map(notification => (
+                            <div 
+                                key={notification._id} 
+                                className={`p-4 rounded-lg border transition ${
+                                    notification.is_read ? 'bg-gray-50' : 'bg-white shadow-sm'
+                                }`}
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold text-sm">{notification.title}</h4>
+                                        <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                                        <p className="text-xs text-gray-400 mt-2">
+                                            {new Date(notification.created_at).toLocaleString()}
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-2 ml-4">
+                                        {!notification.is_read && (
+                                            <button 
+                                                onClick={() => markAsRead(notification._id)}
+                                                className="text-xs text-green-600 hover:underline"
+                                            >
+                                                Mark as read
+                                            </button>
+                                        )}
+                                        <button 
+                                            onClick={() => deleteNotification(notification._id)}
+                                            className="text-xs text-red-600 hover:underline"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 // --- DAILY MANAGEMENT TAB ---
 const DailyTab = () => {
     const [dailyQuest, setDailyQuest] = useState(null);
@@ -1523,6 +1904,182 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
     );
 };
 
+// --- POST MODAL ---
+const PostModal = ({ post, onClose, onSave }) => {
+    const [formData, setFormData] = useState(post || {
+        title: '',
+        content: '',
+        category: 'Updates',
+        tags: ''
+    });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+                    <h3 className="text-2xl font-bold">{post ? 'Edit Post' : 'Create New Post'}</h3>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+                
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Post Title</label>
+                        <input
+                            type="text"
+                            required
+                            value={formData.title}
+                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            placeholder="Enter post title..."
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Category</label>
+                        <select
+                            value={formData.category}
+                            onChange={(e) => setFormData({...formData, category: e.target.value})}
+                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
+                            <option value="Updates">Updates</option>
+                            <option value="Tips">Tips</option>
+                            <option value="Events">Events</option>
+                            <option value="Success Stories">Success Stories</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Content</label>
+                        <textarea
+                            required
+                            value={formData.content}
+                            onChange={(e) => setFormData({...formData, content: e.target.value})}
+                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            rows="4"
+                            placeholder="Write your post content..."
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Tags (comma-separated)</label>
+                        <input
+                            type="text"
+                            value={formData.tags}
+                            onChange={(e) => setFormData({...formData, tags: e.target.value})}
+                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            placeholder="e.g., environment, tips, community"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Post Image</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => setFormData({...formData, image: e.target.files[0]})}
+                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Optional: Upload an image for this post</p>
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
+                        <button
+                            type="submit"
+                            className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2"
+                        >
+                            <Save className="w-5 h-5" />
+                            {post ? 'Update Post' : 'Create Post'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-6 py-3 border rounded-lg hover:bg-gray-50 transition font-semibold"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+// --- CHALLENGE MODAL ---
+const ChallengeModal = ({ onClose, onSave }) => {
+    const [formData, setFormData] = useState({
+        title: '',
+        content: '',
+        tags: []
+    });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+                    <h3 className="text-2xl font-bold">Create Community Challenge</h3>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+                
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Challenge Title</label>
+                        <input
+                            type="text"
+                            required
+                            value={formData.title}
+                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            placeholder="Enter challenge title..."
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Challenge Description</label>
+                        <textarea
+                            required
+                            value={formData.content}
+                            onChange={(e) => setFormData({...formData, content: e.target.value})}
+                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            rows="4"
+                            placeholder="Describe the community challenge..."
+                        />
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
+                        <button
+                            type="submit"
+                            className="flex-1 bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition font-semibold"
+                        >
+                            Create Challenge
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-6 py-3 border rounded-lg hover:bg-gray-50 transition font-semibold"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
 // --- DAILY CHALLENGE MODAL ---
 const DailyChallengeModal = ({ onClose, onSave }) => {
     const [formData, setFormData] = useState({
@@ -1780,8 +2337,9 @@ const AdminDashboard = () => {
                     <TabButton id="overview" label="Overview" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="users" label="Users" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="quests" label="Quests" icon={<BookOpen className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <TabButton id="community" label="Community" icon={<FileText className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="submissions" label="Submissions" icon={<FileCheck className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
-                    <TabButton id="daily" label="Daily Content" icon={<Calendar className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <TabButton id="notifications" label="Notifications" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="analytics" label="Analytics" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
 
@@ -1789,8 +2347,9 @@ const AdminDashboard = () => {
                 {activeTab === 'overview' && <OverviewTab stats={stats} setActiveTab={setActiveTab} />}
                 {activeTab === 'users' && <UsersTab users={users} pendingPartners={pendingPartners} onApprove={handleApprovePartner} onReject={handleRejectPartner} onDeleteUser={handleDeleteUser} />}
                 {activeTab === 'quests' && <QuestsTab quests={quests} setQuests={setQuests} />}
+                {activeTab === 'community' && <CommunityTab posts={[]} setPosts={() => {}} />}
                 {activeTab === 'submissions' && <SubmissionsTab />}
-                {activeTab === 'daily' && <DailyTab />}
+                {activeTab === 'notifications' && <NotificationsTab />}
                 {activeTab === 'analytics' && <AnalyticsTab stats={stats} users={users} quests={quests} />}
             </main>
         </div>

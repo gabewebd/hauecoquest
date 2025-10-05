@@ -65,6 +65,52 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Quest'
   }],
+  streaks: {
+    current_streak: {
+      type: Number,
+      default: 0
+    },
+    longest_streak: {
+      type: Number,
+      default: 0
+    },
+    last_activity: {
+      type: Date,
+      default: Date.now
+    }
+  },
+  goals: {
+    energy_conservation: {
+      current: {
+        type: Number,
+        default: 0
+      },
+      target: {
+        type: Number,
+        default: 10
+      }
+    },
+    water_saved: {
+      current: {
+        type: Number,
+        default: 0
+      },
+      target: {
+        type: Number,
+        default: 500
+      }
+    },
+    trees_planted: {
+      current: {
+        type: Number,
+        default: 0
+      },
+      target: {
+        type: Number,
+        default: 5
+      }
+    }
+  },
   created_at: {
     type: Date,
     default: Date.now

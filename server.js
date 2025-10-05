@@ -47,6 +47,7 @@ try {
   app.use('/api/badges', require('./routes/badges'));
   app.use('/api/challenges', require('./routes/challenges'));
   app.use('/api/dashboard', require('./routes/dashboard'));
+  app.use('/api/notifications', require('./routes/notifications').router);
   console.log('✅ All routes loaded successfully');
 } catch (error) {
   console.error('❌ Error loading routes:', error);

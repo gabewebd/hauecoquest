@@ -13,6 +13,8 @@ import PartnerDashboard from './pages/PartnerDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ContactQuestMasters from './pages/ContactQuestMasters';
 import AlliancePartners from './pages/AlliancePartners';
+import ChallengeDetailsPage from './pages/ChallengeDetailsPage';
+import PostDetailsPage from './pages/PostDetailsPage';
 
 import { UserProvider, useUser } from './context/UserContext';
 import { CheckCircle, Info, X } from 'lucide-react';
@@ -58,11 +60,13 @@ const Notification = ({ notification, onDismiss }) => {
 // App Content Component (inside UserProvider)
 const AppContent = () => {
   const [currentPage, setCurrentPage] = useState('home');
+  const [pageParams, setPageParams] = useState(null);
   const { notification, dismissNotification } = useUser();
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page, params = null) => {
     setCurrentPage(page);
-    console.log(`Navigating to: ${page}`);
+    setPageParams(params);
+    console.log(`Navigating to: ${page}`, params ? `with params: ${params}` : '');
   };
 
   const renderPage = () => {
@@ -91,6 +95,10 @@ const AppContent = () => {
         return <ContactQuestMasters onPageChange={handlePageChange} />;
       case 'alliancepartners':
         return <AlliancePartners onPageChange={handlePageChange} />;
+      case 'challenge-details':
+        return <ChallengeDetailsPage onPageChange={handlePageChange} challengeId={pageParams} />;
+      case 'post-details':
+        return <PostDetailsPage onPageChange={handlePageChange} postId={pageParams} />;
       default:
         return <HomePage onPageChange={handlePageChange} />;
     }

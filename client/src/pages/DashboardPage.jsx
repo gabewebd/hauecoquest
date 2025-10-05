@@ -1,7 +1,7 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
 import { useUser } from "../context/UserContext";
-import { BookOpen, PlusCircle, User, Settings, BarChart, TreePine, Recycle, Droplets, Sun, Zap, Activity, Badge, Trophy, CheckCircle, Clock, List, ChevronRight, Award, UserCircle, Users, Crown, Building } from 'lucide-react';
+import { BookOpen, PlusCircle, User, Settings, BarChart, TreePine, Recycle, Droplets, Sun, Zap, Activity, Badge, Trophy, CheckCircle, Clock, List, ChevronRight, Award, UserCircle, Users, Crown, Building, Target, MapPin, Calendar, Search } from 'lucide-react';
 
 // --- ALL HELPER COMPONENTS ARE NOW DEFINED AT THE TOP LEVEL ---
 
@@ -57,16 +57,53 @@ const AchievementSection = ({ achievements }) => (
             </div>
             <div className="mt-4 space-y-3">
                 <p className="font-semibold text-sm">Next Badges to Unlock</p>
-                <GoalItem title="Energy Master" value="7/10" progress={70} label="Complete 10 energy conservation quests" />
-                <GoalItem title="Water Guardian" value="156/500" progress={31.2} label="Save 500 liters of water" />
+                {achievements.length > 0 ? (
+                    achievements.slice(0, 2).map((achievement, index) => (
+                        <GoalItem 
+                            key={index}
+                            title={achievement.badge_id?.name || 'Next Badge'} 
+                            value={`${achievement.current || 0}/${achievement.target || 10}`} 
+                            progress={achievement.progress || 0} 
+                            label={achievement.badge_id?.description || 'Complete quests to unlock'} 
+                        />
+                    ))
+                ) : (
+                    <>
+                        <GoalItem title="First Quest" value="0/1" progress={0} label="Complete your first quest" />
+                        <GoalItem title="Quest Master" value="0/5" progress={0} label="Complete 5 quests" />
+                    </>
+                )}
             </div>
         </div>
     </div>
 );
 
-const OverviewTabContent = ({ dashboardData, onPageChange }) => (
+const OverviewTabContent = ({ dashboardData, onPageChange, userData }) => (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
+            {/* User Level Display */}
+            <div className="bg-gradient-to-r from-green-500 to-blue-600 p-6 rounded-2xl shadow-lg text-white">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h3 className="text-2xl font-bold mb-2">Level {userData.level}</h3>
+                        <p className="text-white/90">Environmental Champion</p>
+                        <div className="mt-4">
+                            <div className="flex justify-between text-sm text-white/80 mb-1">
+                                <span>Progress to Level {userData.level + 1}</span>
+                                <span>{userData.points % 100} / 100 points</span>
+                            </div>
+                            <div className="w-full bg-white/30 rounded-full h-2">
+                                <div className="bg-white h-2 rounded-full transition-all duration-300" style={{ width: `${((userData.points % 100) / 100) * 100}%` }}></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <div className="text-4xl font-bold">{userData.points}</div>
+                        <div className="text-sm text-white/80">Total Points</div>
+                    </div>
+                </div>
+            </div>
+            
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <StatCard icon={<CheckCircle className="w-8 h-8 text-green-500" />} value={dashboardData.questsCompleted} label="Quests Completed" change="+1 this month" />
                 <StatCard icon={<Award className="w-8 h-8 text-orange-500" />} value={dashboardData.badgesEarned} label="Badges Earned" change="+0 new" />
@@ -102,6 +139,485 @@ const OverviewTabContent = ({ dashboardData, onPageChange }) => (
     </div>
 );
 
+// --- QUESTS TAB ---
+const QuestsTab = ({ onPageChange }) => {
+    const [quests, setQuests] = useState([]);
+    const [userSubmissions, setUserSubmissions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        fetchQuests();
+        fetchUserSubmissions();
+    }, []);
+
+    const fetchQuests = async () => {
+        try {
+            const { questAPI } = await import('../utils/api');
+            const data = await questAPI.getAllQuests();
+            setQuests(data);
+        } catch (error) {
+            console.error('Error fetching quests:', error);
+        }
+    };
+
+    const fetchUserSubmissions = async () => {
+        try {
+            const { questAPI } = await import('../utils/api');
+            const data = await questAPI.getMySubmissions();
+            setUserSubmissions(data);
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching user submissions:', error);
+            setLoading(false);
+        }
+    };
+
+    const handleStartQuest = (questId) => {
+        onPageChange('quest-details', questId);
+    };
+
+    // Calculate quest progress
+    const completedQuests = userSubmissions.filter(s => s.status === 'approved').length;
+    const inProgressQuests = userSubmissions.filter(s => s.status === 'pending').length;
+    const availableQuests = quests.filter(q => 
+        !userSubmissions.some(s => s.quest_id._id === q._id)
+    ).length;
+
+    const filteredQuests = quests.filter(q => 
+        q.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-12">
+                <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            {/* Quest Progress Cards */}
+            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+                <h3 className="text-xl font-bold mb-6">Quest Progress</h3>
+                <div className="grid grid-cols-3 gap-4 mb-8 text-center">
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="mx-auto w-fit mb-2">
+                            <CheckCircle className="w-8 h-8 text-green-500" />
+                        </div>
+                        <p className="text-2xl font-bold">{completedQuests}</p>
+                        <p className="text-sm text-gray-500">Completed</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="mx-auto w-fit mb-2">
+                            <Clock className="w-8 h-8 text-blue-500" />
+                        </div>
+                        <p className="text-2xl font-bold">{inProgressQuests}</p>
+                        <p className="text-sm text-gray-500">In Progress</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="mx-auto w-fit mb-2">
+                            <List className="w-8 h-8 text-gray-500" />
+                        </div>
+                        <p className="text-2xl font-bold">{availableQuests}</p>
+                        <p className="text-sm text-gray-500">Available</p>
+                    </div>
+                </div>
+                
+                <h4 className="font-semibold mb-4">Progress by Category</h4>
+                <div className="space-y-3">
+                    {Object.entries(quests.reduce((acc, quest) => {
+                        const category = quest.category;
+                        if (!acc[category]) {
+                            acc[category] = { total: 0, completed: 0 };
+                        }
+                        acc[category].total++;
+                        if (userSubmissions.some(s => s.quest_id._id === quest._id && s.status === 'approved')) {
+                            acc[category].completed++;
+                        }
+                        return acc;
+                    }, {})).map(([category, progress]) => {
+                        const progressPercent = progress.total > 0 ? (progress.completed / progress.total) * 100 : 0;
+                        const getCategoryIcon = (cat) => {
+                            const icons = {
+                                'Recycling & Waste': <Recycle className="w-5 h-5 text-blue-500"/>,
+                                'Energy Conservation': <Sun className="w-5 h-5 text-yellow-500"/>,
+                                'Water Conservation': <Droplets className="w-5 h-5 text-cyan-500"/>,
+                                'Gardening & Planting': <TreePine className="w-5 h-5 text-green-500"/>,
+                                'Education & Awareness': <BookOpen className="w-5 h-5 text-purple-500"/>,
+                                'Transportation': <Building className="w-5 h-5 text-indigo-500"/>
+                            };
+                            return icons[cat] || <TreePine className="w-5 h-5 text-green-500"/>;
+                        };
+                        return (
+                            <div key={category} className="mb-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <div className="w-5">{getCategoryIcon(category)}</div>
+                                    <p className="font-semibold text-sm flex-1">{category}</p>
+                                    <p className="text-xs text-gray-500">{progress.completed} of {progress.total} quests</p>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                    <div className="bg-green-500 h-1.5 rounded-full" style={{ width: `${progressPercent}%` }}></div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h3 className="text-xl font-bold">Available Quests</h3>
+                        <p className="text-sm text-gray-500">Start new environmental quests and track your progress</p>
+                    </div>
+                </div>
+
+                <div className="mb-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search quests..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    {filteredQuests.length === 0 ? (
+                        <div className="text-center py-12">
+                            <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                            <p className="text-gray-500">No quests found. Check back later for new quests!</p>
+                        </div>
+                    ) : (
+                        filteredQuests.map(quest => (
+                            <div key={quest._id} className="border rounded-xl p-5 hover:shadow-md transition">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                            <h4 className="text-lg font-bold">{quest.title}</h4>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                quest.isActive 
+                                                    ? 'bg-green-100 text-green-700' 
+                                                    : 'bg-gray-100 text-gray-700'
+                                            }`}>
+                                                {quest.isActive ? 'Active' : 'Inactive'}
+                                            </span>
+                                            <span className={`text-xs font-semibold px-2 py-1 rounded ${
+                                                quest.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
+                                                quest.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                                                'bg-red-100 text-red-700'
+                                            }`}>
+                                                {quest.difficulty}
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
+                                            <span className="flex items-center gap-1">
+                                                <Target className="w-4 h-4" />
+                                                {quest.category}
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Award className="w-4 h-4" />
+                                                {quest.points} points
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Users className="w-4 h-4" />
+                                                {quest.completions?.length || 0} participants
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <MapPin className="w-4 h-4" />
+                                                {quest.location}
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Calendar className="w-4 h-4" />
+                                                {quest.duration}
+                                            </span>
+                                        </div>
+                                        {quest.description && (
+                                            <p className="text-sm text-gray-600 line-clamp-2">{quest.description}</p>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button 
+                                            onClick={() => handleStartQuest(quest._id)}
+                                            className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition font-semibold"
+                                        >
+                                            <BookOpen className="w-4 h-4" />
+                                            Start Quest
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- NOTIFICATIONS TAB ---
+const NotificationsTab = () => {
+    const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
+
+    const fetchNotifications = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5000/api/notifications', {
+                headers: { 'x-auth-token': token }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setNotifications(data);
+            }
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
+            setLoading(false);
+        }
+    };
+
+    const markAsRead = async (notificationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+                method: 'PUT',
+                headers: { 'x-auth-token': token }
+            });
+            fetchNotifications();
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    };
+
+    const deleteNotification = async (notificationId) => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
+                method: 'DELETE',
+                headers: { 'x-auth-token': token }
+            });
+            fetchNotifications();
+        } catch (error) {
+            console.error('Error deleting notification:', error);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-12">
+                <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+                <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold">Notifications</h3>
+                    <button 
+                        onClick={() => {
+                            const token = localStorage.getItem('token');
+                            fetch('http://localhost:5000/api/notifications/read-all', {
+                                method: 'PUT',
+                                headers: { 'x-auth-token': token }
+                            }).then(() => fetchNotifications());
+                        }}
+                        className="text-sm text-green-600 hover:underline"
+                    >
+                        Mark all as read
+                    </button>
+                </div>
+
+                {notifications.length === 0 ? (
+                    <div className="text-center py-12">
+                        <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500">No notifications yet</p>
+                    </div>
+                ) : (
+                    <div className="space-y-3">
+                        {notifications.map(notification => (
+                            <div 
+                                key={notification._id} 
+                                className={`p-4 rounded-lg border transition ${
+                                    notification.is_read ? 'bg-gray-50' : 'bg-white shadow-sm'
+                                }`}
+                            >
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold text-sm">{notification.title}</h4>
+                                        <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                                        <p className="text-xs text-gray-400 mt-2">
+                                            {new Date(notification.created_at).toLocaleString()}
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-2 ml-4">
+                                        {!notification.is_read && (
+                                            <button 
+                                                onClick={() => markAsRead(notification._id)}
+                                                className="text-xs text-green-600 hover:underline"
+                                            >
+                                                Mark as read
+                                            </button>
+                                        )}
+                                        <button 
+                                            onClick={() => deleteNotification(notification._id)}
+                                            className="text-xs text-red-600 hover:underline"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// --- ACHIEVEMENTS TAB ---
+const AchievementsTab = () => {
+    const [badgeData, setBadgeData] = useState({
+        totalBadges: 0,
+        earnedBadges: 0,
+        badgeProgress: [],
+        nextBadges: []
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchBadgeData();
+    }, []);
+
+    const fetchBadgeData = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const userId = JSON.parse(localStorage.getItem('user'))._id;
+            
+            const response = await fetch(`http://localhost:5000/api/badges/user/${userId}/progress`, {
+                headers: { 'x-auth-token': token }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                setBadgeData(data);
+            }
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching badge data:', error);
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-12">
+                <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            {/* Badge Collection Summary */}
+            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+                <h3 className="text-xl font-bold mb-4">Badge Collection</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-purple-50 p-6 rounded-xl text-center">
+                        <div className="text-4xl font-bold text-purple-600 mb-2">{badgeData.earnedBadges}</div>
+                        <div className="text-sm text-purple-600 mb-1">Badges Earned</div>
+                        <div className="text-xs text-gray-500">Out of {badgeData.totalBadges} available badges</div>
+                    </div>
+                    <div className="bg-green-50 p-6 rounded-xl text-center">
+                        <div className="text-4xl font-bold text-green-600 mb-2">{Math.round((badgeData.earnedBadges / badgeData.totalBadges) * 100)}%</div>
+                        <div className="text-sm text-green-600 mb-1">Completion Rate</div>
+                        <div className="text-xs text-gray-500">Keep going to earn more badges!</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Next Badges to Unlock */}
+            {badgeData.nextBadges.length > 0 && (
+                <div className="bg-white p-6 rounded-2xl shadow-lg border">
+                    <h3 className="text-xl font-bold mb-4">Next Badges to Unlock</h3>
+                    <div className="space-y-4">
+                        {badgeData.nextBadges.map((badge, index) => (
+                            <div key={badge._id} className="border rounded-lg p-4">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                        <Trophy className="w-5 h-5 text-gray-500" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold">{badge.name}</h4>
+                                        <p className="text-sm text-gray-600">{badge.description}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-sm font-semibold">{badge.current}/{badge.target}</div>
+                                        <div className="text-xs text-gray-500">{badge.progress}%</div>
+                                    </div>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div 
+                                        className="bg-orange-400 h-2 rounded-full transition-all duration-300"
+                                        style={{ width: `${badge.progress}%` }}
+                                    ></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* All Badges Progress */}
+            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+                <h3 className="text-xl font-bold mb-4">All Badges Progress</h3>
+                <div className="space-y-3">
+                    {badgeData.badgeProgress.map((badge, index) => (
+                        <div key={badge._id} className={`border rounded-lg p-3 ${badge.isEarned ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}>
+                            <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${badge.isEarned ? 'bg-green-500' : 'bg-gray-300'}`}>
+                                    {badge.isEarned ? <Trophy className="w-4 h-4 text-white" /> : <Trophy className="w-4 h-4 text-gray-500" />}
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className={`font-semibold ${badge.isEarned ? 'text-green-800' : 'text-gray-700'}`}>
+                                        {badge.name}
+                                    </h4>
+                                    <p className="text-sm text-gray-600">{badge.description}</p>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-sm font-semibold">{badge.current}/{badge.target}</div>
+                                    <div className="text-xs text-gray-500">{badge.progress}%</div>
+                                </div>
+                            </div>
+                            {!badge.isEarned && (
+                                <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                                    <div 
+                                        className="bg-orange-400 h-1.5 rounded-full transition-all duration-300"
+                                        style={{ width: `${badge.progress}%` }}
+                                    ></div>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const ProgressTabContent = ({ dashboardData, userData, levelProgress }) => (
     <div className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -123,16 +639,16 @@ const ProgressTabContent = ({ dashboardData, userData, levelProgress }) => (
                         label={`Longest Streak: ${dashboardData.longestStreak || 0} days`} 
                     />
                     <GoalItem 
-                        title="Weekly Goal" 
-                        value={`${dashboardData.weeklyPoints || 0}/150`} 
-                        progress={Math.min((dashboardData.weeklyPoints || 0) / 150 * 100, 100)} 
-                        label="Earn 150 eco-points this week" 
+                        title="Energy Conservation" 
+                        value={`${dashboardData.goals?.energy_conservation?.current || 0}/${dashboardData.goals?.energy_conservation?.target || 10}`} 
+                        progress={Math.min(((dashboardData.goals?.energy_conservation?.current || 0) / (dashboardData.goals?.energy_conservation?.target || 10)) * 100, 100)} 
+                        label="Complete energy conservation quests" 
                     />
                     <GoalItem 
-                        title="Monthly Goal" 
-                        value={`${dashboardData.monthlyQuests || 0}/3`} 
-                        progress={Math.min((dashboardData.monthlyQuests || 0) / 3 * 100, 100)} 
-                        label="Complete 3 new quests this month" 
+                        title="Water Saved" 
+                        value={`${dashboardData.goals?.water_saved?.current || 0}/${dashboardData.goals?.water_saved?.target || 500}L`} 
+                        progress={Math.min(((dashboardData.goals?.water_saved?.current || 0) / (dashboardData.goals?.water_saved?.target || 500)) * 100, 100)} 
+                        label="Save water through conservation" 
                     />
                 </div>
             </div>
@@ -408,6 +924,7 @@ const DashboardHeader = ({ userData, levelProgress, avatarStyle, headerTheme }) 
 // --- Main Dashboard Component ---
 const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
     const { user, logout, requestRole } = useUser();
+    const [activeTab, setActiveTab] = useState('overview');
     const [dashboardData, setDashboardData] = useState({
         questsCompleted: 0,
         badgesEarned: 0,
@@ -437,24 +954,26 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
             const token = localStorage.getItem('token');
             const headers = { 'x-auth-token': token };
 
-            const dashboardRes = await fetch('http://localhost:5000/api/dashboard/stats', { headers });
-            const dashboardStats = await dashboardRes.json();
+            // Fetch user dashboard data
+            const dashboardRes = await fetch('http://localhost:5000/api/dashboard/user', { headers });
+            const dashboardData = await dashboardRes.json();
             
             if(!dashboardRes.ok) {
-                throw new Error(dashboardStats.msg || "Failed to fetch dashboard stats");
+                throw new Error(dashboardData.msg || "Failed to fetch dashboard data");
             }
 
-            console.log('Dashboard stats loaded:', dashboardStats);
+            console.log('Dashboard data loaded:', dashboardData);
 
+            // Create recent activity from actual data
             const recentActivity = [
-                ...dashboardStats.recentSubmissions.map(s => ({
+                ...(dashboardData.submissions || []).slice(0, 3).map(s => ({
                     icon: <CheckCircle className="w-5 h-5 text-green-500" />,
                     title: `Completed '${s.quest?.title || 'a quest'}'`,
-                    subtitle: `You earned ${s.points_earned} points`,
+                    subtitle: `You earned ${s.points_earned || 0} points`,
                     time: new Date(s.submitted_at).toLocaleDateString(),
-                    points: `+${s.points_earned} points`
+                    points: `+${s.points_earned || 0} points`
                 })),
-                ...dashboardStats.recentPosts.map(p => ({
+                ...(dashboardData.posts || []).slice(0, 2).map(p => ({
                     icon: <User className="w-5 h-5 text-blue-500" />,
                     title: `Posted: ${p.title}`,
                     subtitle: 'Shared with the community',
@@ -462,23 +981,27 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
                 }))
             ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 5);
 
+            // Update dashboard data with real backend data
             setDashboardData({
-                questsCompleted: dashboardStats.questsCompleted,
-                badgesEarned: dashboardStats.badgesEarned,
-                ecoPoints: dashboardStats.eco_score,
-                questsInProgress: dashboardStats.questsInProgress,
-                availableQuests: dashboardStats.availableQuests,
+                questsCompleted: dashboardData.submissions?.length || 0,
+                badgesEarned: dashboardData.badges?.earned || 0,
+                ecoPoints: dashboardData.user?.points || 0,
+                questsInProgress: dashboardData.questsInProgress || 0,
+                availableQuests: dashboardData.availableQuests || 0,
                 recentActivity: recentActivity,
-                achievements: dashboardStats.badges || [],
-                categoryProgress: dashboardStats.categoryProgress || {},
-                currentStreak: dashboardStats.currentStreak,
-                longestStreak: dashboardStats.longestStreak,
-                weeklyPoints: dashboardStats.weeklyPoints,
-                monthlyQuests: dashboardStats.monthlyQuests,
-                level: dashboardStats.level,
-                progressToNextLevel: dashboardStats.progressToNextLevel,
-                pointsForNextLevel: dashboardStats.pointsForNextLevel
+                achievements: dashboardData.badges?.progress || [],
+                categoryProgress: dashboardData.categoryProgress || {},
+                currentStreak: dashboardData.user?.streaks?.current_streak || 0,
+                longestStreak: dashboardData.user?.streaks?.longest_streak || 0,
+                weeklyPoints: dashboardData.weeklyPoints || 0,
+                monthlyQuests: dashboardData.monthlyQuests || 0,
+                goals: dashboardData.user?.goals || {
+                    energy_conservation: { current: 0, target: 10 },
+                    water_saved: { current: 0, target: 500 },
+                    trees_planted: { current: 0, target: 5 }
+                }
             });
+            
             setLoading(false);
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
@@ -535,10 +1058,24 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
                 
                 <DashboardHeader userData={userData} levelProgress={levelProgress} avatarStyle={avatarStyle} headerTheme={headerTheme} />
                 
-                <div className="space-y-8">
-                    <OverviewTabContent dashboardData={dashboardData} onPageChange={onPageChange} />
-                    <ProgressTabContent dashboardData={dashboardData} userData={userData} levelProgress={levelProgress} />
+                {/* Navigation Tabs */}
+                <div className="bg-white p-2 rounded-xl shadow-md border inline-flex items-center gap-2 mb-8">
+                    <TabButton id="overview" label="Overview" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <TabButton id="quests" label="Quests" icon={<BookOpen className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <TabButton id="achievements" label="Achievements" icon={<Trophy className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <TabButton id="notifications" label="Notifications" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
+
+                {/* Tab Content */}
+                {activeTab === 'overview' && (
+                    <div className="space-y-8">
+                        <OverviewTabContent dashboardData={dashboardData} onPageChange={onPageChange} userData={userData} />
+                        <ProgressTabContent dashboardData={dashboardData} userData={userData} levelProgress={levelProgress} />
+                    </div>
+                )}
+                {activeTab === 'quests' && <QuestsTab onPageChange={onPageChange} />}
+                {activeTab === 'achievements' && <AchievementsTab />}
+                {activeTab === 'notifications' && <NotificationsTab />}
             </main>
         </div>
     );
