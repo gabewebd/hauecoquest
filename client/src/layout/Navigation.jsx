@@ -1,8 +1,7 @@
-// Josh Andrei Aguiluz
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Menu, X, User, LogOut, Shield, Award, Star, Trophy, Zap, Calendar, 
-  Users, Home, BookOpen, MessageCircle, Crown, ChevronDown, Trash2, Settings 
+  Menu, X, User, LogOut, Shield, Trash2, Trophy, 
+  ChevronDown, BookOpen, MessageCircle, Crown, Home, Sparkles 
 } from 'lucide-react';
 import { useUser } from "../context/UserContext";
 
@@ -10,7 +9,6 @@ export function Navigation({ currentPage, onPageChange }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
-  // ✅ Safe destructure (prevents "user is null" crash)
   const { user, logout: userLogout, deleteAccount } = useUser() || {};
 
   const handleDeleteAccount = async () => {
@@ -48,20 +46,15 @@ export function Navigation({ currentPage, onPageChange }) {
     { id: 'leaderboard', label: 'Leaderboard', icon: Crown },
   ];
 
-  // UPDATED: Replicating the avatar theme structure from ProfilePage to ensure consistency
-  // These objects now contain the background (bg) and the icon color (color)
   const avatars = [
     { name: "Girl Avatar 1", gender: "Female", color: "text-pink-500", bg: "bg-pink-100" },
     { name: "Girl Avatar 2", gender: "Female", color: "text-pink-400", bg: "bg-pink-50" },
     { name: "Boy Avatar 1", gender: "Male", color: "text-blue-500", bg: "bg-blue-100" },
     { name: "Boy Avatar 2", gender: "Male", color: "text-blue-400", bg: "bg-blue-50" },
   ];
-  // Find the selected avatar object
   const selectedAvatar = avatars.find((a) => a.name === (user?.avatar || "Girl Avatar 1"));
-  // Use a default style if the avatar isn't found
   const defaultAvatarStyle = { bg: "bg-pink-100", color: "text-pink-500" };
   const currentAvatarStyle = selectedAvatar || defaultAvatarStyle;
-
 
   const getProfileDropdown = () => {
     if (!user) return null;
@@ -74,53 +67,52 @@ export function Navigation({ currentPage, onPageChange }) {
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-          className="flex items-center gap-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full px-3 py-2 shadow-sm hover:shadow-md transition-all"
+          className="flex items-center gap-3 bg-white hover:bg-gray-50 rounded-full px-3 py-2 transition-all shadow-md border border-gray-200"
         >
           <div className="relative">
-            {/* FINAL FIX APPLIED HERE: Using the correct background and icon color classes */}
             <div className={`w-10 h-10 ${currentAvatarStyle.bg} rounded-full flex items-center justify-center`}>
-              <User className={`w-6 h-6 ${currentAvatarStyle.color}`} /> {/* Icon color is now dynamic */}
+              <User className={`w-6 h-6 ${currentAvatarStyle.color}`} />
             </div>
-            <div className="absolute -top-1 -right-1 bg-orange-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full border-2 border-white">
+            <div className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full border-2 border-white shadow-sm">
               {level}
             </div>
           </div>
           <div className="hidden lg:block text-left">
             <div className="flex items-center gap-1">
-              <span className="text-sm font-semibold text-gray-800">{user.username || 'User'}</span>
+              <span className="text-sm font-semibold text-gray-900">{user.username || 'User'}</span>
               <span>{roleIcon}</span>
             </div>
-            <div className="text-xs text-gray-500 flex items-center gap-1">
+            <div className="text-xs text-gray-600 flex items-center gap-1">
               <Trophy className="w-3 h-3" />
               {points.toLocaleString()} pts
             </div>
           </div>
-          <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`w-4 h-4 text-gray-600 transition-transform ${profileDropdownOpen ? 'rotate-180' : ''}`} />
         </button>
 
         {profileDropdownOpen && (
-          <div className="absolute right-0 top-full mt-2 w-56 bg-white/95 backdrop-blur-sm border border-gray-100 rounded-2xl shadow-xl py-2 z-50">
+          <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-gray-200 rounded-2xl shadow-2xl py-2 z-50">
             <button 
               onClick={() => { onPageChange('profile'); setProfileDropdownOpen(false); }} 
-              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full rounded-lg mx-1"
             >
               <User className="w-4 h-4" /> View Profile
             </button>
 
-            <div className="border-t border-gray-100 my-1"></div>
+            <div className="border-t border-gray-200 my-1"></div>
             
             <button 
               onClick={() => { userLogout?.(); onPageChange('home'); setProfileDropdownOpen(false); }} 
-              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 w-full rounded-lg mx-1"
             >
               <LogOut className="w-4 h-4" /> Logout
             </button>
             
-            <div className="border-t border-gray-100 my-1"></div>
+            <div className="border-t border-gray-200 my-1"></div>
             
             <button 
               onClick={() => { handleDeleteAccount(); setProfileDropdownOpen(false); }} 
-              className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full"
+              className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full rounded-lg mx-1"
             >
               <Trash2 className="w-4 h-4" /> Delete Account
             </button>
@@ -131,32 +123,31 @@ export function Navigation({ currentPage, onPageChange }) {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          <button onClick={() => onPageChange('home')} className="flex items-center space-x-2">
-            <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-2xl">🌱</span>
+        <div className="flex justify-between items-center h-16">
+          <button onClick={() => onPageChange('home')} className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-gray-800">HAU Eco-Quest</h1>
-              <p className="text-xs text-gray-500">Join the Green Adventure</p>
-            </div>
+            <span className="text-xl font-black text-gray-900">HAU Eco-Quest</span>
           </button>
 
-          <div className="hidden md:flex items-center space-x-2">
+          <div className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => {
               const isActive = currentPage === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => onPageChange(item.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-colors ${
-                    isActive ? 'bg-green-500 text-white' : 'text-gray-600 hover:bg-gray-100'
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                    isActive 
+                      ? 'bg-green-100 text-green-600' 
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                   }`}
                 >
                   <item.icon className="w-4 h-4" />
-                  <span className="hidden lg:inline">{item.label}</span>
+                  {item.label}
                 </button>
               );
             })}
@@ -165,19 +156,18 @@ export function Navigation({ currentPage, onPageChange }) {
           <div className="hidden md:flex items-center space-x-3">
             {user ? (
               <div className="flex items-center space-x-3">
-                {/* Only show dashboard buttons if user doesn't have a pending role request */}
                 {!user.requested_role && user.role === 'user' && (
                   <button 
                     onClick={() => onPageChange('dashboard')} 
-                    className="flex items-center gap-2 bg-green-100 text-green-600 border border-green-200 hover:bg-green-200 px-4 py-2 rounded-full font-semibold transition-colors"
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
-                    <Zap className="w-4 h-4" /> Dashboard
+                    Dashboard
                   </button>
                 )}
                 {!user.requested_role && user.role === 'partner' && (
                   <button 
                     onClick={() => onPageChange('partner-dashboard')} 
-                    className="flex items-center gap-2 bg-purple-100 text-purple-600 border border-purple-200 hover:bg-purple-200 px-4 py-2 rounded-full font-semibold transition-colors"
+                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     <Shield className="w-4 h-4" /> Partner
                   </button>
@@ -185,14 +175,13 @@ export function Navigation({ currentPage, onPageChange }) {
                 {!user.requested_role && user.role === 'admin' && (
                   <button 
                     onClick={() => onPageChange('admin-dashboard')} 
-                    className="flex items-center gap-2 bg-red-100 text-red-600 border border-red-200 hover:bg-red-200 px-4 py-2 rounded-full font-semibold transition-colors"
+                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
                   >
                     <Shield className="w-4 h-4" /> Admin
                   </button>
                 )}
-                {/* Show pending status badge if user has pending request */}
                 {user.requested_role && !user.is_approved && (
-                  <div className="flex items-center gap-2 bg-amber-100 text-amber-700 border border-amber-200 px-4 py-2 rounded-full font-semibold">
+                  <div className="flex items-center gap-2 bg-amber-100 text-amber-700 border border-amber-300 px-4 py-2 rounded-full font-bold text-sm">
                     <Shield className="w-4 h-4" /> Pending Approval
                   </div>
                 )}
@@ -200,24 +189,82 @@ export function Navigation({ currentPage, onPageChange }) {
               </div>
             ) : (
               <div className="flex items-center space-x-3">
-                <button onClick={() => onPageChange('login')} className="font-semibold text-gray-600 hover:text-green-600">
+                <button 
+                  onClick={() => onPageChange('login')} 
+                  className="font-bold text-gray-700 hover:text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-100 transition-all"
+                >
                   Login
                 </button>
-                <button onClick={() => onPageChange('signup')} className="bg-green-500 text-white px-5 py-2 rounded-full font-bold hover:bg-green-600">
-                  Join Adventure
+                <button 
+                  onClick={() => onPageChange('signup')} 
+                  className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-full font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all"
+                >
+                  Sign Up
                 </button>
               </div>
             )}
           </div>
 
-          <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X /> : <Menu />}
+          <button className="md:hidden p-2 hover:bg-gray-100 rounded-lg" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            {/* Mobile menu content can be added here if needed */}
+          <div className="md:hidden py-4 border-t border-gray-200">
+            <div className="flex flex-col space-y-2">
+              {navItems.map((item) => {
+                const isActive = currentPage === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => { onPageChange(item.id); setMobileMenuOpen(false); }}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-bold text-sm transition-all ${
+                      isActive 
+                        ? 'bg-green-100 text-green-600' 
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    {item.label}
+                  </button>
+                );
+              })}
+              
+              {user ? (
+                <>
+                  <div className="border-t border-gray-200 my-2"></div>
+                  <button 
+                    onClick={() => { onPageChange('profile'); setMobileMenuOpen(false); }} 
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded-lg font-semibold"
+                  >
+                    <User className="w-5 h-5" /> Profile
+                  </button>
+                  <button 
+                    onClick={() => { userLogout?.(); onPageChange('home'); setMobileMenuOpen(false); }} 
+                    className="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 rounded-lg font-semibold"
+                  >
+                    <LogOut className="w-5 h-5" /> Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <div className="border-t border-gray-200 my-2"></div>
+                  <button 
+                    onClick={() => { onPageChange('login'); setMobileMenuOpen(false); }} 
+                    className="px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg font-bold"
+                  >
+                    Login
+                  </button>
+                  <button 
+                    onClick={() => { onPageChange('signup'); setMobileMenuOpen(false); }} 
+                    className="bg-green-600 text-white px-4 py-3 rounded-lg font-bold"
+                  >
+                    Sign Up
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         )}
       </div>

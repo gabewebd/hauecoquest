@@ -6,7 +6,7 @@ import { Check, Sprout, Users, Crown, ChevronLeft, GraduationCap, Mail, Lock } f
 
 const StyledInput = ({ label, placeholder, type, icon, name, value, onChange }) => (
     <div>
-        <label className="block text-sm font-medium mb-1">{label}</label>
+        <label className="block text-sm font-bold text-gray-700 mb-2">{label}</label>
         <div className="relative">
             <input
                 type={type}
@@ -15,9 +15,9 @@ const StyledInput = ({ label, placeholder, type, icon, name, value, onChange }) 
                 name={name}
                 value={value}
                 onChange={onChange}
-                className="w-full bg-gray-50 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-inner"
+                className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all font-medium"
             />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
                 {icon}
             </div>
         </div>
@@ -26,7 +26,7 @@ const StyledInput = ({ label, placeholder, type, icon, name, value, onChange }) 
 
 const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
     return (
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); goToStep(2); }}>
+        <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); goToStep(2); }}>
             <StyledInput 
                 label="Full Name" 
                 placeholder="Enter your full name" 
@@ -65,7 +65,7 @@ const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
             />
             <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold py-3 rounded-full shadow-lg hover:opacity-90 transition"
+                className="w-full flex justify-center items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black py-4 rounded-full text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all mt-6"
             >
                 Continue to Role Selection
             </button>
@@ -76,37 +76,54 @@ const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
 const AgreementForm = ({ agreedToTerms, setAgreedToTerms, goToStep, handleSubmit, loading }) => {
     return (
         <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="text-center mb-6">
-                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Sprout className="w-8 h-8 text-green-600" />
+            
+            <div className="bg-green-50 border-2 border-green-200 p-5 rounded-2xl">
+                <div className="flex items-start gap-3 mb-3">
+                    <div className="bg-gradient-to-br from-green-400 to-emerald-600 p-2 rounded-xl shadow-lg flex-shrink-0">
+                        <Sprout className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-lg text-gray-800">Welcome to HAU Eco-Quest!</h3>
+                        <p className="text-gray-600 text-sm mt-1">
+                            Start your environmental journey as an Eco-Hero. You can request additional roles 
+                            like Partner or Admin access from your dashboard after completing your registration.
+                        </p>
+                    </div>
                 </div>
-                <h3 className="font-bold text-xl mb-2 text-gray-800">Welcome to HAU Eco-Quest!</h3>
-                <p className="text-gray-600">
-                    Start your environmental journey as an Eco-Hero. You can request additional roles 
-                    like Partner or Admin access from your dashboard after completing your registration.
-                </p>
+                
+                <div className="mt-4 pt-4 border-t-2 border-green-200">
+                    <h4 className="font-bold text-green-800 mb-3">Your Account Features:</h4>
+                    <ul className="text-sm text-green-700 space-y-2">
+                        <li className="flex items-start gap-2">
+                            <span className="text-green-600 font-bold">•</span>
+                            <span>Complete environmental quests and earn points</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-green-600 font-bold">•</span>
+                            <span>Join the eco-community and share your progress</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-green-600 font-bold">•</span>
+                            <span>Track your environmental impact</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <span className="text-green-600 font-bold">•</span>
+                            <span>Request Partner or Admin access from your dashboard</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
             
-            <div className="bg-green-50 p-4 rounded-xl border border-green-200">
-                <h4 className="font-semibold text-green-800 mb-2">Your Account Features:</h4>
-                <ul className="text-sm text-green-700 space-y-1">
-                    <li>• Complete environmental quests and earn points</li>
-                    <li>• Join the eco-community and share your progress</li>
-                    <li>• Track your environmental impact</li>
-                    <li>• Request Partner or Admin access from your dashboard</li>
-                </ul>
-            </div>
-            
-            <div className="mb-8">
-                <label className="flex items-start text-sm text-gray-600 cursor-pointer">
+            <div className="bg-white border-2 border-gray-200 p-4 rounded-2xl">
+                <label className="flex items-start text-sm text-gray-700 font-medium cursor-pointer">
                     <input
                         type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-green-600 mt-1 focus:ring-green-500"
+                        className="h-4 w-4 rounded border-gray-300 text-green-600 mt-0.5 focus:ring-green-500 focus:ring-2 flex-shrink-0"
                         checked={agreedToTerms}
                         onChange={(e) => setAgreedToTerms(e.target.checked)}
                     />
                     <span className="ml-3">
-                        I agree to the <a href="#" className="text-green-600 font-semibold hover:underline">Terms of Service</a> and <a href="#" className="text-green-600 font-semibold hover:underline">Privacy Policy</a>, and I want to receive environmental quest updates via email.
+                        I agree to the <a href="#" className="text-green-600 font-bold hover:text-green-700 transition-colors">Terms of Service</a> and <a href="#" className="text-green-600 font-bold hover:text-green-700 transition-colors">Privacy Policy</a>, and I want to receive environmental quest updates via email.
                     </span>
                 </label>
             </div>
@@ -114,7 +131,7 @@ const AgreementForm = ({ agreedToTerms, setAgreedToTerms, goToStep, handleSubmit
             <div className="flex gap-4">
                 <button
                     type="button"
-                    className="w-1/3 flex justify-center items-center gap-2 bg-gray-200 text-gray-700 font-semibold py-3 rounded-full hover:bg-gray-300 transition"
+                    className="w-1/3 flex justify-center items-center gap-2 bg-gray-200 text-gray-700 font-bold py-4 rounded-full hover:bg-gray-300 transition-all shadow-lg"
                     onClick={() => goToStep(1)}
                 >
                     <ChevronLeft className="w-5 h-5" />
@@ -122,7 +139,7 @@ const AgreementForm = ({ agreedToTerms, setAgreedToTerms, goToStep, handleSubmit
                 </button>
                 <button
                     type="submit"
-                    className="w-2/3 flex justify-center items-center gap-2 bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold py-3 rounded-full shadow-lg hover:opacity-90 transition disabled:opacity-50"
+                    className="w-2/3 flex justify-center items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black py-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     disabled={!agreedToTerms || loading}
                 >
                     {loading ? (
@@ -214,11 +231,11 @@ const SignUp = ({ onPageChange }) => {
             <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold transition-all duration-300 ${
                 isComplete ? 'bg-green-600 text-white' :
                 isCurrent ? 'bg-green-600 text-white border-2 border-green-600' :
-                'border border-gray-300 text-gray-500'
+                'border-2 border-gray-300 text-gray-500'
             }`}>
                 {isComplete ? <Check className="w-4 h-4" /> : number}
             </div>
-            <span className={isCurrent || isComplete ? 'text-green-600 font-semibold' : 'text-gray-400'}>
+            <span className={`font-bold ${isCurrent || isComplete ? 'text-green-600' : 'text-gray-400'}`}>
                 {label}
             </span>
         </div>
@@ -229,65 +246,96 @@ const SignUp = ({ onPageChange }) => {
         ? "Create your account and start making a positive environmental impact today"
         : "Review the terms and complete your HAU Eco-Quest registration";
 
-    const containerClass = "min-h-screen bg-gradient-to-b from-white to-green-50 flex flex-col";
-    const mainClass = "flex-grow flex items-center justify-center px-4 py-12";
-
     return (
-        <div className={containerClass}> 
-            <div className={mainClass}>
-                <div className="bg-white rounded-3xl shadow-lg max-w-lg w-full p-8 relative">
-                    
-                    <div className="text-center mb-6">
-                        <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-                            <GraduationCap className="w-8 h-8 text-green-600" />
+        <div className="min-h-screen bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 relative overflow-hidden">
+            {/* Decorative Background Elements */}
+            <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-20 left-10 w-32 h-32 bg-white rounded-full"></div>
+                <div className="absolute top-40 right-20 w-24 h-24 bg-white rounded-full"></div>
+                <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-white rounded-full"></div>
+                <div className="absolute bottom-40 right-1/3 w-20 h-20 bg-white rounded-full"></div>
+                <div className="absolute top-1/2 left-1/2 w-28 h-28 bg-white rounded-full"></div>
+            </div>
+
+            {/* Wavy SVG Bottom */}
+            <div className="absolute inset-0 opacity-20">
+                <svg className="absolute bottom-0 w-full" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                    <path fill="currentColor" fillOpacity="0.3" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                </svg>
+            </div>
+
+            <div className="relative min-h-screen flex items-center justify-center px-4 py-12">
+                <div className="w-full max-w-lg">
+                    <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-10">
+                        
+                        <div className="text-center mb-8">
+                            <div className="inline-block bg-gradient-to-br from-green-400 to-emerald-600 p-4 rounded-2xl mb-4 shadow-lg">
+                                <GraduationCap className="w-8 h-8 text-white" />
+                            </div>
+                            <h1 className="text-4xl font-black text-gray-900 mb-2">{FormTitle}</h1>
+                            <p className="text-gray-600 text-lg">{FormSubtitle}</p>
                         </div>
-                        <h2 className="text-2xl font-bold mb-2">{FormTitle}</h2>
-                        <p className="text-gray-600">{FormSubtitle}</p>
+
+                        <div className="flex justify-center mb-8">
+                            <div className="flex items-center gap-4">
+                                <StepIcon number={1} isCurrent={isStep1} isComplete={!isStep1} label="Account Details" />
+                                <div className={`h-0.5 w-12 transition-colors duration-300 ${isStep1 ? 'bg-gray-300' : 'bg-green-600'}`}></div>
+                                <StepIcon number={2} isCurrent={!isStep1} isComplete={false} label="Terms & Agreement" />
+                            </div>
+                        </div>
+
+                        {message && (
+                            <div className={`p-4 rounded-2xl mb-6 text-center font-semibold border-2 ${
+                                message.includes('successful') ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'
+                            }`}>
+                                {message}
+                            </div>
+                        )}
+
+                        {isStep1 ? (
+                            <AccountDetailsForm 
+                                goToStep={setStep} 
+                                formData={formData}
+                                handleInputChange={handleInputChange}
+                            />
+                        ) : (
+                            <AgreementForm 
+                                agreedToTerms={agreedToTerms}
+                                setAgreedToTerms={setAgreedToTerms}
+                                goToStep={setStep}
+                                handleSubmit={handleFinalSubmit}
+                                loading={loading}
+                            />
+                        )}
+
+                        <div className="relative my-8">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t-2 border-gray-200"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-4 bg-white text-gray-500 font-medium">or</span>
+                            </div>
+                        </div>
+
+                        <p className="text-center text-gray-600">
+                            Already part of the eco-community?{" "}
+                            <button onClick={handleLoginClick} className="font-black text-green-600 hover:text-green-700 transition-colors">
+                                Sign In Here
+                            </button>
+                        </p>
                     </div>
 
-                    <div className="flex justify-center mb-8">
-                        <div className="flex items-center gap-4">
-                            <StepIcon number={1} isCurrent={isStep1} isComplete={!isStep1} label="Account Details" />
-                            <div className={`h-0.5 w-12 transition-colors duration-300 ${isStep1 ? 'bg-gray-300' : 'bg-green-600'}`}></div>
-                            <StepIcon number={2} isCurrent={!isStep1} isComplete={false} label="Terms & Agreement" />
-                        </div>
+                    <div className="mt-8 text-center">
+                        <p className="text-sm text-white text-opacity-90">
+                            By signing up, you agree to our{" "}
+                            <a href="#" className="font-semibold hover:underline">Terms of Service</a>
+                            {" "}and{" "}
+                            <a href="#" className="font-semibold hover:underline">Privacy Policy</a>
+                        </p>
                     </div>
-
-                    {message && (
-                        <div className={`p-3 rounded-lg mb-4 text-center text-sm font-semibold ${
-                            message.includes('successful') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                            {message}
-                        </div>
-                    )}
-
-                    {isStep1 ? (
-                        <AccountDetailsForm 
-                            goToStep={setStep} 
-                            formData={formData}
-                            handleInputChange={handleInputChange}
-                        />
-                    ) : (
-                        <AgreementForm 
-                            agreedToTerms={agreedToTerms}
-                            setAgreedToTerms={setAgreedToTerms}
-                            goToStep={setStep}
-                            handleSubmit={handleFinalSubmit}
-                            loading={loading}
-                        />
-                    )}
-
-                    <p className="text-center text-sm mt-6 text-gray-600">
-                        Already part of the eco-community?{" "}
-                        <button onClick={handleLoginClick} className="text-green-600 font-semibold hover:underline">
-                            Sign In Here
-                        </button>
-                    </p>
                 </div>
             </div>
-        </div> 
-
-        
+        </div>
     );
 };
 

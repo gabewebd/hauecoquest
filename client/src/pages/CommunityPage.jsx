@@ -1,6 +1,6 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
-import { Users, Heart, Trophy, Leaf, UserPlus, Share2, Award, Shield, Search, MessageCircle, MoreHorizontal, Flag, Smile, Camera, Users2, FileText, X } from 'lucide-react';
+import { Users, Heart, Trophy, Leaf, UserPlus, Share2, Award, Shield, Search, MessageCircle, MoreHorizontal, Flag, Smile, Camera, Users2, FileText, X, Sparkles, Target, Plus } from 'lucide-react';
 import FacebookIcon from '../img/Facebook.png';
 import InstagramIcon from '../img/Instagram.png';
 import TiktokIcon from '../img/Tiktok.png';
@@ -47,7 +47,6 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
       onPageChange('login');
       return;
     }
-    // Copy link to clipboard
     const postUrl = `${window.location.origin}/community/post/${postId}`;
     navigator.clipboard.writeText(postUrl).then(() => {
       alert('Post link copied to clipboard!');
@@ -61,90 +60,103 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
   };
 
   return (
-  <div className="bg-white/90 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-100 mb-6">
-    <div className="flex justify-between items-start">
+  <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-all mb-4">
+    <div className="flex justify-between items-start mb-4">
       <div className="flex items-center gap-3">
-        <img src={avatar} alt={name} className="w-12 h-12 rounded-full" />
+        <img src={avatar} alt={name} className="w-12 h-12 rounded-full border-2 border-gray-100" />
         <div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <button 
               onClick={() => onPageChange('profile', postId)}
-              className="font-bold text-gray-800 hover:text-green-600 hover:underline"
+              className="font-bold text-gray-900 hover:text-green-600 transition-colors"
             >
               {name}
             </button>
-            <span className="text-blue-500">✔️</span>
             {isPinned && (
-              <span className="text-xs bg-yellow-500 text-white px-2 py-1 rounded ml-2">
-                📌 Pinned by Admin
+              <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold border border-amber-200">
+                Pinned
               </span>
             )}
           </div>
           <p className="text-sm text-gray-500">{title} • {time}</p>
         </div>
       </div>
-      <div className="flex items-center gap-2 text-gray-400">
-        {/* Admin can pin posts */}
+      <div className="flex items-center gap-2">
         {user && user.role === 'admin' && (
           <button 
             onClick={() => onPin && onPin(postId)}
-            className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+            className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 font-semibold transition-colors"
           >
-            Pin Post
+            Pin
           </button>
         )}
       </div>
     </div>
-    <p className="my-4 text-gray-700">{text}</p>
+    
+    <p className="text-gray-800 mb-4 leading-relaxed">{text}</p>
+    
     {quest && (
       <div className="bg-green-50 border border-green-200 text-green-700 text-sm font-semibold px-3 py-2 rounded-lg inline-block mb-4">
         {quest}
       </div>
     )}
-    {image && <img src={image} alt="Post content" className="rounded-lg w-full object-cover max-h-80" />}
-    <div className="flex justify-between items-center mt-4 border-t border-gray-100 pt-4">
+    
+    {image && (
+      <div className="rounded-xl overflow-hidden border border-gray-200 mb-4">
+        <img src={image} alt="Post content" className="w-full object-cover max-h-96" />
+      </div>
+    )}
+    
+    <div className="flex justify-between items-center pt-4 border-t border-gray-100">
       <div className="flex items-center gap-6 text-gray-500">
         <button 
           onClick={handleLike}
-          className={`flex items-center gap-2 hover:text-red-500 ${isLiked ? 'text-red-500' : ''}`}
+          className={`flex items-center gap-2 hover:text-red-500 transition-colors font-medium ${isLiked ? 'text-red-500' : ''}`}
         >
-          <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} /> {likeCount}
+          <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} /> 
+          <span className="text-sm">{likeCount}</span>
         </button>
         <button 
           onClick={() => setShowCommentInput(!showCommentInput)}
-          className="flex items-center gap-2 hover:text-blue-500"
+          className="flex items-center gap-2 hover:text-blue-500 transition-colors font-medium"
         >
-          <MessageCircle className="w-5 h-5" /> {commentCount}
+          <MessageCircle className="w-5 h-5" /> 
+          <span className="text-sm">{commentCount}</span>
+        </button>
+        <button 
+          onClick={handleShare}
+          className="flex items-center gap-2 hover:text-green-500 transition-colors font-medium"
+        >
+          <Share2 className="w-5 h-5" />
         </button>
       </div>
-      {/* FIXED: Replaced text-primary-green with text-green-600 */}
       <button 
         onClick={() => onPageChange('post-details', postId)}
-        className="text-sm font-bold text-green-600 hover:underline"
+        className="text-sm font-bold text-green-600 hover:text-green-700 transition-colors"
       >
         View Details
       </button>
     </div>
     
     {showCommentInput && (
-      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+      <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
         <textarea
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
           placeholder="Write a comment..."
-          className="w-full p-2 border border-gray-200 rounded-lg resize-none"
-          rows="2"
+          className="w-full p-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
+          rows="3"
         />
-        <div className="flex justify-end gap-2 mt-2">
+        <div className="flex justify-end gap-2 mt-3">
           <button 
             onClick={() => setShowCommentInput(false)}
-            className="px-3 py-1 text-sm text-gray-500 hover:text-gray-700"
+            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 font-semibold transition-colors"
           >
             Cancel
           </button>
           <button 
             onClick={handleComment}
-            className="px-3 py-1 text-sm bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors"
           >
             Comment
           </button>
@@ -190,7 +202,6 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, user }) => {
       
       await onSubmit(postData);
       
-      // Reset form
       setFormData({ title: '', content: '', category: 'Updates', tags: '' });
       setSelectedFile(null);
       setPreviewUrl(null);
@@ -207,32 +218,32 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, user }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-          <h3 className="text-2xl font-bold">Create New Post</h3>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
+        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between rounded-t-2xl">
+          <h3 className="text-2xl font-bold text-gray-900">Create New Post</h3>
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
         
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-semibold mb-2">Post Title</label>
+            <label className="block text-sm font-bold mb-2 text-gray-900">Post Title</label>
             <input
               type="text"
               required
               value={formData.title}
               onChange={(e) => setFormData({...formData, title: e.target.value})}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
               placeholder="What's your environmental story?"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2">Category</label>
+            <label className="block text-sm font-bold mb-2 text-gray-900">Category</label>
             <select
               value={formData.category}
               onChange={(e) => setFormData({...formData, category: e.target.value})}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
             >
               <option value="Updates">Updates</option>
               <option value="Environmental Tips">Environmental Tips</option>
@@ -244,31 +255,31 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, user }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2">Content</label>
+            <label className="block text-sm font-bold mb-2 text-gray-900">Content</label>
             <textarea
               required
               value={formData.content}
               onChange={(e) => setFormData({...formData, content: e.target.value})}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
               rows="6"
               placeholder="Share your environmental journey, tips, or achievements..."
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2">Tags (comma-separated)</label>
+            <label className="block text-sm font-bold mb-2 text-gray-900">Tags (comma-separated)</label>
             <input
               type="text"
               value={formData.tags}
               onChange={(e) => setFormData({...formData, tags: e.target.value})}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
               placeholder="e.g., recycling, sustainability, tips"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold mb-2">Post Image (Optional)</label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+            <label className="block text-sm font-bold mb-2 text-gray-900">Post Image (Optional)</label>
+            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-green-500 transition-colors">
               <input
                 type="file"
                 accept="image/*"
@@ -281,20 +292,20 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, user }) => {
                 className="cursor-pointer block text-center"
               >
                 {previewUrl ? (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <img 
                       src={previewUrl} 
                       alt="Post preview" 
-                      className="max-h-32 mx-auto rounded-lg"
+                      className="max-h-40 mx-auto rounded-xl border-2 border-gray-200"
                     />
-                    <p className="text-sm text-green-600">Click to change image</p>
+                    <p className="text-sm text-green-600 font-semibold">Click to change image</p>
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    <div className="w-12 h-12 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
-                      <Camera className="w-6 h-6 text-gray-400" />
+                  <div className="space-y-3">
+                    <div className="w-16 h-16 bg-gray-100 rounded-xl mx-auto flex items-center justify-center">
+                      <Camera className="w-8 h-8 text-gray-400" />
                     </div>
-                    <p className="text-sm text-gray-600">Click to upload image</p>
+                    <p className="text-sm text-gray-600 font-semibold">Click to upload image</p>
                     <p className="text-xs text-gray-400">PNG, JPG up to 5MB</p>
                   </div>
                 )}
@@ -306,14 +317,14 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, user }) => {
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 transition font-semibold"
+              className="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl hover:bg-gray-200 transition-colors font-bold"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2"
+              className="flex-1 bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition-colors font-bold flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -337,7 +348,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, user }) => {
 const CommunityPage = ({ onPageChange }) => {
   const { user } = useUser();
   const [posts, setPosts] = useState([]);
-  const [allPosts, setAllPosts] = useState([]); // Store all posts for filtering
+  const [allPosts, setAllPosts] = useState([]);
   const [communityChallenge, setCommunityChallenge] = useState(null);
   const [stats, setStats] = useState({
     activeUsers: 0,
@@ -365,7 +376,6 @@ const CommunityPage = ({ onPageChange }) => {
       });
       
       if (response.ok) {
-        // Refresh posts to show updated likes
         fetchCommunityData();
       }
     } catch (error) {
@@ -386,7 +396,6 @@ const CommunityPage = ({ onPageChange }) => {
       });
       
       if (response.ok) {
-        // Refresh posts to show updated comments
         fetchCommunityData();
       }
     } catch (error) {
@@ -405,7 +414,6 @@ const CommunityPage = ({ onPageChange }) => {
       });
       
       if (response.ok) {
-        // Refresh posts to show updated pin status
         fetchCommunityData();
         alert('Post pinned successfully!');
       }
@@ -428,7 +436,6 @@ const CommunityPage = ({ onPageChange }) => {
       
       if (response.ok) {
         alert('Successfully joined the challenge!');
-        // Refresh challenge data
         const challengeResponse = await fetch('http://localhost:5000/api/dashboard/community-challenge');
         const challengeData = await challengeResponse.json();
         setCommunityChallenge(challengeData.challenge);
@@ -443,23 +450,15 @@ const CommunityPage = ({ onPageChange }) => {
   };
 
   const fetchCommunityData = async () => {
-   
     try {
-      // Fetch posts
       const postsData = await postAPI.getAllPosts();
-      
-      // Fetch users for stats
       const usersData = await userAPI.getLeaderboard();
-      
-      // Fetch quests for stats
       const questsData = await questAPI.getAllQuests();
       
-      // Fetch community challenge
       const challengeResponse = await fetch('http://localhost:5000/api/dashboard/community-challenge');
       const challengeData = await challengeResponse.json();
       setCommunityChallenge(challengeData.challenge);
       
-      // Calculate stats
       const totalLikes = postsData.reduce((sum, post) => sum + (post.likes?.length || 0), 0);
       const totalPoints = usersData.reduce((sum, user) => sum + (user.eco_score || user.points || 0), 0);
       const completedQuests = questsData.filter(q => !q.isActive).length;
@@ -471,7 +470,6 @@ const CommunityPage = ({ onPageChange }) => {
         totalPoints: totalPoints
       });
       
-      // Transform posts for display
       const transformedPosts = postsData.map((post, index) => {
         const author = post.author;
         const timeAgo = getTimeAgo(new Date(post.created_at));
@@ -524,11 +522,9 @@ const CommunityPage = ({ onPageChange }) => {
     return 'Green Rookie';
   };
 
-  // Filter and search functionality
   useEffect(() => {
     let filteredPosts = [...allPosts];
     
-    // Apply search filter
     if (searchTerm) {
       filteredPosts = filteredPosts.filter(post => 
         post.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -536,7 +532,6 @@ const CommunityPage = ({ onPageChange }) => {
       );
     }
     
-    // Apply activity filter
     if (activeFilter === 'Recent Activity') {
       filteredPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     } else if (activeFilter === 'Most Popular') {
@@ -560,7 +555,6 @@ const CommunityPage = ({ onPageChange }) => {
       const result = await postAPI.createPost(postData);
       console.log('Post creation result:', result);
       
-      // Refresh the posts
       fetchCommunityData();
       alert('Post created successfully!');
     } catch (error) {
@@ -571,312 +565,414 @@ const CommunityPage = ({ onPageChange }) => {
   };
 
   return (
-    <div className="font-sans bg-app-bg text-gray-800">
-      <main className="pt-24 pb-12">
-        {/* Community Hub Header */}
-        <section className="container mx-auto px-4 mb-12">
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              {/* FIXED: Replaced text-dark-green with text-green-900 */}
-              <h2 className="text-4xl font-extrabold text-green-900 mb-2">Community Hub</h2>
-              <p className="text-gray-600 max-w-lg">Connect with fellow eco-heroes, share your environmental journey, and inspire others to make a positive impact on our planet!</p>
-              <div className="flex items-center gap-4 mt-6">
-                
-                {/* Only show the "Join Community" button if the user is NOT logged in */}
-                {!user && (
-                  <button 
-                    onClick={() => onPageChange('signup')}
-                    className="flex items-center gap-2 bg-green-500 text-white font-bold py-3 px-6 rounded-full transition-transform transform hover:scale-105"
-                  >
-                    <UserPlus className="w-5 h-5"/> Join Community
-                  </button>
-                )}
-
+    <div className="font-sans bg-gray-50 text-gray-900 min-h-screen pb-28">
+      <main className="pt-20 pb-12">
+        {/* Page Header */}
+        <section className="bg-white border-b border-gray-200 shadow-sm">
+          <div className="container mx-auto px-6 py-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-3 rounded-xl shadow-lg">
+                  <Users2 className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-black text-gray-900 mb-1">Community Hub</h1>
+                  <p className="text-gray-600 text-sm">Connect with fellow eco-heroes and share your journey</p>
+                </div>
               </div>
-            </div>
-            <div className="bg-green-50 p-6 rounded-2xl text-center">
-                <p className="text-gray-500">Community Illustration Placeholder</p>
             </div>
           </div>
         </section>
 
         {/* Stats Bar */}
-        <section className="container mx-auto px-4 mb-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="bg-white p-4 rounded-2xl shadow-md border flex items-center gap-4"><Users className="w-8 h-8 text-blue-500"/><div><p className="text-2xl font-bold">{loading ? '...' : stats.activeUsers}</p><p className="text-sm text-gray-500">Active Heroes</p></div></div>
-                <div className="bg-white p-4 rounded-2xl shadow-md border flex items-center gap-4"><Heart className="w-8 h-8 text-red-500"/><div><p className="text-2xl font-bold">{loading ? '...' : stats.totalLikes}</p><p className="text-sm text-gray-500">Total Likes</p></div></div>
-                <div className="bg-white p-4 rounded-2xl shadow-md border flex items-center gap-4"><Trophy className="w-8 h-8 text-yellow-500"/><div><p className="text-2xl font-bold">{loading ? '...' : stats.questsCompleted}</p><p className="text-sm text-gray-500">Quests Completed</p></div></div>
-                <div className="bg-white p-4 rounded-2xl shadow-md border flex items-center gap-4"><Leaf className="w-8 h-8 text-green-500"/><div><p className="text-2xl font-bold">{loading ? '...' : stats.totalPoints}</p><p className="text-sm text-gray-500">Total Points</p></div></div>
-            </div>
-        </section>
-        
-        {/* Community Challenge */}
-        <section className="container mx-auto px-4 mb-8">
-          <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl shadow-lg p-6">
-            {communityChallenge ? (
-              <>
-                <div className="text-center mb-6">
-                  <div className="text-4xl mb-3">🌳</div>
-                  <h3 className="text-2xl md:text-3xl font-bold mb-3 text-green-800">{communityChallenge.title}</h3>
-                  <p className="text-gray-700 max-w-xl mx-auto">{communityChallenge.description}</p>
+        <section className="bg-white border-b border-gray-200">
+          <div className="container mx-auto px-6 py-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-5 h-5 text-blue-600"/>
                 </div>
-
-                <div className="bg-white rounded-2xl shadow-lg p-6">
-                  {/* Progress Bar */}
-                  <div className="mb-8">
-                    <div className="flex justify-between text-sm font-semibold mb-3">
-                      <span className="text-green-700">Trees Planted</span>
-                      <span className="text-green-700">{communityChallenge.current_progress || 0} / {communityChallenge.target}</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
-                      <div 
-                        className="bg-gradient-to-r from-green-500 to-green-600 h-6 rounded-full transition-all duration-500 flex items-center justify-end pr-3"
-                        style={{ width: `${Math.min(((communityChallenge.current_progress || 0) / communityChallenge.target) * 100, 100)}%` }}
-                      >
-                        <span className="text-white text-xs font-bold">
-                          {Math.round(((communityChallenge.current_progress || 0) / communityChallenge.target) * 100)}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600 mb-1">
-                        {communityChallenge.participants?.length || 0}
-                      </div>
-                      <div className="text-xs text-gray-600 font-semibold">Eco-Warriors</div>
-                    </div>
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600 mb-1">
-                        {communityChallenge.target - (communityChallenge.current_progress || 0)}
-                      </div>
-                      <div className="text-xs text-gray-600 font-semibold">Trees to Go</div>
-                    </div>
-                    <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                      <div className="text-2xl mb-1">🏆</div>
-                      <div className="text-xs text-gray-600 font-semibold">Tree Master Badge</div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    {!user ? (
-                      <>
-                        <button 
-                          onClick={() => onPageChange('signup')}
-                          className="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-4 rounded-full shadow-lg transition transform hover:scale-105"
-                        >
-                          🌱 Sign Up to Join Challenge
-                        </button>
-                        <button 
-                          onClick={() => onPageChange('login')}
-                          className="bg-white hover:bg-gray-50 text-green-600 font-bold px-8 py-4 rounded-full shadow-lg border-2 border-green-600 transition transform hover:scale-105"
-                        >
-                          🔑 Login to Join
-                        </button>
-                      </>
-                    ) : user.role === 'user' ? (
-                      <>
-                        <button 
-                          onClick={() => onPageChange('challenge-details', communityChallenge._id)}
-                          className="bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-full shadow-lg transition transform hover:scale-105"
-                        >
-                          🌱 Join Challenge & Earn Badge
-                        </button>
-                        <button 
-                          onClick={() => onPageChange('challenge-details', communityChallenge._id)}
-                          className="bg-white hover:bg-gray-50 text-green-600 font-bold px-6 py-3 rounded-full shadow-lg border-2 border-green-600 transition transform hover:scale-105"
-                        >
-                          📊 View Challenge
-                        </button>
-                      </>
-                    ) : (
-                      <button 
-                        onClick={() => onPageChange('challenge-details', communityChallenge._id)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-full shadow-lg transition transform hover:scale-105"
-                      >
-                        👁️ View Challenge Progress
-                      </button>
-                    )}
-                  </div>
+                <div>
+                  <p className="text-xl font-bold text-gray-900">{loading ? '...' : stats.activeUsers}</p>
+                  <p className="text-xs text-gray-500 font-semibold">Active Heroes</p>
                 </div>
-              </>
-            ) : (
-              <div className="text-center py-8">
-                <Users2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-600 mb-2">No Active Challenge</h3>
-                <p className="text-gray-500">Check back later for new community challenges!</p>
               </div>
-            )}
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                  <Heart className="w-5 h-5 text-red-600"/>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-gray-900">{loading ? '...' : stats.totalLikes}</p>
+                  <p className="text-xs text-gray-500 font-semibold">Total Likes</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <Trophy className="w-5 h-5 text-amber-600"/>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-gray-900">{loading ? '...' : stats.questsCompleted}</p>
+                  <p className="text-xs text-gray-500 font-semibold">Quests Done</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Leaf className="w-5 h-5 text-green-600"/>
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-gray-900">{loading ? '...' : stats.totalPoints}</p>
+                  <p className="text-xs text-gray-500 font-semibold">Total Points</p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Community Feed */}
-        <section className="container mx-auto px-4">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-2xl font-bold">Community Feed</h3>
-            {user && (
-              <button 
-                onClick={() => setShowCreatePostModal(true)}
-                className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
-              >
-                <FileText className="w-4 h-4" />
-                Create Post
-              </button>
-            )}
-          </div>
-          <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <div className="flex flex-wrap gap-2">
-              {['Recent Activity', 'Most Popular'].map((filter) => (
-                <button 
-                  key={filter}
-                  onClick={() => handleFilterChange(filter)}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                    activeFilter === filter 
-                      ? 'bg-green-500 text-white' 
-                      : 'bg-white border text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
+        {/* Two Column Layout */}
+        <section className="container mx-auto px-6 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Sidebar - Community Challenge (1 column) */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24">
+                {/* Community Challenge Card */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden mb-6">
+                  {communityChallenge ? (
+                    <>
+                      {/* Challenge Header with Image Placeholder */}
+                      <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-6 relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="absolute top-5 left-5 w-20 h-20 bg-white rounded-full"></div>
+                          <div className="absolute bottom-5 right-5 w-24 h-24 bg-white rounded-full"></div>
+                        </div>
+                        <div className="relative text-center text-white">
+                          <div className="w-24 h-24 bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl mx-auto mb-4 flex items-center justify-center border-2 border-white border-opacity-30">
+                            <Target className="w-12 h-12" />
+                          </div>
+                          <h3 className="text-xl font-black mb-2">{communityChallenge.title}</h3>
+                        </div>
+                      </div>
+
+                      {/* Challenge Content */}
+                      <div className="p-6">
+                        <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                          {communityChallenge.description}
+                        </p>
+
+                        {/* Progress Bar */}
+                        <div className="mb-6">
+                          <div className="flex justify-between text-xs font-bold mb-2 text-gray-700">
+                            <span>Progress</span>
+                            <span className="text-green-600">
+                              {communityChallenge.current_progress || 0} / {communityChallenge.target}
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-green-500 to-emerald-600 h-3 rounded-full transition-all duration-500"
+                              style={{ width: `${Math.min(((communityChallenge.current_progress || 0) / communityChallenge.target) * 100, 100)}%` }}
+                            ></div>
+                          </div>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="grid grid-cols-2 gap-3 mb-6">
+                          <div className="text-center p-3 bg-green-50 rounded-xl">
+                            <div className="text-xl font-black text-green-600 mb-1">
+                              {communityChallenge.participants?.length || 0}
+                            </div>
+                            <div className="text-xs text-gray-600 font-semibold">Warriors</div>
+                          </div>
+                          <div className="text-center p-3 bg-blue-50 rounded-xl">
+                            <div className="text-xl font-black text-blue-600 mb-1">
+                              {communityChallenge.target - (communityChallenge.current_progress || 0)}
+                            </div>
+                            <div className="text-xs text-gray-600 font-semibold">Remaining</div>
+                          </div>
+                        </div>
+
+                        {/* Action Button */}
+                        {!user ? (
+                          <button 
+                            onClick={() => onPageChange('signup')}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-3 rounded-xl shadow-md transition-all"
+                          >
+                            Join Challenge
+                          </button>
+                        ) : user.role === 'user' ? (
+                          <button 
+                            onClick={() => onPageChange('challenge-details', communityChallenge._id)}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-3 rounded-xl shadow-md transition-all"
+                          >
+                            View Challenge
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => onPageChange('challenge-details', communityChallenge._id)}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-3 rounded-xl shadow-md transition-all"
+                          >
+                            View Progress
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <div className="w-16 h-16 bg-gray-100 rounded-xl mx-auto mb-4 flex items-center justify-center">
+                        <Trophy className="w-8 h-8 text-gray-300" />
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-600 mb-2">No Active Challenge</h3>
+                      <p className="text-sm text-gray-500">Check back later for new challenges!</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Quick Info Card */}
+                {!user && (
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border-2 border-green-200">
+                    <h4 className="font-black text-gray-900 mb-2">Join Our Community</h4>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Connect with eco-heroes and start making an impact today.
+                    </p>
+                    <button 
+                      onClick={() => onPageChange('signup')}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2.5 rounded-lg transition-all"
+                    >
+                      Sign Up Now
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="relative w-full md:w-auto">
-              <input 
-                type="text" 
-                placeholder="Search community posts..." 
-                value={searchTerm}
-                onChange={handleSearchChange}
-                className="w-full md:w-64 pl-10 pr-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-500" 
-              />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            </div>
-          </div>
-          
-          {/* Posts */}
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : posts.length === 0 ? (
-            <div className="bg-white p-12 rounded-2xl shadow-lg border text-center">
-              <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-gray-600 mb-2">No Community Updates Yet</h3>
-              <p className="text-gray-500">Be the first to share your environmental journey!</p>
-            </div>
-          ) : (
-            <>
-              <div>
-                {posts.map((post, index) => (
-                  <PostCard 
-                    key={index} 
-                    {...post} 
-                    onLike={handleLike}
-                    onComment={handleComment}
-                    onPin={handlePin}
-                    postId={post.id || index}
-                    user={user}
-                    onPageChange={onPageChange}
-                    isPinned={post.isPinned}
-                  />
-                ))}
+
+            {/* Right Content - Posts Feed (2 columns) */}
+            <div className="lg:col-span-2">
+              {/* Filters - Made Sticky with proper z-index and backdrop */}
+              <div className="sticky top-20 z-40 bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-6 backdrop-blur-sm">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                  <div className="flex gap-2">
+                    {['Recent Activity', 'Most Popular'].map((filter) => (
+                      <button 
+                        key={filter}
+                        onClick={() => handleFilterChange(filter)}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                          activeFilter === filter 
+                            ? 'bg-green-600 text-white shadow-md' 
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {filter}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="relative w-full md:w-64">
+                    <input 
+                      type="text" 
+                      placeholder="Search posts..." 
+                      value={searchTerm}
+                      onChange={handleSearchChange}
+                      className="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                    />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  </div>
+                </div>
               </div>
               
-              {posts.length > 10 && (
-                <div className="text-center mt-8">
-                  <button className="bg-white border font-bold text-gray-700 py-3 px-8 rounded-full hover:bg-gray-50">Load More Posts</button>
-                </div>
-              )}
-            </>
-          )}
+              {/* Posts Container - with proper overflow clipping */}
+              <div className="relative">
+                <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-gray-50 to-transparent pointer-events-none z-30"></div>
+                
+                {/* Posts */}
+                {loading ? (
+                  <div className="flex justify-center items-center py-16">
+                    <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : posts.length === 0 ? (
+                  <div className="bg-white p-16 rounded-2xl shadow-lg border border-gray-200 text-center">
+                    <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-gray-600 mb-2">No Posts Found</h3>
+                    <p className="text-gray-500">
+                      {searchTerm ? 'Try adjusting your search' : 'Be the first to share your story!'}
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    {posts.map((post, index) => (
+                      <PostCard 
+                        key={index} 
+                        {...post} 
+                        onLike={handleLike}
+                        onComment={handleComment}
+                        onPin={handlePin}
+                        postId={post.id || index}
+                        user={user}
+                        onPageChange={onPageChange}
+                        isPinned={post.isPinned}
+                      />
+                    ))}
+                    
+                    {posts.length > 10 && (
+                      <div className="text-center mt-6 mb-24">
+                        <button className="bg-white border-2 border-gray-200 font-bold text-gray-700 py-3 px-8 rounded-xl hover:bg-gray-50 transition-all">
+                          Load More Posts
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Community Guidelines */}
-        <section className="container mx-auto px-4 mt-24">
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Community Guidelines</h2>
-                <p className="text-gray-600 max-w-xl mx-auto mb-8">Let's keep our community positive, supportive, and focused on environmental action. Share your journey, celebrate others' achievements, and inspire change together!</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                    <div className="flex flex-col items-center gap-2"><Smile className="w-10 h-10 text-yellow-500"/> <h4 className="font-bold">Stay Positive</h4> <p className="text-sm text-gray-500">Encourage and support fellow eco-heroes.</p></div>
-                    <div className="flex flex-col items-center gap-2"><Camera className="w-10 h-10 text-blue-500"/> <h4 className="font-bold">Share Progress</h4> <p className="text-sm text-gray-500">Document your environmental impact.</p></div>
-                    <div className="flex flex-col items-center gap-2"><Users2 className="w-10 h-10 text-green-500"/> <h4 className="font-bold">Collaborate</h4> <p className="text-sm text-gray-500">Work together for a better world.</p></div>
+        <section className="container mx-auto px-6 py-16">
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl shadow-2xl overflow-hidden">
+            <div className="grid md:grid-cols-2 gap-0">
+              {/* Left side - Placeholder Image */}
+              <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-12 flex items-center justify-center relative overflow-hidden">
+                <div className="absolute inset-0 opacity-10">
+                  <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full"></div>
+                  <div className="absolute bottom-10 right-10 w-40 h-40 bg-white rounded-full"></div>
                 </div>
-            </div>
-        </section>
-      </main>
-
-      {/* Footer */}
-            <footer className="bg-green-700 text-white pt-16 pb-8 px-6">
-              <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
-                {/* Brand */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <img
-                      src="/vite.svg"
-                      alt="HAU Eco-Quest Logo"
-                      className="h-8 w-8 bg-white rounded-full p-1"
-                    />
-                    <h3 className="text-2xl font-bold">HAU Eco-Quest</h3>
+                <div className="relative text-center text-white z-10">
+                  <div className="w-48 h-48 bg-white bg-opacity-20 backdrop-blur-sm rounded-3xl mx-auto mb-6 flex items-center justify-center border-4 border-white border-opacity-30">
+                    <div className="text-center">
+                      <Users2 className="w-20 h-20 mx-auto mb-3" />
+                      <span className="text-2xl font-black">Community</span>
+                      <br />
+                      <span className="text-lg font-bold">Guidelines</span>
+                    </div>
                   </div>
-                  <p className="text-sm text-green-100">
-                    Empowering students to become environmental champions through
-                    engaging sustainability adventures. Join the movement to save our
-                    planet!
+                  <p className="text-lg font-semibold text-white opacity-90">Build a Better Community</p>
+                </div>
+              </div>
+
+              {/* Right side - Guidelines */}
+              <div className="p-10 flex flex-col justify-center">
+                <div className="mb-8">
+                  <h2 className="text-3xl font-black text-gray-900 mb-3">Community Guidelines</h2>
+                  <p className="text-gray-600 text-base leading-relaxed">
+                    Keep our community positive, supportive, and focused on environmental action
                   </p>
                 </div>
-      
-                {/* Adventure Paths */}
-                <div>
-                  <h4 className="font-bold mb-4">Adventure Paths</h4>
-                  <ul className="space-y-2 text-sm text-green-100">
-                    <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Browse Epic Quests</button></li>
-                    <li><button onClick={() => onPageChange('community')} className="hover:text-white">Hero Community</button></li>
-                    <li><button onClick={() => onPageChange('leaderboard')} className="hover:text-white">Hall of Fame</button></li>
-                  </ul>
-                </div>
-      
-                {/* Support Guild */}
-                <div>
-                  <h4 className="font-bold mb-4">Support Guild</h4>
-                  <ul className="space-y-2 text-sm text-green-100">
-                    <li><button onClick={() => onPageChange('contactquestmasters')} className="hover:text-white">Contact Quest Masters</button></li>
-                    <li><button onClick={() => onPageChange('alliancepartners')} className="hover:text-white">Alliance Partners</button></li>
-                  </ul>
-                </div>
-      
-                {/* Connect */}
-                <div>
-                  <h4 className="font-bold mb-4">Connect with Us</h4>
-                  <div className="bg-green-600 p-4 rounded-lg text-sm">
-                    <p>eco-quest@hau.edu.ph</p>
-                    <p>+63 (2) 123-4567</p>
-                    <p>HAU Main Campus</p>
-                    <div className="flex gap-4 mt-4">
-                      <a href="#"><img src={FacebookIcon} alt="Facebook" className="w-6 h-6" /></a>
-                      <a href="#"><img src={InstagramIcon} alt="Instagram" className="w-6 h-6" /></a>
-                      <a href="#"><img src={TiktokIcon} alt="Instagram" className="w-6 h-6" /></a>
+
+                <div className="space-y-6">
+                  <div className="flex gap-4 items-start">
+                    <div className="w-14 h-14 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Smile className="w-7 h-7 text-amber-600"/>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1 text-base">Stay Positive</h4>
+                      <p className="text-sm text-gray-600 leading-relaxed">Encourage and support fellow eco-heroes in their journey</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 items-start">
+                    <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Camera className="w-7 h-7 text-blue-600"/>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1 text-base">Share Progress</h4>
+                      <p className="text-sm text-gray-600 leading-relaxed">Document and celebrate your environmental impact with the community</p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 items-start">
+                    <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Users2 className="w-7 h-7 text-green-600"/>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 mb-1 text-base">Collaborate</h4>
+                      <p className="text-sm text-gray-600 leading-relaxed">Work together with others to create lasting positive change</p>
                     </div>
                   </div>
                 </div>
               </div>
-      
-              <div className="max-w-6xl mx-auto text-center border-t border-green-600 mt-8 pt-6 text-green-200 text-sm">
-                <p>© 2025 HAU Eco-Quest. All rights reserved. Built with for a sustainable future.</p>
-              </div>
-            </footer>
+            </div>
+          </div>
+        </section>
+      </main>
 
-        {/* Create Post Modal */}
-        <CreatePostModal
-          isOpen={showCreatePostModal}
-          onClose={() => setShowCreatePostModal(false)}
-          onSubmit={handleCreatePost}
-          user={user}
-        />
+        {/* Footer */}
+        <footer className="bg-green-700 text-white pt-16 pb-8 px-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
+          {/* Brand */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <img
+                src="/vite.svg"
+                alt="HAU Eco-Quest Logo"
+                className="h-8 w-8 bg-white rounded-full p-1"
+              />
+              <h3 className="text-2xl font-bold">HAU Eco-Quest</h3>
+            </div>
+            <p className="text-sm text-green-100">
+              Empowering students to become environmental champions through
+              engaging sustainability adventures. Join the movement to save our
+              planet!
+            </p>
+          </div>
+
+          {/* Adventure Paths */}
+          <div>
+            <h4 className="font-bold mb-4">Adventure Paths</h4>
+            <ul className="space-y-2 text-sm text-green-100">
+              <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Browse Epic Quests</button></li>
+              <li><button onClick={() => onPageChange('community')} className="hover:text-white">Hero Community</button></li>
+              <li><button onClick={() => onPageChange('leaderboard')} className="hover:text-white">Hall of Fame</button></li>
+            </ul>
+          </div>
+
+          {/* Support Guild */}
+          <div>
+            <h4 className="font-bold mb-4">Support Guild</h4>
+            <ul className="space-y-2 text-sm text-green-100">
+              <li><button onClick={() => onPageChange('contactquestmasters')} className="hover:text-white">Contact Quest Masters</button></li>
+              <li><button onClick={() => onPageChange('alliancepartners')} className="hover:text-white">Alliance Partners</button></li>
+            </ul>
+          </div>
+
+          {/* Connect */}
+          <div>
+            <h4 className="font-bold mb-4">Connect with Us</h4>
+            <div className="bg-green-600 p-4 rounded-lg text-sm">
+              <p>eco-quest@hau.edu.ph</p>
+              <p>+63 (2) 123-4567</p>
+              <p>HAU Main Campus</p>
+              <div className="flex gap-4 mt-4">
+                <a href="#"><img src={FacebookIcon} alt="Facebook" className="w-6 h-6" /></a>
+                <a href="#"><img src={InstagramIcon} alt="Instagram" className="w-6 h-6" /></a>
+                <a href="#"><img src={TiktokIcon} alt="TikTok" className="w-6 h-6" /></a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto text-center border-t border-green-600 mt-8 pt-6 text-green-200 text-sm">
+          <p>© 2025 HAU Eco-Quest. All rights reserved. Built with for a sustainable future.</p>
+        </div>
+      </footer>
+
+      {/* Create Post Modal */}
+      <CreatePostModal
+        isOpen={showCreatePostModal}
+        onClose={() => setShowCreatePostModal(false)}
+        onSubmit={handleCreatePost}
+        user={user}
+      />
+
+      {/* Sticky Create Post Button - Fixed to bottom center */}
+      {user && (
+        <button 
+          onClick={() => setShowCreatePostModal(true)}
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-full shadow-2xl hover:bg-green-700 transition-all hover:scale-105 flex items-center gap-2 font-bold"
+        >
+          <Plus className="w-5 h-5" />
+          <span>Create Post</span>
+        </button>
+      )}
     </div>
   );
 }
 
 export default CommunityPage;
-
