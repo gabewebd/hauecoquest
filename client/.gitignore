@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# Force include the img folder inside client/
+!client/img/
+!client/img/**
