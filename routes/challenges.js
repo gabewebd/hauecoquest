@@ -42,6 +42,18 @@ const upload = multer({
     }
 });
 
+// Error handling middleware for multer
+const handleUploadError = (err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({ msg: 'File too large. Maximum size is 5MB.' });
+        }
+    } else if (err.message === 'Only images are allowed!') {
+        return res.status(400).json({ msg: 'Only images are allowed!' });
+    }
+    next(err);
+};
+
 // @route   GET /api/challenges
 // @desc    Get all active challenges
 // @access  Public
@@ -118,7 +130,7 @@ router.post('/', [auth, roleCheck('admin', 'partner')], async (req, res) => {
 // @route   POST /api/challenges/:id/join
 // @desc    Join a challenge with photo proof (Users only - not admin/partner)
 // @access  Private
-router.post('/:id/join', [auth, upload.single('photo')], async (req, res) => {
+router.post('/:id/join', [auth, upload.single('photo'), handleUploadError], async (req, res) => {
     try {
         const challenge = await Challenge.findById(req.params.id);
         
@@ -153,7 +165,7 @@ router.post('/:id/join', [auth, upload.single('photo')], async (req, res) => {
         challenge.participants.push({
             user: req.user.id,
             contribution: contributionAmount,
-            photo_url: req.file.path,
+            photo_url: `/uploads/${req.file.filename}`,
             status: 'pending'
         });
 
@@ -318,7 +330,7 @@ router.put('/:id', [auth, roleCheck('admin')], async (req, res) => {
 // @route   POST /api/challenges/submit
 // @desc    Submit challenge proof (Users only)
 // @access  Private
-router.post('/submit', [auth, upload.single('photo')], async (req, res) => {
+router.post('/submit', [auth, upload.single('photo'), handleUploadError], async (req, res) => {
     try {
         const { reflection, challengeId } = req.body;
         
