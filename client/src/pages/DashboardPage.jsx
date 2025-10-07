@@ -372,7 +372,7 @@ const NotificationsTab = () => {
     const fetchNotifications = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/notifications', {
+            const response = await fetch('/api/notifications', {
                 headers: { 'x-auth-token': token }
             });
             
@@ -390,7 +390,7 @@ const NotificationsTab = () => {
     const markAsRead = async (notificationId) => {
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+            await fetch(`/api/notifications/${notificationId}/read`, {
                 method: 'PUT',
                 headers: { 'x-auth-token': token }
             });
@@ -403,7 +403,7 @@ const NotificationsTab = () => {
     const deleteNotification = async (notificationId) => {
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
+            await fetch(`/api/notifications/${notificationId}`, {
                 method: 'DELETE',
                 headers: { 'x-auth-token': token }
             });
@@ -429,7 +429,7 @@ const NotificationsTab = () => {
                     <button 
                         onClick={() => {
                             const token = localStorage.getItem('token');
-                            fetch('http://localhost:5000/api/notifications/read-all', {
+                            fetch('/api/notifications/read-all', {
                                 method: 'PUT',
                                 headers: { 'x-auth-token': token }
                             }).then(() => fetchNotifications());
@@ -507,7 +507,7 @@ const AchievementsTab = () => {
             const token = localStorage.getItem('token');
             const userId = JSON.parse(localStorage.getItem('user'))._id;
             
-            const response = await fetch(`http://localhost:5000/api/badges/user/${userId}/progress`, {
+            const response = await fetch(`/api/badges/user/${userId}/progress`, {
                 headers: { 'x-auth-token': token }
             });
             
@@ -955,7 +955,7 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
             const headers = { 'x-auth-token': token };
 
             // Fetch user dashboard data
-            const dashboardRes = await fetch('http://localhost:5000/api/dashboard/user', { headers });
+            const dashboardRes = await fetch('/api/dashboard/user', { headers });
             const dashboardData = await dashboardRes.json();
             
             if(!dashboardRes.ok) {

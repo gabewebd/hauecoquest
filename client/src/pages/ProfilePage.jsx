@@ -54,14 +54,14 @@ const ProfilePage = ({ onPageChange }) => {
             
             // Fetch user's quest submissions (for regular users)
             if (user.role === 'user') {
-                const questsRes = await fetch('http://localhost:5000/api/quests/submissions/my', {
+                const questsRes = await fetch('/api/quests/submissions/my', {
                     headers: { 'x-auth-token': token }
                 });
                 const questsData = await questsRes.json();
                 setUserQuests(questsData);
             } else {
                 // For admin and partner, fetch quests they created
-                const questsRes = await fetch('http://localhost:5000/api/quests', {
+                const questsRes = await fetch('/api/quests', {
                     headers: { 'x-auth-token': token }
                 });
                 const questsData = await questsRes.json();
@@ -70,7 +70,7 @@ const ProfilePage = ({ onPageChange }) => {
             }
 
             // Fetch user's posts/activity
-            const postsRes = await fetch('http://localhost:5000/api/posts', {
+            const postsRes = await fetch('/api/posts', {
                 headers: { 'x-auth-token': token }
             });
             const postsData = await postsRes.json();
@@ -78,14 +78,14 @@ const ProfilePage = ({ onPageChange }) => {
             setUserActivity(userPosts);
 
             // Fetch user's badges/achievements
-            const badgesRes = await fetch('http://localhost:5000/api/badges/my', {
+            const badgesRes = await fetch('/api/badges/my', {
                 headers: { 'x-auth-token': token }
             });
             const badgesData = await badgesRes.json();
             setUserAchievements(badgesData);
 
             // Fetch user's photo history
-            const photosRes = await fetch('http://localhost:5000/api/users/photos', {
+            const photosRes = await fetch('/api/users/photos', {
                 headers: { 'x-auth-token': token }
             });
             const photosData = await photosRes.json();

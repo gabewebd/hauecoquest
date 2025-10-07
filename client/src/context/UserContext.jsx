@@ -161,7 +161,7 @@ export const UserProvider = ({ children }) => {
     try {
       const token = localStorage.getItem('token');
 
-      const response = await fetch('http://localhost:5000/api/auth/request-role', {
+      const response = await fetch('/api/auth/request-role', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

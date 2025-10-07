@@ -41,11 +41,10 @@ const ActivityItem = ({ icon, title, subtitle, time }) => (
 const TabButton = ({ id, label, icon, activeTab, setActiveTab }) => (
     <button
         onClick={() => setActiveTab(id)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all text-sm ${
-            activeTab === id
+        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all text-sm ${activeTab === id
                 ? 'bg-green-500 text-white shadow-md'
                 : 'bg-white text-gray-600 hover:bg-gray-100'
-        }`}
+            }`}
     >
         {icon}
         {label}
@@ -65,27 +64,27 @@ const OverviewTab = ({ stats, setActiveTab }) => (
         <div className="bg-white p-6 rounded-2xl shadow-lg border">
             <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <QuickAction 
-                    icon={<Users className="w-6 h-6 text-blue-500" />} 
-                    title="Manage Users" 
+                <QuickAction
+                    icon={<Users className="w-6 h-6 text-blue-500" />}
+                    title="Manage Users"
                     subtitle="View and manage user accounts"
                     onClick={() => setActiveTab('users')}
                 />
-                <QuickAction 
-                    icon={<BookOpen className="w-6 h-6 text-green-500" />} 
-                    title="Manage Quests" 
+                <QuickAction
+                    icon={<BookOpen className="w-6 h-6 text-green-500" />}
+                    title="Manage Quests"
                     subtitle="Create and edit quests"
                     onClick={() => setActiveTab('quests')}
                 />
-                <QuickAction 
-                    icon={<BarChart className="w-6 h-6 text-purple-500" />} 
-                    title="View Analytics" 
+                <QuickAction
+                    icon={<BarChart className="w-6 h-6 text-purple-500" />}
+                    title="View Analytics"
                     subtitle="System performance metrics"
                     onClick={() => setActiveTab('analytics')}
                 />
-                <QuickAction 
-                    icon={<Calendar className="w-6 h-6 text-orange-500" />} 
-                    title="Create Daily Quest" 
+                <QuickAction
+                    icon={<Calendar className="w-6 h-6 text-orange-500" />}
+                    title="Create Daily Quest"
                     subtitle="Set today's featured quest"
                     onClick={() => setActiveTab('daily')}
                 />
@@ -95,19 +94,19 @@ const OverviewTab = ({ stats, setActiveTab }) => (
         <div className="bg-white p-6 rounded-2xl shadow-lg border">
             <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
             <div>
-                <ActivityItem 
+                <ActivityItem
                     icon={<Users className="w-5 h-5 text-blue-500" />}
                     title="New user registered"
                     subtitle="Recent sign up"
                     time="Recent"
                 />
-                <ActivityItem 
+                <ActivityItem
                     icon={<CheckCircle className="w-5 h-5 text-green-500" />}
                     title="Quest completed"
                     subtitle="User activity"
                     time="Recent"
                 />
-                <ActivityItem 
+                <ActivityItem
                     icon={<Shield className="w-5 h-5 text-yellow-500" />}
                     title="Partner approved"
                     subtitle="Partnership confirmed"
@@ -131,7 +130,7 @@ const UserProfileModal = ({ user, onClose }) => {
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                
+
                 <div className="p-6 space-y-6">
                     <div className="text-center">
                         <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -139,13 +138,12 @@ const UserProfileModal = ({ user, onClose }) => {
                         </div>
                         <h4 className="text-2xl font-bold">{user.username}</h4>
                         <p className="text-gray-500">{user.email}</p>
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-2 ${
-                            user.role === 'partner' 
-                                ? 'bg-purple-100 text-purple-700' 
+                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mt-2 ${user.role === 'partner'
+                                ? 'bg-purple-100 text-purple-700'
                                 : user.role === 'admin'
-                                ? 'bg-red-100 text-red-700'
-                                : 'bg-blue-100 text-blue-700'
-                        }`}>
+                                    ? 'bg-red-100 text-red-700'
+                                    : 'bg-blue-100 text-blue-700'
+                            }`}>
                             {user.role}
                         </span>
                     </div>
@@ -213,11 +211,11 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
     const [selectedUser, setSelectedUser] = useState(null);
 
     const filteredUsers = users.filter(u => {
-        const matchesSearch = u.username.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            u.email.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesRole = filterRole === 'all' || 
-                          (filterRole === 'student' && u.role === 'user') ||
-                          (filterRole === 'partner' && u.role === 'partner');
+        const matchesSearch = u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.email.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesRole = filterRole === 'all' ||
+            (filterRole === 'student' && u.role === 'user') ||
+            (filterRole === 'partner' && u.role === 'partner');
         return matchesSearch && matchesRole;
     });
 
@@ -237,25 +235,24 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
                                     <p className="font-semibold">{request.username}</p>
                                     <p className="text-sm text-gray-500">{request.email}</p>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                                            request.requested_role === 'admin' 
-                                                ? 'bg-red-100 text-red-700' 
+                                        <span className={`text-xs font-semibold px-2 py-1 rounded-full ${request.requested_role === 'admin'
+                                                ? 'bg-red-100 text-red-700'
                                                 : 'bg-purple-100 text-purple-700'
-                                        }`}>
+                                            }`}>
                                             Requested: {request.requested_role === 'admin' ? 'Admin' : 'Partner'}
                                         </span>
                                         <p className="text-xs text-gray-400">Applied: {new Date(request.created_at).toLocaleDateString()}</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-2">
-                                    <button 
+                                    <button
                                         onClick={() => onApprove(request._id)}
                                         className="flex items-center gap-1 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
                                     >
                                         <CheckCircle className="w-4 h-4" />
                                         Approve
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => onReject(request._id)}
                                         className="flex items-center gap-1 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
                                     >
@@ -314,13 +311,12 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
                                     <td className="px-4 py-3 font-semibold">{user.username}</td>
                                     <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
                                     <td className="px-4 py-3 text-sm">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                            user.role === 'partner' 
-                                                ? 'bg-purple-100 text-purple-700' 
+                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.role === 'partner'
+                                                ? 'bg-purple-100 text-purple-700'
                                                 : user.role === 'admin'
-                                                ? 'bg-red-100 text-red-700'
-                                                : 'bg-blue-100 text-blue-700'
-                                        }`}>
+                                                    ? 'bg-red-100 text-red-700'
+                                                    : 'bg-blue-100 text-blue-700'
+                                            }`}>
                                             {user.role}
                                         </span>
                                     </td>
@@ -328,14 +324,14 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
                                     <td className="px-4 py-3 text-sm text-gray-600">{new Date(user.created_at).toLocaleDateString()}</td>
                                     <td className="px-4 py-3">
                                         <div className="flex gap-2">
-                                            <button 
+                                            <button
                                                 onClick={() => setSelectedUser(user)}
                                                 className="p-2 hover:bg-blue-50 rounded-lg transition"
                                                 title="View Profile"
                                             >
                                                 <Users className="w-4 h-4 text-blue-600" />
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => onDeleteUser(user._id)}
                                                 className="p-2 hover:bg-red-50 rounded-lg transition"
                                                 title="Delete User"
@@ -390,7 +386,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Quest Title</label>
@@ -398,7 +394,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             type="text"
                             required
                             value={formData.title}
-                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             placeholder="e.g., Campus Tree Planting"
                         />
@@ -409,7 +405,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             <label className="block text-sm font-semibold mb-2">Category</label>
                             <select
                                 value={formData.category}
-                                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             >
                                 <option>Gardening & Planting</option>
@@ -425,7 +421,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             <label className="block text-sm font-semibold mb-2">Difficulty</label>
                             <select
                                 value={formData.difficulty}
-                                onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             >
                                 <option>Easy</option>
@@ -442,7 +438,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 type="number"
                                 required
                                 value={formData.points}
-                                onChange={(e) => setFormData({...formData, points: parseInt(e.target.value)})}
+                                onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             />
                         </div>
@@ -453,7 +449,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 type="number"
                                 required
                                 value={formData.maxParticipants}
-                                onChange={(e) => setFormData({...formData, maxParticipants: parseInt(e.target.value)})}
+                                onChange={(e) => setFormData({ ...formData, maxParticipants: parseInt(e.target.value) })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             />
                         </div>
@@ -466,7 +462,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 type="text"
                                 required
                                 value={formData.location}
-                                onChange={(e) => setFormData({...formData, location: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                                 placeholder="e.g., HAU Main Campus"
                             />
@@ -478,7 +474,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 type="text"
                                 required
                                 value={formData.duration}
-                                onChange={(e) => setFormData({...formData, duration: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                                 placeholder="e.g., 1 week"
                             />
@@ -490,7 +486,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         <textarea
                             required
                             value={formData.description}
-                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             rows="4"
                             placeholder="Describe the quest objectives and activities..."
@@ -501,7 +497,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         <label className="block text-sm font-semibold mb-2">Objectives</label>
                         <textarea
                             value={formData.objectives}
-                            onChange={(e) => setFormData({...formData, objectives: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, objectives: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             rows="3"
                             placeholder="List quest objectives..."
@@ -512,7 +508,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         <label className="block text-sm font-semibold mb-2">Submission Requirements</label>
                         <textarea
                             value={formData.submissionRequirements}
-                            onChange={(e) => setFormData({...formData, submissionRequirements: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, submissionRequirements: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             rows="3"
                             placeholder="List submission requirements..."
@@ -524,7 +520,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         <input
                             type="file"
                             accept="image/*"
-                            onChange={(e) => setFormData({...formData, image: e.target.files[0]})}
+                            onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">Optional: Upload an image for this quest</p>
@@ -560,7 +556,7 @@ const QuestsTab = ({ quests, setQuests }) => {
     const handleSaveQuest = async (questData) => {
         try {
             const token = localStorage.getItem('token');
-            
+
             if (editingQuest) {
                 // For updates, we'll use JSON for now (can add file upload later)
                 const payload = {
@@ -576,7 +572,7 @@ const QuestsTab = ({ quests, setQuests }) => {
                     maxParticipants: questData.maxParticipants
                 };
 
-                const response = await fetch(`http://localhost:5000/api/quests/${editingQuest._id}`, {
+                const response = await fetch(`/api/quests/${editingQuest._id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -584,7 +580,7 @@ const QuestsTab = ({ quests, setQuests }) => {
                     },
                     body: JSON.stringify(payload)
                 });
-                
+
                 if (!response.ok) throw new Error('Failed to update quest');
                 const updatedQuest = await response.json();
                 setQuests(quests.map(q => q._id === editingQuest._id ? updatedQuest : q));
@@ -601,19 +597,19 @@ const QuestsTab = ({ quests, setQuests }) => {
                 formData.append('objectives', JSON.stringify(questData.objectives ? [questData.objectives] : []));
                 formData.append('submissionRequirements', JSON.stringify(questData.submissionRequirements ? [questData.submissionRequirements] : ['Photo proof required']));
                 formData.append('maxParticipants', questData.maxParticipants);
-                
+
                 if (questData.image) {
                     formData.append('image', questData.image);
                 }
 
-                const response = await fetch('http://localhost:5000/api/quests', {
+                const response = await fetch('/api/quests', {
                     method: 'POST',
                     headers: {
                         'x-auth-token': token
                     },
                     body: formData
                 });
-                
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.msg || 'Failed to create quest');
@@ -621,7 +617,7 @@ const QuestsTab = ({ quests, setQuests }) => {
                 const newQuest = await response.json();
                 setQuests([newQuest, ...quests]);
             }
-            
+
             setShowModal(false);
             setEditingQuest(null);
         } catch (error) {
@@ -632,16 +628,16 @@ const QuestsTab = ({ quests, setQuests }) => {
 
     const handleDeleteQuest = async (id) => {
         if (!confirm('Are you sure you want to delete this quest?')) return;
-        
+
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/quests/${id}`, {
+            const response = await fetch(`/api/quests/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'x-auth-token': token
                 }
             });
-            
+
             if (!response.ok) throw new Error('Failed to delete quest');
             setQuests(quests.filter(q => q._id !== id));
         } catch (error) {
@@ -655,7 +651,7 @@ const QuestsTab = ({ quests, setQuests }) => {
             <div className="bg-white p-6 rounded-2xl shadow-lg border">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold">Quest Management</h3>
-                    <button 
+                    <button
                         onClick={() => {
                             setEditingQuest(null);
                             setShowModal(true);
@@ -674,11 +670,10 @@ const QuestsTab = ({ quests, setQuests }) => {
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
                                         <h4 className="text-lg font-bold">{quest.title}</h4>
-                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                            quest.isActive 
-                                                ? 'bg-green-100 text-green-700' 
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${quest.isActive
+                                                ? 'bg-green-100 text-green-700'
                                                 : 'bg-gray-100 text-gray-700'
-                                        }`}>
+                                            }`}>
                                             {quest.isActive ? 'Active' : 'Inactive'}
                                         </span>
                                     </div>
@@ -702,7 +697,7 @@ const QuestsTab = ({ quests, setQuests }) => {
                                     </div>
                                 </div>
                                 <div className="flex gap-2 ml-4">
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setEditingQuest(quest);
                                             setShowModal(true);
@@ -711,7 +706,7 @@ const QuestsTab = ({ quests, setQuests }) => {
                                     >
                                         <Edit className="w-5 h-5 text-blue-600" />
                                     </button>
-                                    <button 
+                                    <button
                                         onClick={() => handleDeleteQuest(quest._id)}
                                         className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
                                     >
@@ -720,11 +715,10 @@ const QuestsTab = ({ quests, setQuests }) => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                                    quest.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
-                                    quest.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                                    'bg-red-100 text-red-700'
-                                }`}>
+                                <span className={`text-xs font-semibold px-2 py-1 rounded ${quest.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
+                                        quest.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                                            'bg-red-100 text-red-700'
+                                    }`}>
                                     {quest.difficulty}
                                 </span>
                             </div>
@@ -802,7 +796,7 @@ const AnalyticsTab = ({ stats, users, quests }) => {
                         </div>
                     </div>
                 </div>
-                
+
                 <div className="bg-white p-6 rounded-xl shadow-md border">
                     <div className="flex items-center gap-4">
                         <div className="bg-green-100 p-3 rounded-lg">
@@ -849,9 +843,9 @@ const AnalyticsTab = ({ stats, users, quests }) => {
                             <span className="text-sm font-medium">{month}</span>
                             <div className="flex items-center gap-3">
                                 <div className="w-32 bg-gray-200 rounded-full h-2">
-                                    <div 
-                                        className="bg-blue-500 h-2 rounded-full" 
-                                        style={{ width: `${(count / Math.max(...analyticsData.userGrowth.map(([,c]) => c))) * 100}%` }}
+                                    <div
+                                        className="bg-blue-500 h-2 rounded-full"
+                                        style={{ width: `${(count / Math.max(...analyticsData.userGrowth.map(([, c]) => c))) * 100}%` }}
                                     ></div>
                                 </div>
                                 <span className="text-sm text-gray-600 w-8">{count}</span>
@@ -872,8 +866,8 @@ const AnalyticsTab = ({ stats, users, quests }) => {
                                 <span className="text-sm text-gray-500">{stats.completed} completions</span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div 
-                                    className="bg-green-500 h-2 rounded-full" 
+                                <div
+                                    className="bg-green-500 h-2 rounded-full"
                                     style={{ width: `${stats.total > 0 ? (stats.completed / (stats.total * 10)) * 100 : 0}%` }}
                                 ></div>
                             </div>
@@ -937,7 +931,7 @@ const CommunityTab = ({ posts, setPosts }) => {
     const handleSavePost = async (postData) => {
         try {
             const token = localStorage.getItem('token');
-            
+
             if (editingPost) {
                 const payload = {
                     title: postData.title,
@@ -946,7 +940,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                     tags: postData.tags.split(',').map(t => t.trim()).filter(t => t)
                 };
 
-                const response = await fetch(`http://localhost:5000/api/posts/${editingPost._id}`, {
+                const response = await fetch(`/api/posts/${editingPost._id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -954,7 +948,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                     },
                     body: JSON.stringify(payload)
                 });
-                
+
                 if (!response.ok) throw new Error('Failed to update post');
                 const updatedPost = await response.json();
                 setPosts(posts.map(p => p._id === editingPost._id ? updatedPost : p));
@@ -964,19 +958,19 @@ const CommunityTab = ({ posts, setPosts }) => {
                 formData.append('content', postData.content);
                 formData.append('category', postData.category);
                 formData.append('tags', JSON.stringify(postData.tags.split(',').map(t => t.trim()).filter(t => t)));
-                
+
                 if (postData.image) {
                     formData.append('image', postData.image);
                 }
 
-                const response = await fetch('http://localhost:5000/api/posts', {
+                const response = await fetch('/api/posts', {
                     method: 'POST',
                     headers: {
                         'x-auth-token': token
                     },
                     body: formData
                 });
-                
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.msg || 'Failed to create post');
@@ -984,7 +978,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                 const newPost = await response.json();
                 setPosts([newPost, ...posts]);
             }
-            
+
             setShowModal(false);
             setEditingPost(null);
         } catch (error) {
@@ -996,7 +990,7 @@ const CommunityTab = ({ posts, setPosts }) => {
     const handleSaveChallenge = async (challengeData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/challenges', {
+            const response = await fetch('/api/challenges', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1009,7 +1003,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                     participants: []
                 })
             });
-            
+
             if (!response.ok) throw new Error('Failed to create challenge');
             alert('Community challenge created successfully!');
             setShowChallengeModal(false);
@@ -1022,18 +1016,18 @@ const CommunityTab = ({ posts, setPosts }) => {
     const handleDeletePost = async (postId) => {
         const reason = prompt('Please provide a reason for deleting this post:');
         if (!reason) return;
-        
+
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/posts/${postId}`, {
+            const response = await fetch(`/api/posts/${postId}`, {
                 method: 'DELETE',
-                headers: { 
+                headers: {
                     'x-auth-token': token,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ reason })
             });
-            
+
             if (!response.ok) throw new Error('Failed to delete post');
             setPosts(posts.filter(p => p._id !== postId));
             alert('Post deleted successfully!');
@@ -1043,7 +1037,7 @@ const CommunityTab = ({ posts, setPosts }) => {
         }
     };
 
-    const filteredPosts = posts.filter(p => 
+    const filteredPosts = posts.filter(p =>
         p.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -1056,7 +1050,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                         <p className="text-sm text-gray-500">Manage community posts and challenges</p>
                     </div>
                     <div className="flex gap-2">
-                        <button 
+                        <button
                             onClick={() => {
                                 setEditingPost(null);
                                 setShowModal(true);
@@ -1066,7 +1060,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                             <Plus className="w-4 h-4" />
                             Create Post
                         </button>
-                        <button 
+                        <button
                             onClick={() => setShowChallengeModal(true)}
                             className="flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition font-semibold"
                         >
@@ -1136,16 +1130,16 @@ const CommunityTab = ({ posts, setPosts }) => {
                                         )}
                                     </div>
                                     <div className="flex gap-2">
-                                        <button 
+                                        <button
                                             onClick={() => {
-                                                setEditingPost({...post, tags: post.tags?.join(', ') || ''});
+                                                setEditingPost({ ...post, tags: post.tags?.join(', ') || '' });
                                                 setShowModal(true);
                                             }}
                                             className="p-2 hover:bg-blue-50 rounded-lg transition border border-blue-200"
                                         >
                                             <Edit className="w-5 h-5 text-blue-600" />
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => handleDeletePost(post._id)}
                                             className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
                                         >
@@ -1192,10 +1186,10 @@ const NotificationsTab = () => {
     const fetchNotifications = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/notifications', {
+            const response = await fetch('/api/notifications', {
                 headers: { 'x-auth-token': token }
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 setNotifications(data);
@@ -1210,7 +1204,7 @@ const NotificationsTab = () => {
     const markAsRead = async (notificationId) => {
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+            await fetch(`/api/notifications/${notificationId}/read`, {
                 method: 'PUT',
                 headers: { 'x-auth-token': token }
             });
@@ -1223,7 +1217,7 @@ const NotificationsTab = () => {
     const deleteNotification = async (notificationId) => {
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
+            await fetch(`/api/notifications/${notificationId}`, {
                 method: 'DELETE',
                 headers: { 'x-auth-token': token }
             });
@@ -1246,10 +1240,10 @@ const NotificationsTab = () => {
             <div className="bg-white p-6 rounded-2xl shadow-lg border">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold">Notifications</h3>
-                    <button 
+                    <button
                         onClick={() => {
                             const token = localStorage.getItem('token');
-                            fetch('http://localhost:5000/api/notifications/read-all', {
+                            fetch('/api/notifications/read-all', {
                                 method: 'PUT',
                                 headers: { 'x-auth-token': token }
                             }).then(() => fetchNotifications());
@@ -1268,11 +1262,10 @@ const NotificationsTab = () => {
                 ) : (
                     <div className="space-y-3">
                         {notifications.map(notification => (
-                            <div 
-                                key={notification._id} 
-                                className={`p-4 rounded-lg border transition ${
-                                    notification.is_read ? 'bg-gray-50' : 'bg-white shadow-sm'
-                                }`}
+                            <div
+                                key={notification._id}
+                                className={`p-4 rounded-lg border transition ${notification.is_read ? 'bg-gray-50' : 'bg-white shadow-sm'
+                                    }`}
                             >
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1">
@@ -1284,14 +1277,14 @@ const NotificationsTab = () => {
                                     </div>
                                     <div className="flex gap-2 ml-4">
                                         {!notification.is_read && (
-                                            <button 
+                                            <button
                                                 onClick={() => markAsRead(notification._id)}
                                                 className="text-xs text-green-600 hover:underline"
                                             >
                                                 Mark as read
                                             </button>
                                         )}
-                                        <button 
+                                        <button
                                             onClick={() => deleteNotification(notification._id)}
                                             className="text-xs text-red-600 hover:underline"
                                         >
@@ -1323,17 +1316,17 @@ const DailyTab = () => {
     const fetchDailyContent = async () => {
         try {
             const token = localStorage.getItem('token');
-            
+
             // Fetch today's quest
-            const questRes = await fetch('http://localhost:5000/api/daily/quest');
+            const questRes = await fetch('/api/daily/quest');
             const questData = await questRes.json();
             setDailyQuest(questData.quest);
 
             // Fetch today's challenge
-            const challengeRes = await fetch('http://localhost:5000/api/daily/challenge');
+            const challengeRes = await fetch('/api/daily/challenge');
             const challengeData = await challengeRes.json();
             setDailyChallenge(challengeData.challenge);
-            
+
             setLoading(false);
         } catch (error) {
             console.error('Error fetching daily content:', error);
@@ -1344,7 +1337,7 @@ const DailyTab = () => {
     const handleCreateDailyQuest = async (questData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/daily/quest', {
+            const response = await fetch('/api/daily/quest', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1371,7 +1364,7 @@ const DailyTab = () => {
     const handleCreateDailyChallenge = async (challengeData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/daily/challenge', {
+            const response = await fetch('/api/daily/challenge', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1410,7 +1403,7 @@ const DailyTab = () => {
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold">Today's Quest</h3>
                     {!dailyQuest && (
-                        <button 
+                        <button
                             onClick={() => setShowQuestModal(true)}
                             className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
                         >
@@ -1419,7 +1412,7 @@ const DailyTab = () => {
                         </button>
                     )}
                 </div>
-                
+
                 {dailyQuest ? (
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                         <h4 className="font-bold text-green-800 mb-2">{dailyQuest.title}</h4>
@@ -1443,7 +1436,7 @@ const DailyTab = () => {
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold">Today's Community Challenge</h3>
                     {!dailyChallenge && (
-                        <button 
+                        <button
                             onClick={() => setShowChallengeModal(true)}
                             className="flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition"
                         >
@@ -1452,7 +1445,7 @@ const DailyTab = () => {
                         </button>
                     )}
                 </div>
-                
+
                 {dailyChallenge ? (
                     <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                         <h4 className="font-bold text-purple-800 mb-2">{dailyChallenge.title}</h4>
@@ -1468,7 +1461,7 @@ const DailyTab = () => {
 
             {/* Daily Quest Modal */}
             {showQuestModal && (
-                <DailyQuestModal 
+                <DailyQuestModal
                     onClose={() => setShowQuestModal(false)}
                     onSave={handleCreateDailyQuest}
                 />
@@ -1476,7 +1469,7 @@ const DailyTab = () => {
 
             {/* Daily Challenge Modal */}
             {showChallengeModal && (
-                <DailyChallengeModal 
+                <DailyChallengeModal
                     onClose={() => setShowChallengeModal(false)}
                     onSave={handleCreateDailyChallenge}
                 />
@@ -1514,7 +1507,7 @@ const DailyQuestModal = ({ onClose, onSave }) => {
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Quest Title</label>
@@ -1522,7 +1515,7 @@ const DailyQuestModal = ({ onClose, onSave }) => {
                             type="text"
                             required
                             value={formData.title}
-                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             placeholder="e.g., Today's Campus Clean-up Challenge"
                         />
@@ -1533,7 +1526,7 @@ const DailyQuestModal = ({ onClose, onSave }) => {
                         <textarea
                             required
                             value={formData.description}
-                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             rows="3"
                             placeholder="Describe today's special quest..."
@@ -1545,7 +1538,7 @@ const DailyQuestModal = ({ onClose, onSave }) => {
                             <label className="block text-sm font-semibold mb-2">Category</label>
                             <select
                                 value={formData.category}
-                                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             >
                                 <option>Gardening & Planting</option>
@@ -1563,7 +1556,7 @@ const DailyQuestModal = ({ onClose, onSave }) => {
                                 type="number"
                                 required
                                 value={formData.points}
-                                onChange={(e) => setFormData({...formData, points: parseInt(e.target.value)})}
+                                onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             />
                         </div>
@@ -1604,10 +1597,10 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
     const fetchSubmissions = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/quests/submissions/all', {
+            const response = await fetch('/api/quests/submissions/all', {
                 headers: { 'x-auth-token': token }
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 setSubmissions(data);
@@ -1622,7 +1615,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
     const handleApprove = async (submissionId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/quests/submissions/${submissionId}/review`, {
+            const response = await fetch(`/api/quests/submissions/${submissionId}/review`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1651,13 +1644,13 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/quests/submissions/${submissionId}/review`, {
+            const response = await fetch(`/api/quests/submissions/${submissionId}/review`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'x-auth-token': token
                 },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     status: 'rejected',
                     rejection_reason: reason
                 })
@@ -1699,43 +1692,39 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                         <p className="text-sm text-gray-500">Review and approve quest completions</p>
                     </div>
                     <div className="flex gap-2">
-                        <button 
+                        <button
                             onClick={() => setFilter('pending')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
-                                filter === 'pending' 
-                                    ? 'bg-yellow-500 text-white' 
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filter === 'pending'
+                                    ? 'bg-yellow-500 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
+                                }`}
                         >
                             Pending
                         </button>
-                        <button 
+                        <button
                             onClick={() => setFilter('approved')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
-                                filter === 'approved' 
-                                    ? 'bg-green-500 text-white' 
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filter === 'approved'
+                                    ? 'bg-green-500 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
+                                }`}
                         >
                             Approved
                         </button>
-                        <button 
+                        <button
                             onClick={() => setFilter('rejected')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
-                                filter === 'rejected' 
-                                    ? 'bg-red-500 text-white' 
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filter === 'rejected'
+                                    ? 'bg-red-500 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
+                                }`}
                         >
                             Rejected
                         </button>
-                        <button 
+                        <button
                             onClick={() => setFilter('all')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${
-                                filter === 'all' 
-                                    ? 'bg-blue-500 text-white' 
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filter === 'all'
+                                    ? 'bg-blue-500 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
+                                }`}
                         >
                             All
                         </button>
@@ -1755,11 +1744,10 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                                             <h4 className="text-lg font-bold">{submission.quest_id?.title || 'Unknown Quest'}</h4>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                submission.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                                'bg-red-100 text-red-700'
-                                            }`}>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                    submission.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                                        'bg-red-100 text-red-700'
+                                                }`}>
                                                 {submission.status.toUpperCase()}
                                             </span>
                                         </div>
@@ -1791,7 +1779,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                                         )}
                                     </div>
                                     <div className="flex gap-2">
-                                        <button 
+                                        <button
                                             onClick={() => setSelectedSubmission(submission)}
                                             className="p-2 hover:bg-blue-50 hover:shadow-md rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-400 transform hover:scale-105"
                                             title="View Details"
@@ -1800,14 +1788,14 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                                         </button>
                                         {submission.status === 'pending' && (
                                             <>
-                                                <button 
+                                                <button
                                                     onClick={() => handleApprove(submission._id)}
                                                     className="p-2 hover:bg-green-50 hover:shadow-md rounded-lg transition-all duration-200 border border-green-200 hover:border-green-400 transform hover:scale-105"
                                                     title="Approve"
                                                 >
                                                     <CheckCircle className="w-5 h-5 text-green-600 hover:text-green-700" />
                                                 </button>
-                                                <button 
+                                                <button
                                                     onClick={() => handleReject(submission._id)}
                                                     className="p-2 hover:bg-red-50 hover:shadow-md rounded-lg transition-all duration-200 border border-red-200 hover:border-red-400 transform hover:scale-105"
                                                     title="Reject"
@@ -1834,7 +1822,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        
+
                         <div className="p-6 space-y-4">
                             <div>
                                 <h4 className="font-semibold text-gray-700 mb-1">Quest</h4>
@@ -1852,9 +1840,9 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                             <div>
                                 <h4 className="font-semibold text-gray-700 mb-1">Proof Photo</h4>
                                 {selectedSubmission.photo_url ? (
-                                    <img 
-                                        src={`http://localhost:5000/${selectedSubmission.photo_url}`} 
-                                        alt="Quest proof" 
+                                    <img
+                                        src={`http://localhost:5000/${selectedSubmission.photo_url}`}
+                                        alt="Quest proof"
                                         className="w-full max-h-96 object-contain border rounded-lg"
                                     />
                                 ) : (
@@ -1863,11 +1851,10 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <h4 className="font-semibold text-gray-700">Status:</h4>
-                                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                                    selectedSubmission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                    selectedSubmission.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                    'bg-red-100 text-red-700'
-                                }`}>
+                                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${selectedSubmission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                        selectedSubmission.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                            'bg-red-100 text-red-700'
+                                    }`}>
                                     {selectedSubmission.status.toUpperCase()}
                                 </span>
                             </div>
@@ -1877,7 +1864,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                                     <p className="text-red-600">{selectedSubmission.rejection_reason}</p>
                                 </div>
                             )}
-                            
+
                             {selectedSubmission.status === 'pending' && (
                                 <div className="flex gap-3 pt-4 border-t">
                                     <button
@@ -1927,7 +1914,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Post Title</label>
@@ -1935,7 +1922,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             type="text"
                             required
                             value={formData.title}
-                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             placeholder="Enter post title..."
                         />
@@ -1945,7 +1932,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <label className="block text-sm font-semibold mb-2">Category</label>
                         <select
                             value={formData.category}
-                            onChange={(e) => setFormData({...formData, category: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         >
                             <option value="Updates">Updates</option>
@@ -1960,7 +1947,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <textarea
                             required
                             value={formData.content}
-                            onChange={(e) => setFormData({...formData, content: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             rows="4"
                             placeholder="Write your post content..."
@@ -1972,7 +1959,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <input
                             type="text"
                             value={formData.tags}
-                            onChange={(e) => setFormData({...formData, tags: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             placeholder="e.g., environment, tips, community"
                         />
@@ -1983,7 +1970,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <input
                             type="file"
                             accept="image/*"
-                            onChange={(e) => setFormData({...formData, image: e.target.files[0]})}
+                            onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">Optional: Upload an image for this post</p>
@@ -2033,7 +2020,7 @@ const ChallengeModal = ({ onClose, onSave }) => {
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Challenge Title</label>
@@ -2041,7 +2028,7 @@ const ChallengeModal = ({ onClose, onSave }) => {
                             type="text"
                             required
                             value={formData.title}
-                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                             placeholder="Enter challenge title..."
                         />
@@ -2052,7 +2039,7 @@ const ChallengeModal = ({ onClose, onSave }) => {
                         <textarea
                             required
                             value={formData.content}
-                            onChange={(e) => setFormData({...formData, content: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                             rows="4"
                             placeholder="Describe the community challenge..."
@@ -2102,7 +2089,7 @@ const DailyChallengeModal = ({ onClose, onSave }) => {
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Challenge Title</label>
@@ -2110,7 +2097,7 @@ const DailyChallengeModal = ({ onClose, onSave }) => {
                             type="text"
                             required
                             value={formData.title}
-                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                             placeholder="e.g., Share Your Green Tip of the Day"
                         />
@@ -2121,7 +2108,7 @@ const DailyChallengeModal = ({ onClose, onSave }) => {
                         <textarea
                             required
                             value={formData.content}
-                            onChange={(e) => setFormData({...formData, content: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                             rows="4"
                             placeholder="Describe today's community challenge..."
@@ -2166,21 +2153,21 @@ const AdminDashboard = () => {
     useEffect(() => {
         // Protect against unauthorized access and pending role requests
         if (!user) return;
-        
+
         if (user.role !== 'admin') {
             alert('Access denied. Admin privileges required.');
             logout();
             window.location.href = '/';
             return;
         }
-        
+
         // Block access if user has pending role request (they're still technically 'user' role)
         if (user.requested_role && !user.is_approved) {
             alert('Your account approval is still pending. Redirecting to dashboard.');
             window.location.href = '/dashboard';
             return;
         }
-        
+
         if (user.role === 'admin' && user.is_approved) {
             fetchData();
         }
@@ -2189,16 +2176,16 @@ const AdminDashboard = () => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('token');
-            
+
             // Fetch users
-            const usersRes = await fetch('http://localhost:5000/api/admin/users', {
+            const usersRes = await fetch('/api/admin/users', {
                 headers: { 'x-auth-token': token }
             });
             const usersData = await usersRes.json();
             setUsers(usersData);
 
             // Fetch quests
-            const questsRes = await fetch('http://localhost:5000/api/quests', {
+            const questsRes = await fetch('/api/quests', {
                 headers: { 'x-auth-token': token }
             });
             const questsData = await questsRes.json();
@@ -2209,7 +2196,7 @@ const AdminDashboard = () => {
             const activeQuests = questsData.filter(q => q.isActive).length;
 
             // Fetch pending submissions count
-            const submissionsRes = await fetch('http://localhost:5000/api/quests/submissions/all', {
+            const submissionsRes = await fetch('/api/quests/submissions/all', {
                 headers: { 'x-auth-token': token }
             });
             const submissionsData = await submissionsRes.json();
@@ -2232,7 +2219,7 @@ const AdminDashboard = () => {
     const handleApprovePartner = async (userId) => {
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/admin/users/${userId}/approve`, {
+            await fetch(`/api/admin/users/${userId}/approve`, {
                 method: 'PUT',
                 headers: { 'x-auth-token': token }
             });
@@ -2246,7 +2233,7 @@ const AdminDashboard = () => {
         if (!confirm('Are you sure you want to reject this role request? The user will become a regular user.')) return;
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/admin/users/${userId}/reject`, {
+            await fetch(`/api/admin/users/${userId}/reject`, {
                 method: 'PUT',
                 headers: { 'x-auth-token': token }
             });
@@ -2260,7 +2247,7 @@ const AdminDashboard = () => {
         if (!confirm('Are you sure you want to delete this user?')) return;
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
+            await fetch(`/api/admin/users/${userId}`, {
                 method: 'DELETE',
                 headers: { 'x-auth-token': token }
             });
@@ -2274,7 +2261,7 @@ const AdminDashboard = () => {
         if (!confirm('Are you sure you want to delete this quest?')) return;
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/quests/${questId}`, {
+            await fetch(`/api/quests/${questId}`, {
                 method: 'DELETE',
                 headers: { 'x-auth-token': token }
             });
@@ -2347,7 +2334,7 @@ const AdminDashboard = () => {
                 {activeTab === 'overview' && <OverviewTab stats={stats} setActiveTab={setActiveTab} />}
                 {activeTab === 'users' && <UsersTab users={users} pendingPartners={pendingPartners} onApprove={handleApprovePartner} onReject={handleRejectPartner} onDeleteUser={handleDeleteUser} />}
                 {activeTab === 'quests' && <QuestsTab quests={quests} setQuests={setQuests} />}
-                {activeTab === 'community' && <CommunityTab posts={[]} setPosts={() => {}} />}
+                {activeTab === 'community' && <CommunityTab posts={[]} setPosts={() => { }} />}
                 {activeTab === 'submissions' && <SubmissionsTab />}
                 {activeTab === 'notifications' && <NotificationsTab />}
                 {activeTab === 'analytics' && <AnalyticsTab stats={stats} users={users} quests={quests} />}

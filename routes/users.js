@@ -50,29 +50,82 @@ router.get('/leaderboard', async (req, res) => {
   try {
     const { department } = req.query;
 
-    // Build query object
-    const query = {};
     if (department && department !== 'all') {
-      query.department = department;
+      // Department-specific leaderboard
+      const users = await User.find({ department })
+        .select('username eco_score points questsCompleted avatar_theme role department')
+        .sort({ eco_score: -1 })
+        .limit(100);
+
+      // Calculate department total points
+      const departmentTotal = users.reduce((sum, user) => sum + (user.eco_score || user.points || 0), 0);
+
+      const leaderboard = users.map((user, index) => ({
+        rank: index + 1,
+        username: user.username,
+        eco_score: user.eco_score,
+        points: user.points,
+        questsCompleted: user.questsCompleted.length,
+        avatar_theme: user.avatar_theme,
+        role: user.role,
+        department: user.department,
+        departmentTotal: departmentTotal
+      }));
+
+      res.json({
+        leaderboard,
+        departmentTotal,
+        department,
+        totalUsers: users.length
+      });
+    } else {
+      // All departments leaderboard - show department totals
+      const allUsers = await User.find()
+        .select('username eco_score points questsCompleted avatar_theme role department')
+        .sort({ eco_score: -1 })
+        .limit(100);
+
+      // Group by department and calculate totals
+      const departmentTotals = {};
+      allUsers.forEach(user => {
+        const dept = user.department || 'SOC'; // Default to SOC if no department
+        if (!departmentTotals[dept]) {
+          departmentTotals[dept] = {
+            department: dept,
+            totalPoints: 0,
+            userCount: 0,
+            topUsers: []
+          };
+        }
+        departmentTotals[dept].totalPoints += (user.eco_score || user.points || 0);
+        departmentTotals[dept].userCount += 1;
+
+        // Keep top 3 users per department
+        if (departmentTotals[dept].topUsers.length < 3) {
+          departmentTotals[dept].topUsers.push({
+            username: user.username,
+            points: user.eco_score || user.points || 0,
+            avatar_theme: user.avatar_theme
+          });
+        }
+      });
+
+      // Convert to array and sort by total points
+      const departmentLeaderboard = Object.values(departmentTotals)
+        .sort((a, b) => b.totalPoints - a.totalPoints)
+        .map((dept, index) => ({
+          rank: index + 1,
+          department: dept.department,
+          totalPoints: dept.totalPoints,
+          userCount: dept.userCount,
+          topUsers: dept.topUsers
+        }));
+
+      res.json({
+        leaderboard: departmentLeaderboard,
+        type: 'department'
+      });
     }
-
-    const users = await User.find(query)
-      .select('username eco_score points questsCompleted avatar_theme role department')
-      .sort({ eco_score: -1 })
-      .limit(100);
-
-    const leaderboard = users.map((user, index) => ({
-      rank: index + 1,
-      username: user.username,
-      eco_score: user.eco_score,
-      points: user.points,
-      questsCompleted: user.questsCompleted.length,
-      avatar_theme: user.avatar_theme,
-      role: user.role,
-      department: user.department
-    }));
-
-    res.json(leaderboard);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ msg: 'Server error' });

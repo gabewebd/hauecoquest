@@ -37,7 +37,7 @@ export default function HomePage({ onPageChange }) {
       setFeaturedQuests(activeQuests);
 
       try {
-        const challengeRes = await fetch('http://localhost:5000/api/challenges');
+        const challengeRes = await fetch('/api/challenges');
         const challengesData = await challengeRes.json();
         if (challengesData.length > 0) {
           setChallenge(challengesData[0]);

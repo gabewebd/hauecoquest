@@ -68,9 +68,37 @@ const LeaderboardRow = ({ user, rank, onPageChange }) => (
   </div>
 );
 
+// Helper component for department leaderboard rows
+const DepartmentRow = ({ department, rank, onPageChange }) => (
+  <div className="flex items-center bg-white p-4 rounded-xl mb-3 hover:bg-green-50/50 transition-colors border-2 border-gray-100">
+    <div className="w-12 text-center font-bold text-gray-500 text-2xl">#{rank}</div>
+    <div className="flex items-center gap-4 flex-1 ml-4">
+      <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
+        {department.department}
+      </div>
+      <div>
+        <h3 className="font-bold text-xl text-gray-800">{department.department}</h3>
+        <p className="text-sm text-gray-500">{department.userCount} students</p>
+        <div className="flex gap-2 mt-1">
+          {department.topUsers.map((user, index) => (
+            <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded-full">
+              {user.username} ({user.points}pts)
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+    <div className="text-right">
+      <div className="text-2xl font-bold text-green-600">{department.totalPoints.toLocaleString()}</div>
+      <div className="text-sm text-gray-500">Total Points</div>
+    </div>
+  </div>
+);
+
 const LeaderboardPage = ({ onPageChange }) => {
   const { user } = useUser();
   const [users, setUsers] = useState([]);
+  const [departmentData, setDepartmentData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [stats, setStats] = useState({
@@ -99,27 +127,52 @@ const LeaderboardPage = ({ onPageChange }) => {
 
   const fetchLeaderboard = async () => {
     try {
-      const leaderboardData = await userAPI.getLeaderboard(selectedDepartment);
+      console.log('Fetching leaderboard for department:', selectedDepartment);
+      const response = await userAPI.getLeaderboard(selectedDepartment);
+      console.log('Leaderboard response:', response);
 
-      // Transform data for display
-      const transformedUsers = leaderboardData.map(user => ({
-        id: user._id,
-        name: user.username,
-        title: getRoleTitle(user.role, user.questsCompleted),
-        points: user.eco_score || user.points || 0,
-        level: Math.floor((user.eco_score || user.points || 0) / 100) + 1,
-        avatarInitial: getInitials(user.username),
-        questsCompleted: user.questsCompleted
-      }));
+      if (selectedDepartment === 'all') {
+        // Department leaderboard - show department totals
+        console.log('Processing all departments view');
+        setUsers(response.leaderboard || []);
+        setDepartmentData(null);
 
-      setUsers(transformedUsers);
+        // Calculate stats for all departments
+        const totalUsers = (response.leaderboard || []).reduce((sum, dept) => sum + (dept.userCount || 0), 0);
+        const totalPoints = (response.leaderboard || []).reduce((sum, dept) => sum + (dept.totalPoints || 0), 0);
 
-      // Calculate stats
-      setStats({
-        totalUsers: leaderboardData.length,
-        totalQuests: leaderboardData.reduce((sum, u) => sum + u.questsCompleted, 0),
-        totalPoints: leaderboardData.reduce((sum, u) => sum + (u.eco_score || u.points || 0), 0)
-      });
+        setStats({
+          totalUsers,
+          totalQuests: 0, // Not available in department view
+          totalPoints
+        });
+      } else {
+        // Individual department leaderboard
+        console.log('Processing individual department view');
+        const transformedUsers = (response.leaderboard || []).map(user => ({
+          id: user._id || user.username, // Use username as fallback ID
+          name: user.username,
+          title: getRoleTitle(user.role, user.questsCompleted),
+          points: user.eco_score || user.points || 0,
+          level: Math.floor((user.eco_score || user.points || 0) / 100) + 1,
+          avatarInitial: getInitials(user.username),
+          questsCompleted: user.questsCompleted
+        }));
+
+        setUsers(transformedUsers);
+        setDepartmentData({
+          department: response.department,
+          totalPoints: response.departmentTotal,
+          totalUsers: response.totalUsers
+        });
+
+        // Calculate stats for this department
+        setStats({
+          totalUsers: response.totalUsers || 0,
+          totalQuests: (response.leaderboard || []).reduce((sum, u) => sum + (u.questsCompleted || 0), 0),
+          totalPoints: response.departmentTotal || 0
+        });
+      }
 
       setLoading(false);
     } catch (error) {
@@ -244,10 +297,34 @@ const LeaderboardPage = ({ onPageChange }) => {
 
         {/* Stats Bar */}
         <section className="container mx-auto px-4 mb-12 grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Users className="w-8 h-8 text-blue-500 mx-auto mb-2" /><p className="text-2xl font-bold">{stats.totalUsers}</p><p className="text-sm text-gray-500">Active Champions</p></div>
-          <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Swords className="w-8 h-8 text-yellow-500 mx-auto mb-2" /><p className="text-2xl font-bold">{stats.totalQuests}</p><p className="text-sm text-gray-500">Quests Completed</p></div>
-          <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Users2 className="w-8 h-8 text-purple-500 mx-auto mb-2" /><p className="text-2xl font-bold">{stats.totalUsers}</p><p className="text-sm text-gray-500">Green Participants</p></div>
-          <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Leaf className="w-8 h-8 text-green-500 mx-auto mb-2" /><p className="text-2xl font-bold">{stats.totalPoints}</p><p className="text-sm text-gray-500">Total Points</p></div>
+          <div className="bg-white p-4 rounded-2xl shadow-md border text-center">
+            <Users className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+            <p className="text-2xl font-bold">{stats.totalUsers}</p>
+            <p className="text-sm text-gray-500">
+              {selectedDepartment === 'all' ? 'Total Students' : 'Department Students'}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-2xl shadow-md border text-center">
+            <Swords className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
+            <p className="text-2xl font-bold">{stats.totalQuests}</p>
+            <p className="text-sm text-gray-500">
+              {selectedDepartment === 'all' ? 'All Quests' : 'Quests Completed'}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-2xl shadow-md border text-center">
+            <Users2 className="w-8 h-8 text-purple-500 mx-auto mb-2" />
+            <p className="text-2xl font-bold">{selectedDepartment === 'all' ? users.length : stats.totalUsers}</p>
+            <p className="text-sm text-gray-500">
+              {selectedDepartment === 'all' ? 'Departments' : 'Active Students'}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-2xl shadow-md border text-center">
+            <Leaf className="w-8 h-8 text-green-500 mx-auto mb-2" />
+            <p className="text-2xl font-bold">{stats.totalPoints}</p>
+            <p className="text-sm text-gray-500">
+              {selectedDepartment === 'all' ? 'Combined Points' : 'Department Points'}
+            </p>
+          </div>
         </section>
 
         {/* Leaderboard Section */}
@@ -256,49 +333,75 @@ const LeaderboardPage = ({ onPageChange }) => {
           {/* Top Champions */}
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold">
-              🏆 Top Environmental Champions 🏆
+              🏆 {selectedDepartment === 'all' ? 'Department Rankings' : 'Top Environmental Champions'} 🏆
             </h2>
             {selectedDepartment !== 'all' && (
               <p className="text-lg text-gray-600 mt-2">
                 {departmentOptions.find(d => d.value === selectedDepartment)?.label}
               </p>
             )}
+            {departmentData && (
+              <div className="mt-4 p-4 bg-green-50 rounded-xl border-2 border-green-200">
+                <p className="text-lg font-bold text-green-800">
+                  Department Total: {departmentData.totalPoints.toLocaleString()} points
+                </p>
+                <p className="text-sm text-green-600">
+                  {departmentData.totalUsers} students contributing
+                </p>
+              </div>
+            )}
           </div>
 
-          {sortedUsers.length >= 3 ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                <TopChampionCard user={sortedUsers[1]} rank={2} onPageChange={onPageChange} />
-                <TopChampionCard user={sortedUsers[0]} rank={1} onPageChange={onPageChange} />
-                <TopChampionCard user={sortedUsers[2]} rank={3} onPageChange={onPageChange} />
-              </div>
-
-              {/* Complete Leaderboard */}
-              <div className="bg-white p-6 rounded-2xl shadow-xl border">
-                <h3 className="text-2xl font-bold mb-4">Complete Leaderboard</h3>
-                {sortedUsers.slice(3, displayCount).map((user, index) => (
-                  <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={index + 4} onPageChange={onPageChange} />
-                ))}
-
-                {/* Show More Button */}
-                {displayCount < sortedUsers.length && (
-                  <div className="text-center mt-6">
-                    <button
-                      onClick={handleShowMore}
-                      className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
-                    >
-                      Show More (+10)
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="bg-white p-12 rounded-2xl shadow-xl border text-center">
-              <Sprout className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-gray-600 mb-2">No Champions Yet</h3>
-              <p className="text-gray-500">Be the first to complete quests and climb the leaderboard!</p>
+          {selectedDepartment === 'all' ? (
+            // Department leaderboard
+            <div className="bg-white p-6 rounded-2xl shadow-xl border">
+              <h3 className="text-2xl font-bold mb-6">Department Rankings</h3>
+              {users.map((department, index) => (
+                <DepartmentRow
+                  key={department.department}
+                  department={department}
+                  rank={department.rank}
+                  onPageChange={onPageChange}
+                />
+              ))}
             </div>
+          ) : (
+            // Individual department leaderboard
+            sortedUsers.length >= 3 ? (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                  <TopChampionCard user={sortedUsers[1]} rank={2} onPageChange={onPageChange} />
+                  <TopChampionCard user={sortedUsers[0]} rank={1} onPageChange={onPageChange} />
+                  <TopChampionCard user={sortedUsers[2]} rank={3} onPageChange={onPageChange} />
+                </div>
+
+                {/* Complete Leaderboard */}
+                <div className="bg-white p-6 rounded-2xl shadow-xl border">
+                  <h3 className="text-2xl font-bold mb-4">Complete Leaderboard</h3>
+                  {sortedUsers.slice(3, displayCount).map((user, index) => (
+                    <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={index + 4} onPageChange={onPageChange} />
+                  ))}
+
+                  {/* Show More Button */}
+                  {displayCount < sortedUsers.length && (
+                    <div className="text-center mt-6">
+                      <button
+                        onClick={handleShowMore}
+                        className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
+                      >
+                        Show More (+10)
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="bg-white p-12 rounded-2xl shadow-xl border text-center">
+                <Sprout className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-gray-600 mb-2">No Champions Yet</h3>
+                <p className="text-gray-500">Be the first to complete quests and climb the leaderboard!</p>
+              </div>
+            )
           )}
         </section>
 

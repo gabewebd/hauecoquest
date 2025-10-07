@@ -1,8 +1,8 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import { 
-    BookOpen, BarChart, Users, TrendingUp, Plus, Edit, Trash2, 
+import {
+    BookOpen, BarChart, Users, TrendingUp, Plus, Edit, Trash2,
     Search, Calendar, MapPin, Award, Target, CheckCircle, Clock,
     FileText, Share2, Eye, MessageCircle, Heart, X, Save, Camera
 } from 'lucide-react';
@@ -25,11 +25,10 @@ const StatCard = ({ icon, value, label, bgColor, trend }) => (
 const TabButton = ({ id, label, icon, activeTab, setActiveTab, badge }) => (
     <button
         onClick={() => setActiveTab(id)}
-        className={`relative flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all text-sm ${
-            activeTab === id
+        className={`relative flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all text-sm ${activeTab === id
                 ? 'bg-green-500 text-white shadow-md'
                 : 'bg-white text-gray-600 hover:bg-gray-100'
-        }`}
+            }`}
     >
         {icon}
         {label}
@@ -81,7 +80,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Quest Title</label>
@@ -89,7 +88,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             type="text"
                             required
                             value={formData.title}
-                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             placeholder="e.g., Campus Tree Planting"
                         />
@@ -100,7 +99,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             <label className="block text-sm font-semibold mb-2">Category</label>
                             <select
                                 value={formData.category}
-                                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             >
                                 <option>Gardening & Planting</option>
@@ -116,7 +115,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             <label className="block text-sm font-semibold mb-2">Difficulty</label>
                             <select
                                 value={formData.difficulty}
-                                onChange={(e) => setFormData({...formData, difficulty: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             >
                                 <option>Easy</option>
@@ -133,7 +132,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 type="number"
                                 required
                                 value={formData.points}
-                                onChange={(e) => setFormData({...formData, points: parseInt(e.target.value)})}
+                                onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             />
                         </div>
@@ -144,7 +143,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 type="number"
                                 required
                                 value={formData.maxParticipants}
-                                onChange={(e) => setFormData({...formData, maxParticipants: parseInt(e.target.value)})}
+                                onChange={(e) => setFormData({ ...formData, maxParticipants: parseInt(e.target.value) })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             />
                         </div>
@@ -157,7 +156,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 type="text"
                                 required
                                 value={formData.location}
-                                onChange={(e) => setFormData({...formData, location: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                                 placeholder="e.g., HAU Main Campus"
                             />
@@ -169,7 +168,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 type="text"
                                 required
                                 value={formData.date}
-                                onChange={(e) => setFormData({...formData, date: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                                 placeholder="e.g., 1 week"
                             />
@@ -181,7 +180,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         <textarea
                             required
                             value={formData.description}
-                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             rows="4"
                             placeholder="Describe the quest objectives and activities..."
@@ -192,7 +191,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         <label className="block text-sm font-semibold mb-2">Requirements</label>
                         <textarea
                             value={formData.requirements}
-                            onChange={(e) => setFormData({...formData, requirements: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             rows="3"
                             placeholder="List any requirements or materials needed..."
@@ -209,15 +208,15 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 className="hidden"
                                 id="quest-image-upload"
                             />
-                            <label 
-                                htmlFor="quest-image-upload" 
+                            <label
+                                htmlFor="quest-image-upload"
                                 className="cursor-pointer block text-center"
                             >
                                 {previewUrl ? (
                                     <div className="space-y-2">
-                                        <img 
-                                            src={previewUrl} 
-                                            alt="Quest preview" 
+                                        <img
+                                            src={previewUrl}
+                                            alt="Quest preview"
                                             className="max-h-32 mx-auto rounded-lg"
                                         />
                                         <p className="text-sm text-green-600">Click to change image</p>
@@ -280,7 +279,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Challenge Title</label>
@@ -288,7 +287,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                             type="text"
                             required
                             value={formData.title}
-                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             placeholder="e.g., Plant 1,000 Trees Challenge"
                         />
@@ -299,7 +298,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                         <textarea
                             required
                             value={formData.description}
-                            onChange={(e) => setFormData({...formData, description: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             rows="4"
                             placeholder="Describe the community challenge..."
@@ -313,7 +312,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                                 type="number"
                                 required
                                 value={formData.target}
-                                onChange={(e) => setFormData({...formData, target: parseInt(e.target.value)})}
+                                onChange={(e) => setFormData({ ...formData, target: parseInt(e.target.value) })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                                 placeholder="1000"
                             />
@@ -323,7 +322,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                             <label className="block text-sm font-semibold mb-2">Category</label>
                             <select
                                 value={formData.category}
-                                onChange={(e) => setFormData({...formData, category: e.target.value})}
+                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             >
                                 <option>Environmental</option>
@@ -379,7 +378,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <X className="w-5 h-5" />
                     </button>
                 </div>
-                
+
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Post Title</label>
@@ -387,7 +386,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             type="text"
                             required
                             value={formData.title}
-                            onChange={(e) => setFormData({...formData, title: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             placeholder="e.g., Tips for Sustainable Living"
                         />
@@ -397,7 +396,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <label className="block text-sm font-semibold mb-2">Category</label>
                         <select
                             value={formData.category}
-                            onChange={(e) => setFormData({...formData, category: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         >
                             <option>Updates</option>
@@ -413,7 +412,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <textarea
                             required
                             value={formData.content}
-                            onChange={(e) => setFormData({...formData, content: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             rows="8"
                             placeholder="Write your post content here..."
@@ -425,7 +424,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <input
                             type="text"
                             value={formData.tags}
-                            onChange={(e) => setFormData({...formData, tags: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             placeholder="e.g., sustainability, recycling, climate"
                         />
@@ -436,7 +435,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <input
                             type="file"
                             accept="image/*"
-                            onChange={(e) => setFormData({...formData, image: e.target.files[0]})}
+                            onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">Optional: Upload an image for this post</p>
@@ -473,30 +472,30 @@ const OverviewTab = ({ quests, posts, setActiveTab }) => {
     return (
         <div className="space-y-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard 
-                    icon={<BookOpen className="w-6 h-6 text-green-500" />} 
-                    value={activeQuests} 
-                    label="Active Quests" 
+                <StatCard
+                    icon={<BookOpen className="w-6 h-6 text-green-500" />}
+                    value={activeQuests}
+                    label="Active Quests"
                     bgColor="bg-green-50"
                     trend="12% this month"
                 />
-                <StatCard 
-                    icon={<Users className="w-6 h-6 text-blue-500" />} 
-                    value={totalParticipants} 
-                    label="Total Participants" 
+                <StatCard
+                    icon={<Users className="w-6 h-6 text-blue-500" />}
+                    value={totalParticipants}
+                    label="Total Participants"
                     bgColor="bg-blue-50"
                     trend="8% this week"
                 />
-                <StatCard 
-                    icon={<Award className="w-6 h-6 text-yellow-500" />} 
-                    value={totalPoints} 
-                    label="Points Awarded" 
+                <StatCard
+                    icon={<Award className="w-6 h-6 text-yellow-500" />}
+                    value={totalPoints}
+                    label="Points Awarded"
                     bgColor="bg-yellow-50"
                 />
-                <StatCard 
-                    icon={<TrendingUp className="w-6 h-6 text-purple-500" />} 
-                    value="95%" 
-                    label="Success Rate" 
+                <StatCard
+                    icon={<TrendingUp className="w-6 h-6 text-purple-500" />}
+                    value="95%"
+                    label="Success Rate"
                     bgColor="bg-purple-50"
                 />
             </div>
@@ -507,7 +506,7 @@ const OverviewTab = ({ quests, posts, setActiveTab }) => {
                         <h3 className="text-xl font-bold">Quick Actions</h3>
                     </div>
                     <div className="space-y-3">
-                        <button 
+                        <button
                             onClick={() => setActiveTab('quests')}
                             className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-green-50 transition-colors border"
                         >
@@ -519,7 +518,7 @@ const OverviewTab = ({ quests, posts, setActiveTab }) => {
                                 <p className="text-xs text-gray-500">Add a new environmental quest</p>
                             </div>
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab('community')}
                             className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-blue-50 transition-colors border"
                         >
@@ -531,7 +530,7 @@ const OverviewTab = ({ quests, posts, setActiveTab }) => {
                                 <p className="text-xs text-gray-500">Share updates with community</p>
                             </div>
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab('analytics')}
                             className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-purple-50 transition-colors border"
                         >
@@ -589,7 +588,7 @@ const QuestsTab = ({ quests, setQuests }) => {
     const handleSaveQuest = async (questData) => {
         try {
             const token = localStorage.getItem('token');
-            
+
             // Use FormData if there's a photo, otherwise use JSON
             if (questData.photo) {
                 const formData = new FormData();
@@ -605,14 +604,14 @@ const QuestsTab = ({ quests, setQuests }) => {
                 formData.append('maxParticipants', questData.maxParticipants);
                 formData.append('photo', questData.photo);
 
-                const response = await fetch('http://localhost:5000/api/quests', {
+                const response = await fetch('/api/quests', {
                     method: 'POST',
                     headers: {
                         'x-auth-token': token
                     },
                     body: formData
                 });
-                
+
                 if (!response.ok) throw new Error('Failed to create quest');
                 const newQuest = await response.json();
                 setQuests([newQuest, ...quests]);
@@ -631,7 +630,7 @@ const QuestsTab = ({ quests, setQuests }) => {
                 };
 
                 if (editingQuest) {
-                    const response = await fetch(`http://localhost:5000/api/quests/${editingQuest._id}`, {
+                    const response = await fetch(`/api/quests/${editingQuest._id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -639,12 +638,12 @@ const QuestsTab = ({ quests, setQuests }) => {
                         },
                         body: JSON.stringify(payload)
                     });
-                    
+
                     if (!response.ok) throw new Error('Failed to update quest');
                     const updatedQuest = await response.json();
                     setQuests(quests.map(q => q._id === editingQuest._id ? updatedQuest : q));
                 } else {
-                    const response = await fetch('http://localhost:5000/api/quests', {
+                    const response = await fetch('/api/quests', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -652,13 +651,13 @@ const QuestsTab = ({ quests, setQuests }) => {
                         },
                         body: JSON.stringify(payload)
                     });
-                    
+
                     if (!response.ok) throw new Error('Failed to create quest');
                     const newQuest = await response.json();
                     setQuests([newQuest, ...quests]);
                 }
             }
-            
+
             setShowModal(false);
             setEditingQuest(null);
         } catch (error) {
@@ -669,16 +668,16 @@ const QuestsTab = ({ quests, setQuests }) => {
 
     const handleDeleteQuest = async (id) => {
         if (!confirm('Are you sure you want to delete this quest?')) return;
-        
+
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/quests/${id}`, {
+            const response = await fetch(`/api/quests/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'x-auth-token': token
                 }
             });
-            
+
             if (!response.ok) throw new Error('Failed to delete quest');
             setQuests(quests.filter(q => q._id !== id));
         } catch (error) {
@@ -687,7 +686,7 @@ const QuestsTab = ({ quests, setQuests }) => {
         }
     };
 
-    const filteredQuests = quests.filter(q => 
+    const filteredQuests = quests.filter(q =>
         q.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -699,7 +698,7 @@ const QuestsTab = ({ quests, setQuests }) => {
                         <h3 className="text-xl font-bold">Quest Management</h3>
                         <p className="text-sm text-gray-500">Create and manage your environmental quests</p>
                     </div>
-                    <button 
+                    <button
                         onClick={() => {
                             setEditingQuest(null);
                             setShowModal(true);
@@ -737,18 +736,16 @@ const QuestsTab = ({ quests, setQuests }) => {
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                                             <h4 className="text-lg font-bold">{quest.title}</h4>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                quest.isActive 
-                                                    ? 'bg-green-100 text-green-700' 
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${quest.isActive
+                                                    ? 'bg-green-100 text-green-700'
                                                     : 'bg-gray-100 text-gray-700'
-                                            }`}>
+                                                }`}>
                                                 {quest.isActive ? 'Active' : 'Inactive'}
                                             </span>
-                                            <span className={`text-xs font-semibold px-2 py-1 rounded ${
-                                                quest.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
-                                                quest.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                                                'bg-red-100 text-red-700'
-                                            }`}>
+                                            <span className={`text-xs font-semibold px-2 py-1 rounded ${quest.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
+                                                    quest.difficulty === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
+                                                        'bg-red-100 text-red-700'
+                                                }`}>
                                                 {quest.difficulty}
                                             </span>
                                         </div>
@@ -779,7 +776,7 @@ const QuestsTab = ({ quests, setQuests }) => {
                                         )}
                                     </div>
                                     <div className="flex gap-2">
-                                        <button 
+                                        <button
                                             onClick={() => {
                                                 setEditingQuest(quest);
                                                 setShowModal(true);
@@ -788,7 +785,7 @@ const QuestsTab = ({ quests, setQuests }) => {
                                         >
                                             <Edit className="w-5 h-5 text-blue-600" />
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => handleDeleteQuest(quest._id)}
                                             className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
                                         >
@@ -826,7 +823,7 @@ const CommunityTab = ({ posts, setPosts }) => {
     const handleSavePost = async (postData) => {
         try {
             const token = localStorage.getItem('token');
-            
+
             if (editingPost) {
                 // For updates, use JSON for now
                 const payload = {
@@ -836,7 +833,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                     tags: postData.tags.split(',').map(t => t.trim()).filter(t => t)
                 };
 
-                const response = await fetch(`http://localhost:5000/api/posts/${editingPost._id}`, {
+                const response = await fetch(`/api/posts/${editingPost._id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -844,7 +841,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                     },
                     body: JSON.stringify(payload)
                 });
-                
+
                 if (!response.ok) throw new Error('Failed to update post');
                 const updatedPost = await response.json();
                 setPosts(posts.map(p => p._id === editingPost._id ? updatedPost : p));
@@ -855,19 +852,19 @@ const CommunityTab = ({ posts, setPosts }) => {
                 formData.append('content', postData.content);
                 formData.append('category', postData.category);
                 formData.append('tags', JSON.stringify(postData.tags.split(',').map(t => t.trim()).filter(t => t)));
-                
+
                 if (postData.image) {
                     formData.append('image', postData.image);
                 }
 
-                const response = await fetch('http://localhost:5000/api/posts', {
+                const response = await fetch('/api/posts', {
                     method: 'POST',
                     headers: {
                         'x-auth-token': token
                     },
                     body: formData
                 });
-                
+
                 if (!response.ok) {
                     const errorData = await response.json();
                     throw new Error(errorData.msg || 'Failed to create post');
@@ -875,7 +872,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                 const newPost = await response.json();
                 setPosts([newPost, ...posts]);
             }
-            
+
             setShowModal(false);
             setEditingPost(null);
         } catch (error) {
@@ -886,10 +883,10 @@ const CommunityTab = ({ posts, setPosts }) => {
 
     const handleDeletePost = async (id) => {
         if (!confirm('Are you sure you want to delete this post?')) return;
-        
+
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/posts/${id}`, {
+            await fetch(`/api/posts/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'x-auth-token': token
@@ -904,7 +901,7 @@ const CommunityTab = ({ posts, setPosts }) => {
     const handleSaveChallenge = async (challengeData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/challenges', {
+            const response = await fetch('/api/challenges', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -917,7 +914,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                     participants: []
                 })
             });
-            
+
             if (!response.ok) throw new Error('Failed to create challenge');
             alert('Community challenge created successfully!');
             setShowChallengeModal(false);
@@ -927,7 +924,7 @@ const CommunityTab = ({ posts, setPosts }) => {
         }
     };
 
-    const filteredPosts = posts.filter(p => 
+    const filteredPosts = posts.filter(p =>
         p.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -940,7 +937,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                         <p className="text-sm text-gray-500">Manage your blog posts and community updates</p>
                     </div>
                     <div className="flex gap-2">
-                        <button 
+                        <button
                             onClick={() => {
                                 setEditingPost(null);
                                 setShowModal(true);
@@ -950,7 +947,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                             <Plus className="w-4 h-4" />
                             Create Post
                         </button>
-                        <button 
+                        <button
                             onClick={() => setShowChallengeModal(true)}
                             className="flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition font-semibold"
                         >
@@ -1020,16 +1017,16 @@ const CommunityTab = ({ posts, setPosts }) => {
                                         )}
                                     </div>
                                     <div className="flex gap-2">
-                                        <button 
+                                        <button
                                             onClick={() => {
-                                                setEditingPost({...post, tags: post.tags?.join(', ') || ''});
+                                                setEditingPost({ ...post, tags: post.tags?.join(', ') || '' });
                                                 setShowModal(true);
                                             }}
                                             className="p-2 hover:bg-blue-50 rounded-lg transition border border-blue-200"
                                         >
                                             <Edit className="w-5 h-5 text-blue-600" />
                                         </button>
-                                        <button 
+                                        <button
                                             onClick={() => handleDeletePost(post._id)}
                                             className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
                                         >
@@ -1123,7 +1120,7 @@ const AnalyticsTab = ({ quests }) => {
                         <div key={category} className="flex items-center gap-3">
                             <div className="w-32 text-sm font-semibold text-gray-700">{category}</div>
                             <div className="flex-1 bg-gray-100 rounded-full h-8 relative overflow-hidden">
-                                <div 
+                                <div
                                     className="bg-green-500 h-full rounded-full flex items-center justify-end pr-3 text-white text-sm font-semibold"
                                     style={{ width: `${(count / totalQuests) * 100}%` }}
                                 >
@@ -1177,10 +1174,10 @@ const NotificationsTab = () => {
     const fetchNotifications = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/notifications', {
+            const response = await fetch('/api/notifications', {
                 headers: { 'x-auth-token': token }
             });
-            
+
             if (response.ok) {
                 const data = await response.json();
                 setNotifications(data);
@@ -1195,7 +1192,7 @@ const NotificationsTab = () => {
     const markAsRead = async (notificationId) => {
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/notifications/${notificationId}/read`, {
+            await fetch(`/api/notifications/${notificationId}/read`, {
                 method: 'PUT',
                 headers: { 'x-auth-token': token }
             });
@@ -1208,7 +1205,7 @@ const NotificationsTab = () => {
     const deleteNotification = async (notificationId) => {
         try {
             const token = localStorage.getItem('token');
-            await fetch(`http://localhost:5000/api/notifications/${notificationId}`, {
+            await fetch(`/api/notifications/${notificationId}`, {
                 method: 'DELETE',
                 headers: { 'x-auth-token': token }
             });
@@ -1231,10 +1228,10 @@ const NotificationsTab = () => {
             <div className="bg-white p-6 rounded-2xl shadow-lg border">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold">Notifications</h3>
-                    <button 
+                    <button
                         onClick={() => {
                             const token = localStorage.getItem('token');
-                            fetch('http://localhost:5000/api/notifications/read-all', {
+                            fetch('/api/notifications/read-all', {
                                 method: 'PUT',
                                 headers: { 'x-auth-token': token }
                             }).then(() => fetchNotifications());
@@ -1253,11 +1250,10 @@ const NotificationsTab = () => {
                 ) : (
                     <div className="space-y-3">
                         {notifications.map(notification => (
-                            <div 
-                                key={notification._id} 
-                                className={`p-4 rounded-lg border transition ${
-                                    notification.is_read ? 'bg-gray-50' : 'bg-white shadow-sm'
-                                }`}
+                            <div
+                                key={notification._id}
+                                className={`p-4 rounded-lg border transition ${notification.is_read ? 'bg-gray-50' : 'bg-white shadow-sm'
+                                    }`}
                             >
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1">
@@ -1269,14 +1265,14 @@ const NotificationsTab = () => {
                                     </div>
                                     <div className="flex gap-2 ml-4">
                                         {!notification.is_read && (
-                                            <button 
+                                            <button
                                                 onClick={() => markAsRead(notification._id)}
                                                 className="text-xs text-green-600 hover:underline"
                                             >
                                                 Mark as read
                                             </button>
                                         )}
-                                        <button 
+                                        <button
                                             onClick={() => deleteNotification(notification._id)}
                                             className="text-xs text-red-600 hover:underline"
                                         >
@@ -1308,15 +1304,15 @@ const DailyTab = () => {
     const fetchDailyContent = async () => {
         try {
             // Fetch today's quest
-            const questRes = await fetch('http://localhost:5000/api/daily/quest');
+            const questRes = await fetch('/api/daily/quest');
             const questData = await questRes.json();
             setDailyQuest(questData.quest);
 
             // Fetch today's challenge
-            const challengeRes = await fetch('http://localhost:5000/api/daily/challenge');
+            const challengeRes = await fetch('/api/daily/challenge');
             const challengeData = await challengeRes.json();
             setDailyChallenge(challengeData.challenge);
-            
+
             setLoading(false);
         } catch (error) {
             console.error('Error fetching daily content:', error);
@@ -1327,7 +1323,7 @@ const DailyTab = () => {
     const handleCreateDailyQuest = async (questData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/daily/quest', {
+            const response = await fetch('/api/daily/quest', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1354,7 +1350,7 @@ const DailyTab = () => {
     const handleCreateDailyChallenge = async (challengeData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:5000/api/daily/challenge', {
+            const response = await fetch('/api/daily/challenge', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1393,7 +1389,7 @@ const DailyTab = () => {
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold">Today's Quest</h3>
                     {!dailyQuest && (
-                        <button 
+                        <button
                             onClick={() => setShowQuestModal(true)}
                             className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
                         >
@@ -1402,7 +1398,7 @@ const DailyTab = () => {
                         </button>
                     )}
                 </div>
-                
+
                 {dailyQuest ? (
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                         <h4 className="font-bold text-green-800 mb-2">{dailyQuest.title}</h4>
@@ -1426,7 +1422,7 @@ const DailyTab = () => {
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-xl font-bold">Today's Community Challenge</h3>
                     {!dailyChallenge && (
-                        <button 
+                        <button
                             onClick={() => setShowChallengeModal(true)}
                             className="flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition"
                         >
@@ -1435,7 +1431,7 @@ const DailyTab = () => {
                         </button>
                     )}
                 </div>
-                
+
                 {dailyChallenge ? (
                     <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
                         <h4 className="font-bold text-purple-800 mb-2">{dailyChallenge.title}</h4>
@@ -1451,7 +1447,7 @@ const DailyTab = () => {
 
             {/* Daily Quest Modal */}
             {showQuestModal && (
-                <QuestModal 
+                <QuestModal
                     onClose={() => setShowQuestModal(false)}
                     onSave={handleCreateDailyQuest}
                 />
@@ -1459,7 +1455,7 @@ const DailyTab = () => {
 
             {/* Daily Challenge Modal */}
             {showChallengeModal && (
-                <PostModal 
+                <PostModal
                     onClose={() => setShowChallengeModal(false)}
                     onSave={handleCreateDailyChallenge}
                 />
@@ -1480,21 +1476,21 @@ const PartnerDashboard = () => {
     useEffect(() => {
         // Protect against unauthorized access and pending role requests
         if (!user) return;
-        
+
         if (user.role !== 'partner') {
             alert('Access denied. Partner privileges required.');
             logout();
             window.location.href = '/';
             return;
         }
-        
+
         // Block access if user has pending role request (they're still technically 'user' role)
         if (user.requested_role && !user.is_approved) {
             alert('Your partner application is still pending approval. Redirecting to dashboard.');
             window.location.href = '/dashboard';
             return;
         }
-        
+
         if (user.role === 'partner' && user.is_approved) {
             fetchData();
         }
@@ -1503,9 +1499,9 @@ const PartnerDashboard = () => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('token');
-            
+
             // Fetch quests
-            const questsRes = await fetch('http://localhost:5000/api/quests', {
+            const questsRes = await fetch('/api/quests', {
                 headers: { 'x-auth-token': token }
             });
             const questsData = await questsRes.json();
@@ -1513,7 +1509,7 @@ const PartnerDashboard = () => {
             setQuests(userQuests);
 
             // Fetch posts
-            const postsRes = await fetch('http://localhost:5000/api/posts', {
+            const postsRes = await fetch('/api/posts', {
                 headers: { 'x-auth-token': token }
             });
             const postsData = await postsRes.json();

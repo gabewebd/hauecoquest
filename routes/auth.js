@@ -24,7 +24,7 @@ router.post('/signup', async (req, res) => {
       username,
       email,
       password,
-      department,
+      department: department || 'SOC', // Default to SOC if not provided
       role: 'user', // Everyone starts as user
       requested_role: null, // No role requests during signup
       eco_score: 0,

@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema({
   department: {
     type: String,
     enum: ['SOC', 'SAS', 'SEA', 'SBA', 'SED', 'CCJEF', 'SHTM', 'SNAMS'],
-    required: true
+    default: 'SOC'
   },
   avatar_theme: {
     type: String,

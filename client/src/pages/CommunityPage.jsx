@@ -368,7 +368,7 @@ const CommunityPage = ({ onPageChange }) => {
   const handleLike = async (postId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, {
+      const response = await fetch(`/api/posts/${postId}/like`, {
         method: 'POST',
         headers: {
           'x-auth-token': token
@@ -386,7 +386,7 @@ const CommunityPage = ({ onPageChange }) => {
   const handleComment = async (postId, commentText) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}/comment`, {
+      const response = await fetch(`/api/posts/${postId}/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -406,7 +406,7 @@ const CommunityPage = ({ onPageChange }) => {
   const handlePin = async (postId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}/pin`, {
+      const response = await fetch(`/api/posts/${postId}/pin`, {
         method: 'PUT',
         headers: {
           'x-auth-token': token
@@ -426,7 +426,7 @@ const CommunityPage = ({ onPageChange }) => {
   const handleJoinChallenge = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/dashboard/join-challenge', {
+      const response = await fetch('/api/dashboard/join-challenge', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -436,7 +436,7 @@ const CommunityPage = ({ onPageChange }) => {
       
       if (response.ok) {
         alert('Successfully joined the challenge!');
-        const challengeResponse = await fetch('http://localhost:5000/api/dashboard/community-challenge');
+        const challengeResponse = await fetch('/api/dashboard/community-challenge');
         const challengeData = await challengeResponse.json();
         setCommunityChallenge(challengeData.challenge);
       } else {
@@ -455,7 +455,7 @@ const CommunityPage = ({ onPageChange }) => {
       const usersData = await userAPI.getLeaderboard();
       const questsData = await questAPI.getAllQuests();
       
-      const challengeResponse = await fetch('http://localhost:5000/api/dashboard/community-challenge');
+      const challengeResponse = await fetch('/api/dashboard/community-challenge');
       const challengeData = await challengeResponse.json();
       setCommunityChallenge(challengeData.challenge);
       

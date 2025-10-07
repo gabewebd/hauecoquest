@@ -22,7 +22,7 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
 
   const fetchChallengeDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/challenges/${challengeId}`);
+      const response = await fetch(`/api/challenges/${challengeId}`);
       const data = await response.json();
       setChallenge(data);
       setLoading(false);
@@ -58,7 +58,7 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
       formData.append('challengeId', challengeId);
 
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/challenges/submit', {
+      const response = await fetch('/api/challenges/submit', {
         method: 'POST',
         headers: {
           'x-auth-token': token

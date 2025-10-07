@@ -23,12 +23,12 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
     const [reflection, setReflection] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     // Check if quest is full
     const currentParticipants = questData?.completions?.length || 0;
     const maxParticipants = questData?.maxParticipants || 100;
     const isQuestFull = currentParticipants >= maxParticipants;
-    
+
     // --- CHANGE: Minimum word count constant removed ---
 
     const handleFileChange = (e) => {
@@ -37,9 +37,9 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         // --- CHANGE: Minimum word count validation removed ---
-        
+
         if (!file) {
             alert('Please upload a photo as proof of completion.');
             return;
@@ -53,7 +53,7 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
             formData.append('reflection_text', reflection);
             formData.append('photo', file);
 
-            const response = await fetch(`http://localhost:5000/api/quests/${questId}/submit`, {
+            const response = await fetch(`/api/quests/${questId}/submit`, {
                 method: 'POST',
                 headers: {
                     'x-auth-token': token
@@ -102,7 +102,7 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
             'rejected': 'bg-red-50 border-red-300 text-red-800'
         };
         const statusColor = statusColors[existingSubmission.status] || statusColors['pending'];
-        
+
         return (
             <div className={`${statusColor} border p-6 rounded-xl text-center`}>
                 <Clock className="w-12 h-12 mx-auto mb-3" />
@@ -123,7 +123,7 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
                 <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-3" />
                 <h4 className="text-xl font-bold text-green-800 mb-2">Quest Submitted!</h4>
                 <p className="text-green-700">Your evidence has been sent to the Quest Master for review. You'll receive your points soon!</p>
-                <button 
+                <button
                     onClick={() => setIsSubmitted(false)}
                     className="mt-4 text-green-600 font-semibold hover:underline"
                 >
@@ -158,7 +158,7 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
                 ></textarea>
                 {/* --- CHANGE: Word count display removed --- */}
             </div>
-            
+
             {/* 2. File Upload */}
             <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">
@@ -172,8 +172,8 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
                         onChange={handleFileChange}
                         className="hidden"
                     />
-                    <label 
-                        htmlFor="proof-file" 
+                    <label
+                        htmlFor="proof-file"
                         className="flex-1 cursor-pointer bg-green-500 text-white py-3 px-4 rounded-xl font-semibold text-center hover:bg-green-600 transition-colors"
                     >
                         <span className='flex items-center justify-center gap-2'>
@@ -192,11 +192,10 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
 
             <button
                 type="submit"
-                className={`w-full flex justify-center items-center gap-2 py-3 rounded-xl text-lg font-bold transition-colors ${
-                    isSubmissionReady && !isSubmitting
+                className={`w-full flex justify-center items-center gap-2 py-3 rounded-xl text-lg font-bold transition-colors ${isSubmissionReady && !isSubmitting
                         ? 'bg-green-500 text-white hover:bg-green-600'
                         : 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                }`}
+                    }`}
                 disabled={!isSubmissionReady || isSubmitting}
             >
                 <CheckCircle className="w-5 h-5" />
@@ -211,39 +210,39 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
 
 const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
     // Fallback and Destructuring with Mock Data from QuestsPage
-    const { 
-        title, description, difficulty, points, duration, participants, 
-        color, icon, category: propCategory, location: propLocation 
+    const {
+        title, description, difficulty, points, duration, participants,
+        color, icon, category: propCategory, location: propLocation
     } = quest;
-    
+
     // Check if user is admin or partner (view-only mode)
     const isViewOnly = userRole === 'admin' || userRole === 'partner';
 
     const category = propCategory || "General Quest";
     const location = propLocation || "HAU Campus";
-    
+
     // --- CHANGE: Process objectives to remove the word count from the text ---
     // This will dynamically remove "(50-word)" from any objective text that contains it.
     const originalObjectives = quest.objectives || ["Complete the primary task as outlined in the quest description.", "Document your progress with photo evidence.", "Submit a reflection on the experience."];
     const objectives = originalObjectives.map(obj => obj.replace(/a short \(50-word\) /i, 'a '));
 
-    const submissionRequirements = quest.submissionRequirements || ["One high-resolution photo/video.","A log or text summary of your results.","Adherence to HAU Eco-Quest guidelines."];
-    
+    const submissionRequirements = quest.submissionRequirements || ["One high-resolution photo/video.", "A log or text summary of your results.", "Adherence to HAU Eco-Quest guidelines."];
+
     // Determine quest status based on user's submission and quest capacity
     const getQuestStatus = () => {
         // Check if quest is full (reached max participants)
         const currentParticipants = quest.completions?.length || participants || 0;
         const maxParticipants = quest.maxParticipants || 100;
-        
+
         if (currentParticipants >= maxParticipants) return 'Completed';
-        
+
         // Check user's submission status
         if (quest.submissionStatus === 'approved') return 'Completed';
         if (quest.submissionStatus === 'pending') return 'Under Review';
         if (quest.submissionStatus === 'rejected') return 'Rejected';
         return 'In Progress';
     };
-    
+
     const status = getQuestStatus();
 
     // Determine status styling
@@ -257,7 +256,7 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
     } else if (status === 'Rejected') {
         statusStyle = 'bg-red-100 text-red-700';
     }
-    
+
     // Determine difficulty styling
     const difficultyStyles = {
         Easy: 'bg-green-100 text-green-600',
@@ -298,32 +297,32 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
                                 <Heart className="w-6 h-6" />
                             </button>
                         </div>
-                        
+
                         <h1 className="text-4xl font-extrabold text-gray-800 mb-4">{title}</h1>
                         <p className="text-gray-600 mb-6">{description}</p>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                            <StatItem 
-                                icon={<Award className="w-5 h-5 text-yellow-500" />} 
-                                value={`${points}`} 
+                            <StatItem
+                                icon={<Award className="w-5 h-5 text-yellow-500" />}
+                                value={`${points}`}
                                 label="Reward Points"
                                 iconColor="bg-yellow-100"
                             />
-                            <StatItem 
-                                icon={<Clock className="w-5 h-5 text-blue-500" />} 
-                                value={duration} 
+                            <StatItem
+                                icon={<Clock className="w-5 h-5 text-blue-500" />}
+                                value={duration}
                                 label="Estimated Time"
                                 iconColor="bg-blue-100"
                             />
-                            <StatItem 
-                                icon={<Users className="w-5 h-5 text-purple-500" />} 
-                                value={participants} 
+                            <StatItem
+                                icon={<Users className="w-5 h-5 text-purple-500" />}
+                                value={participants}
                                 label="Participants"
                                 iconColor="bg-purple-100"
                             />
-                             <StatItem 
-                                icon={<MapPin className="w-5 h-5 text-red-500" />} 
-                                value={location.split(' ')[0]} 
+                            <StatItem
+                                icon={<MapPin className="w-5 h-5 text-red-500" />}
+                                value={location.split(' ')[0]}
                                 label="Location"
                                 iconColor="bg-red-100"
                             />
@@ -337,13 +336,13 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
                                 {status}
                             </span>
                         </div>
-                        
+
                         {/* ACCEPT QUEST BUTTON REMOVED AS REQUESTED */}
 
                     </div>
 
                     {/* --- Single Column Content (Objectives, Requirements, Submission) --- */}
-                    <div className="space-y-8"> 
+                    <div className="space-y-8">
                         {/* 1. Quest Objectives */}
                         <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
                             <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -359,7 +358,7 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
                                 ))}
                             </ul>
                         </div>
-                        
+
                         {/* 2. Submission Requirements */}
                         <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
                             <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -375,7 +374,7 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
                                 ))}
                             </ul>
                         </div>
-                        
+
                         {/* 3. Quest Submission Form or View-Only Message */}
                         <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-100">
                             {isViewOnly ? (
@@ -383,7 +382,7 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
                                     <Eye className="w-12 h-12 text-blue-600 mx-auto mb-3" />
                                     <h4 className="text-xl font-bold text-blue-800 mb-2">View Only Mode</h4>
                                     <p className="text-blue-700">
-                                        As {userRole === 'admin' ? 'an administrator' : 'a partner'}, you can view this quest but cannot participate. 
+                                        As {userRole === 'admin' ? 'an administrator' : 'a partner'}, you can view this quest but cannot participate.
                                         Your role is to monitor progress and {userRole === 'admin' ? 'approve submissions' : 'create quests'}.
                                     </p>
                                     <div className="mt-4 grid grid-cols-2 gap-4">
@@ -398,8 +397,8 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
                                     </div>
                                 </div>
                             ) : (
-                                <QuestSubmissionForm 
-                                    questId={quest._id} 
+                                <QuestSubmissionForm
+                                    questId={quest._id}
                                     onSubmissionSuccess={onSubmissionSuccess}
                                     existingSubmission={quest.existingSubmission}
                                     questData={quest}

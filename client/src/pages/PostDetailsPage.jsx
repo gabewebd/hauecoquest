@@ -20,7 +20,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
 
   const fetchPostDetails = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}`);
+      const response = await fetch(`/api/posts/${postId}`);
       const data = await response.json();
       setPost(data);
       setLikeCount(data.likes?.length || 0);
@@ -40,7 +40,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}/like`, {
+      const response = await fetch(`/api/posts/${postId}/like`, {
         method: 'POST',
         headers: {
           'x-auth-token': token
@@ -69,7 +69,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
     setSubmittingComment(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/posts/${postId}/comment`, {
+      const response = await fetch(`/api/posts/${postId}/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

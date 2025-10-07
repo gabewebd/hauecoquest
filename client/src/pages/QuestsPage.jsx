@@ -210,7 +210,7 @@ const QuestsPage = ({ onPageChange }) => {
             setQuests(transformedQuests);
             
             try {
-                const dailyQuestRes = await fetch('http://localhost:5000/api/daily/quest');
+                const dailyQuestRes = await fetch('/api/daily/quest');
                 const dailyQuestData = await dailyQuestRes.json();
                 if (dailyQuestData.quest) {
                     const transformedDailyQuest = {
