@@ -33,16 +33,23 @@ app.use((req, res, next) => {
   next();
 });
 
-// Ensure uploads directory exists
+// Ensure img directory structure exists
 const fs = require('fs');
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-  console.log('📁 Created uploads directory');
-}
+const imgDir = path.join(__dirname, 'img');
+const postsDir = path.join(imgDir, 'posts');
+const questsDir = path.join(imgDir, 'quests');
+const challengesDir = path.join(imgDir, 'challenges');
 
-// Serve uploaded files statically
-app.use('/uploads', express.static(uploadsDir, {
+// Create directories if they don't exist
+[imgDir, postsDir, questsDir, challengesDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+    console.log(`📁 Created directory: ${dir}`);
+  }
+});
+
+// Serve uploaded files statically from img directory
+app.use('/img', express.static(imgDir, {
   setHeaders: (res, path) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -69,18 +76,22 @@ try {
 
 // Health check route
 app.get('/api/health', (req, res) => {
-  const uploadsExists = fs.existsSync(uploadsDir);
-  const uploadsFiles = uploadsExists ? fs.readdirSync(uploadsDir).length : 0;
+  const imgExists = fs.existsSync(imgDir);
+  const postsFiles = fs.existsSync(postsDir) ? fs.readdirSync(postsDir).length : 0;
+  const questsFiles = fs.existsSync(questsDir) ? fs.readdirSync(questsDir).length : 0;
+  const challengesFiles = fs.existsSync(challengesDir) ? fs.readdirSync(challengesDir).length : 0;
   
   res.json({ 
     status: 'ok', 
     message: 'HAU Eco-Quest API is running',
     timestamp: new Date().toISOString(),
     port: PORT,
-    uploads: {
-      directory: uploadsDir,
-      exists: uploadsExists,
-      fileCount: uploadsFiles
+    img: {
+      directory: imgDir,
+      exists: imgExists,
+      posts: { directory: postsDir, fileCount: postsFiles },
+      quests: { directory: questsDir, fileCount: questsFiles },
+      challenges: { directory: challengesDir, fileCount: challengesFiles }
     }
   });
 });

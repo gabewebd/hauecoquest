@@ -10,10 +10,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Create uploads directory if it doesn't exist
-const uploadDir = 'uploads';
+// Create img/challenges directory if it doesn't exist
+const uploadDir = 'img/challenges';
 if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
+    fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // Configure multer for file uploads
@@ -165,7 +165,7 @@ router.post('/:id/join', [auth, upload.single('photo'), handleUploadError], asyn
         challenge.participants.push({
             user: req.user.id,
             contribution: contributionAmount,
-            photo_url: `/uploads/${req.file.filename}`,
+            photo_url: `/img/challenges/${req.file.filename}`,
             status: 'pending'
         });
 
@@ -360,7 +360,7 @@ router.post('/submit', [auth, upload.single('photo'), handleUploadError], async 
         challenge.participants.push({
             user: req.user.id,
             contribution: 1,
-            photo_url: `/uploads/${req.file.filename}`,
+            photo_url: `/img/challenges/${req.file.filename}`,
             status: 'pending'
         });
 

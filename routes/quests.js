@@ -9,10 +9,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Create uploads directory if it doesn't exist
-const uploadDir = 'uploads';
+// Create img/quests directory if it doesn't exist
+const uploadDir = 'img/quests';
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // Configure multer for file uploads
@@ -132,7 +132,7 @@ router.post('/', [auth, checkRole('partner', 'admin'), upload.single('photo'), h
       maxParticipants: maxParticipants || 100,
       createdBy: req.user.id,
       isActive: true,
-      imageUrl: req.file ? `/uploads/${req.file.filename}` : null
+      imageUrl: req.file ? `/img/quests/${req.file.filename}` : null
     });
 
     const quest = await newQuest.save();
@@ -245,7 +245,7 @@ router.post('/:id/submit', [auth, upload.single('photo'), handleUploadError], as
     const submission = new QuestSubmission({
       user_id: req.user.id,
       quest_id: req.params.id,
-      photo_url: req.file ? `/uploads/${req.file.filename}` : '',
+      photo_url: req.file ? `/img/quests/${req.file.filename}` : '',
       reflection_text: reflection_text || '',
       status: isAdmin ? 'approved' : 'pending',
       reviewed_by: isAdmin ? req.user.id : null,
