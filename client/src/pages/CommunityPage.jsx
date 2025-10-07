@@ -968,8 +968,15 @@ const CommunityPage = ({ onPageChange }) => {
         user={user}
       />
 
+      {/* Debug info - remove this after fixing */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed top-4 right-4 bg-black bg-opacity-75 text-white p-2 rounded text-xs z-50">
+          User: {user ? user.username : 'Not logged in'}
+        </div>
+      )}
+
       {/* Sticky Create Post Button - Fixed to bottom center */}
-      {user && (
+      {user ? (
         <button
           onClick={() => setShowCreatePostModal(true)}
           className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-full shadow-2xl hover:bg-green-700 transition-all hover:scale-105 flex items-center gap-2 font-bold"
@@ -977,6 +984,10 @@ const CommunityPage = ({ onPageChange }) => {
           <Plus className="w-5 h-5" />
           <span>Create Post</span>
         </button>
+      ) : (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-600 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 font-bold">
+          <span>Please log in to create posts</span>
+        </div>
       )}
     </div>
   );
