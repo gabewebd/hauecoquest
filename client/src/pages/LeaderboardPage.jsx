@@ -16,6 +16,9 @@ const TopChampionCard = ({ user, rank, onPageChange }) => {
   };
   const style = rankStyles[rank];
 
+  // Points are always shown since only 'partner' users are passed to this filtered array
+  const pointsDisplay = user.points.toLocaleString();
+
   return (
     <div className={`relative ${style.bg} p-6 rounded-2xl border-2 ${style.border} text-center flex flex-col items-center`}>
       {style.crown && <Crown className="absolute -top-4 text-yellow-500 w-8 h-8" />}
@@ -34,39 +37,44 @@ const TopChampionCard = ({ user, rank, onPageChange }) => {
       </button>
       <p className={`text-sm font-semibold ${style.text} mb-2`}>{user.title}</p>
       {/* FIXED: Replaced text-dark-green with text-green-900 */}
-      <p className="text-2xl font-bold text-green-900">{user.points.toLocaleString()}</p>
+      <p className="text-2xl font-bold text-green-900">{pointsDisplay}</p>
     </div>
   );
 };
 
 // Helper component for the rest of the leaderboard rows (4th place and below)
-const LeaderboardRow = ({ user, rank, onPageChange }) => (
-  <div className="flex items-center bg-white p-3 rounded-xl mb-2 hover:bg-green-50/50 transition-colors">
-    <div className="w-8 text-center font-bold text-gray-500 text-lg">#{rank}</div>
-    <div className="flex items-center gap-3 flex-1 ml-4">
-      <div className="relative">
-        <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center font-bold text-lg text-gray-600">{user.avatarInitial}</div>
-        <div className="absolute -bottom-0 -right-0 bg-white text-xs font-bold w-5 h-5 rounded-full border flex items-center justify-center">{user.level}</div>
+const LeaderboardRow = ({ user, rank, onPageChange }) => {
+  // Points are always shown since only 'partner' users are passed to this array
+  const pointsDisplay = user.points.toLocaleString();
+
+  return (
+    <div className="flex items-center bg-white p-3 rounded-xl mb-2 hover:bg-green-50/50 transition-colors">
+      <div className="w-8 text-center font-bold text-gray-500 text-lg">#{rank}</div>
+      <div className="flex items-center gap-3 flex-1 ml-4">
+        <div className="relative">
+          <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center font-bold text-lg text-gray-600">{user.avatarInitial}</div>
+          <div className="absolute -bottom-0 -right-0 bg-white text-xs font-bold w-5 h-5 rounded-full border flex items-center justify-center">{user.level}</div>
+        </div>
+        <div>
+          <button
+            onClick={() => onPageChange('profile', { userId: user.id })}
+            className="font-bold text-gray-800 hover:text-green-600 hover:underline cursor-pointer"
+          >
+            {user.name}
+          </button>
+          <p className="text-sm text-gray-500">{user.title}</p>
+        </div>
       </div>
-      <div>
-        <button
-          onClick={() => onPageChange('profile', { userId: user.id })}
-          className="font-bold text-gray-800 hover:text-green-600 hover:underline cursor-pointer"
-        >
-          {user.name}
-        </button>
-        <p className="text-sm text-gray-500">{user.title}</p>
+      <div className="hidden md:flex items-center gap-3 text-gray-400">
+        <Award className="w-5 h-5" title="Award Winner" />
+        <Shield className="w-5 h-5" title="Guardian" />
+        <Sprout className="w-5 h-5" title="Planter" />
       </div>
+      {/* FIXED: Replaced text-primary-green with text-green-600 */}
+      <div className="w-24 text-right font-bold text-green-600 text-lg">{pointsDisplay}</div>
     </div>
-    <div className="hidden md:flex items-center gap-3 text-gray-400">
-      <Award className="w-5 h-5" title="Award Winner" />
-      <Shield className="w-5 h-5" title="Guardian" />
-      <Sprout className="w-5 h-5" title="Planter" />
-    </div>
-    {/* FIXED: Replaced text-primary-green with text-green-600 */}
-    <div className="w-24 text-right font-bold text-green-600 text-lg">{user.points.toLocaleString()}</div>
-  </div>
-);
+  );
+};
 
 // Helper component for department leaderboard rows
 const DepartmentRow = ({ department, rank, onPageChange }) => (
@@ -155,6 +163,7 @@ const LeaderboardPage = ({ onPageChange }) => {
         const transformedUsers = (response.leaderboard || []).map(user => ({
           id: user._id || user.username, // Use username as fallback ID
           name: user.username,
+          role: user.role, // Ensure role is included for filtering
           title: getRoleTitle(user.role, user.questsCompleted),
           points: user.eco_score || user.points || 0,
           level: Math.floor((user.eco_score || user.points || 0) / 100) + 1,
@@ -207,8 +216,11 @@ const LeaderboardPage = ({ onPageChange }) => {
     return 'Green Rookie';
   };
 
-  // Sort users by points (descending)
-  const sortedUsers = [...users].sort((a, b) => b.points - a.points);
+  // 🟢 MODIFICATION: Filter to include ONLY 'partner' users (excludes 'admin' and 'user')
+  const filteredUsers = users.filter(user => user.role === 'partner');
+
+  // Sort the filtered users by points (descending)
+  const sortedUsers = [...filteredUsers].sort((a, b) => b.points - a.points);
 
   const handleShowMore = () => {
     setDisplayCount(prev => prev + 10);
@@ -224,6 +236,9 @@ const LeaderboardPage = ({ onPageChange }) => {
       </div>
     );
   }
+
+  const topThree = sortedUsers.slice(0, 3);
+  const remainingUsers = sortedUsers.slice(3, displayCount);
 
   return (
     <div className="font-sans bg-app-bg text-gray-800">
@@ -337,7 +352,7 @@ const LeaderboardPage = ({ onPageChange }) => {
           {/* Top Champions */}
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold">
-              🏆 {selectedDepartment === 'all' ? 'Department Rankings' : 'Top Environmental Champions'} 🏆
+              🏆 {selectedDepartment === 'all' ? 'Department Rankings' : 'Top Environmental Partners'} 🏆
             </h2>
             {selectedDepartment !== 'all' && (
               <p className="text-lg text-gray-600 mt-2">
@@ -370,7 +385,7 @@ const LeaderboardPage = ({ onPageChange }) => {
               ))}
             </div>
           ) : (
-            // Individual department leaderboard
+            // Individual department leaderboard (now only showing partners in that department)
             sortedUsers.length >= 3 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -381,8 +396,8 @@ const LeaderboardPage = ({ onPageChange }) => {
 
                 {/* Complete Leaderboard */}
                 <div className="bg-white p-6 rounded-2xl shadow-xl border">
-                  <h3 className="text-2xl font-bold mb-4">Complete Leaderboard</h3>
-                  {sortedUsers.slice(3, displayCount).map((user, index) => (
+                  <h3 className="text-2xl font-bold mb-4">Complete Partner Rankings</h3>
+                  {remainingUsers.map((user, index) => (
                     <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={index + 4} onPageChange={onPageChange} />
                   ))}
 
@@ -402,8 +417,8 @@ const LeaderboardPage = ({ onPageChange }) => {
             ) : (
               <div className="bg-white p-12 rounded-2xl shadow-xl border text-center">
                 <Sprout className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-600 mb-2">No Champions Yet</h3>
-                <p className="text-gray-500">Be the first to complete quests and climb the leaderboard!</p>
+                <h3 className="text-xl font-bold text-gray-600 mb-2">No Partners Found</h3>
+                <p className="text-gray-500">There are no environmental partners registered in this department yet.</p>
               </div>
             )
           )}
