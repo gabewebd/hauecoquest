@@ -490,7 +490,7 @@ const CommunityPage = ({ onPageChange }) => {
           time: timeAgo,
           text: post.content,
           quest: post.category === 'Updates' ? null : post.category,
-          image: post.image_url ? `${post.image_url}` : null,
+          image: post.image_url ? post.image_url : null,
           likes: post.likes?.length || 0,
           comments: post.comments?.length || 0,
           shares: 0,

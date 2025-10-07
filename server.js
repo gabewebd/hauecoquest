@@ -57,6 +57,15 @@ app.use('/img', express.static(imgDir, {
   }
 }));
 
+// Serve uploaded files statically from uploads directory
+app.use('/uploads', express.static('uploads', {
+  setHeaders: (res, path) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+  }
+}));
+
 // Define Routes with error handling
 try {
   app.use('/api/auth', require('./routes/auth'));
@@ -80,9 +89,9 @@ app.get('/api/health', (req, res) => {
   const postsFiles = fs.existsSync(postsDir) ? fs.readdirSync(postsDir).length : 0;
   const questsFiles = fs.existsSync(questsDir) ? fs.readdirSync(questsDir).length : 0;
   const challengesFiles = fs.existsSync(challengesDir) ? fs.readdirSync(challengesDir).length : 0;
-  
-  res.json({ 
-    status: 'ok', 
+
+  res.json({
+    status: 'ok',
     message: 'HAU Eco-Quest API is running',
     timestamp: new Date().toISOString(),
     port: PORT,
