@@ -7,10 +7,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Create uploads directory if it doesn't exist
-const uploadDir = 'uploads';
+// Create client/img/posts directory if it doesn't exist
+const uploadDir = 'client/img/posts';
 if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 // Configure multer for file uploads
@@ -125,7 +125,7 @@ router.post('/', auth, upload.single('image'), handleUploadError, async (req, re
       category: category || 'Updates',
       author: req.user.id,
       tags: processedTags,
-      image_url: req.file ? `/uploads/${req.file.filename}` : (image_url || null)
+      image_url: req.file ? `/img/posts/${req.file.filename}` : (image_url || null)
     });
 
     await post.save();
