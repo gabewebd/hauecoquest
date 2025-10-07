@@ -22,11 +22,11 @@ const TopChampionCard = ({ user, rank, onPageChange }) => {
       <div className="relative mb-3">
         {/* FIXED: Replaced to-primary-green with to-green-500 */}
         <div className={`w-20 h-20 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center text-white text-3xl font-bold`}>
-            {user.avatarInitial}
+          {user.avatarInitial}
         </div>
         <div className="absolute -bottom-1 -right-1 bg-white text-sm font-bold w-8 h-8 rounded-full border-2 flex items-center justify-center border-yellow-300">{user.level}</div>
       </div>
-      <button 
+      <button
         onClick={() => onPageChange('profile', { userId: user.id })}
         className="font-bold text-lg text-gray-800 hover:text-green-600 hover:underline cursor-pointer"
       >
@@ -49,7 +49,7 @@ const LeaderboardRow = ({ user, rank, onPageChange }) => (
         <div className="absolute -bottom-0 -right-0 bg-white text-xs font-bold w-5 h-5 rounded-full border flex items-center justify-center">{user.level}</div>
       </div>
       <div>
-        <button 
+        <button
           onClick={() => onPageChange('profile', { userId: user.id })}
           className="font-bold text-gray-800 hover:text-green-600 hover:underline cursor-pointer"
         >
@@ -59,9 +59,9 @@ const LeaderboardRow = ({ user, rank, onPageChange }) => (
       </div>
     </div>
     <div className="hidden md:flex items-center gap-3 text-gray-400">
-      <Award className="w-5 h-5" title="Award Winner"/>
-      <Shield className="w-5 h-5" title="Guardian"/>
-      <Sprout className="w-5 h-5" title="Planter"/>
+      <Award className="w-5 h-5" title="Award Winner" />
+      <Shield className="w-5 h-5" title="Guardian" />
+      <Sprout className="w-5 h-5" title="Planter" />
     </div>
     {/* FIXED: Replaced text-primary-green with text-green-600 */}
     <div className="w-24 text-right font-bold text-green-600 text-lg">{user.points.toLocaleString()}</div>
@@ -69,214 +69,260 @@ const LeaderboardRow = ({ user, rank, onPageChange }) => (
 );
 
 const LeaderboardPage = ({ onPageChange }) => {
-    const { user } = useUser();
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({
-        totalUsers: 0,
-        totalQuests: 0,
-        totalPoints: 0
-    });
-    const [displayCount, setDisplayCount] = useState(10);
+  const { user } = useUser();
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalQuests: 0,
+    totalPoints: 0
+  });
+  const [displayCount, setDisplayCount] = useState(10);
 
-    useEffect(() => {
-        fetchLeaderboard();
-    }, []);
+  const departmentOptions = [
+    { value: 'all', label: 'All Departments' },
+    { value: 'SOC', label: 'School of Computing (SOC)' },
+    { value: 'SAS', label: 'School of Arts and Sciences (SAS)' },
+    { value: 'SEA', label: 'School of Engineering and Architecture (SEA)' },
+    { value: 'SBA', label: 'School of Business and Accountancy (SBA)' },
+    { value: 'SED', label: 'School of Education (SED)' },
+    { value: 'CCJEF', label: 'College of Criminal Justice Education and Forensics (CCJEF)' },
+    { value: 'SHTM', label: 'School of Hospitality and Tourism Management (SHTM)' },
+    { value: 'SNAMS', label: 'School of Nursing and Allied Medical Sciences (SNAMS)' }
+  ];
 
-    const fetchLeaderboard = async () => {
-        try {
-            const leaderboardData = await userAPI.getLeaderboard();
-            
-            // Transform data for display
-            const transformedUsers = leaderboardData.map(user => ({
-                id: user._id,
-                name: user.username,
-                title: getRoleTitle(user.role, user.questsCompleted),
-                points: user.eco_score || user.points || 0,
-                level: Math.floor((user.eco_score || user.points || 0) / 100) + 1,
-                avatarInitial: getInitials(user.username),
-                questsCompleted: user.questsCompleted
-            }));
+  useEffect(() => {
+    fetchLeaderboard();
+    setDisplayCount(10); // Reset display count when department changes
+  }, [selectedDepartment]);
 
-            setUsers(transformedUsers);
-            
-            // Calculate stats
-            setStats({
-                totalUsers: leaderboardData.length,
-                totalQuests: leaderboardData.reduce((sum, u) => sum + u.questsCompleted, 0),
-                totalPoints: leaderboardData.reduce((sum, u) => sum + (u.eco_score || u.points || 0), 0)
-            });
-            
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching leaderboard:', error);
-            setLoading(false);
-        }
-    };
+  const fetchLeaderboard = async () => {
+    try {
+      const leaderboardData = await userAPI.getLeaderboard(selectedDepartment);
 
-    const getInitials = (name) => {
-        return name
-            .split(' ')
-            .map(word => word[0])
-            .join('')
-            .toUpperCase()
-            .substring(0, 2);
-    };
+      // Transform data for display
+      const transformedUsers = leaderboardData.map(user => ({
+        id: user._id,
+        name: user.username,
+        title: getRoleTitle(user.role, user.questsCompleted),
+        points: user.eco_score || user.points || 0,
+        level: Math.floor((user.eco_score || user.points || 0) / 100) + 1,
+        avatarInitial: getInitials(user.username),
+        questsCompleted: user.questsCompleted
+      }));
 
-    const getRoleTitle = (role, questsCompleted) => {
-        if (role === 'admin') return 'Quest Master';
-        if (role === 'partner') return 'Environmental Partner';
-        
-        // Based on quests completed
-        if (questsCompleted >= 20) return 'Sustainability Champion';
-        if (questsCompleted >= 15) return 'Eco-Warrior';
-        if (questsCompleted >= 10) return 'Green Guardian';
-        if (questsCompleted >= 5) return 'Nature Defender';
-        if (questsCompleted >= 3) return 'Eco-Enthusiast';
-        return 'Green Rookie';
-    };
+      setUsers(transformedUsers);
 
-    // Sort users by points (descending)
-    const sortedUsers = [...users].sort((a, b) => b.points - a.points);
+      // Calculate stats
+      setStats({
+        totalUsers: leaderboardData.length,
+        totalQuests: leaderboardData.reduce((sum, u) => sum + u.questsCompleted, 0),
+        totalPoints: leaderboardData.reduce((sum, u) => sum + (u.eco_score || u.points || 0), 0)
+      });
 
-    const handleShowMore = () => {
-        setDisplayCount(prev => prev + 10);
-    };
-
-    if (loading) {
-        return (
-            <div className="font-sans bg-app-bg text-gray-800 min-h-screen flex items-center justify-center pt-24">
-                <div className="text-center">
-                    <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading leaderboard...</p>
-                </div>
-            </div>
-        );
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      setLoading(false);
     }
+  };
+
+  const getInitials = (name) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  const getRoleTitle = (role, questsCompleted) => {
+    if (role === 'admin') return 'Quest Master';
+    if (role === 'partner') return 'Environmental Partner';
+
+    // Based on quests completed
+    if (questsCompleted >= 20) return 'Sustainability Champion';
+    if (questsCompleted >= 15) return 'Eco-Warrior';
+    if (questsCompleted >= 10) return 'Green Guardian';
+    if (questsCompleted >= 5) return 'Nature Defender';
+    if (questsCompleted >= 3) return 'Eco-Enthusiast';
+    return 'Green Rookie';
+  };
+
+  // Sort users by points (descending)
+  const sortedUsers = [...users].sort((a, b) => b.points - a.points);
+
+  const handleShowMore = () => {
+    setDisplayCount(prev => prev + 10);
+  };
+
+  if (loading) {
+    return (
+      <div className="font-sans bg-app-bg text-gray-800 min-h-screen flex items-center justify-center pt-24">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading leaderboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="font-sans bg-app-bg text-gray-800">
-        <main className="pt-24 pb-12">
-            {/* Header */}
-            <section className="container mx-auto px-4 mb-12">
-                <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div>
-                        {/* FIXED: Replaced text-dark-green with text-green-900 */}
-                        <h2 className="text-4xl font-extrabold text-green-900 mb-2">Hall of Fame</h2>
-                        <p className="text-gray-600 max-w-lg">Celebrate our environmental champions and see how you rank among the eco-heroes making a real difference in the world!</p>
-                        <div className="flex items-center gap-4 mt-6">
-                            {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
-                            <button 
-                                onClick={() => {
-                                    const leaderboardSection = document.querySelector('#leaderboard-section');
-                                    if (leaderboardSection) {
-                                        leaderboardSection.scrollIntoView({ behavior: 'smooth' });
-                                    }
-                                }}
-                                className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
-                            >
-                                View Rankings
-                            </button>
-                            <button 
-                                onClick={() => {
-                                    if (user) {
-                                        if (user.role === 'admin') {
-                                            onPageChange('admin-dashboard');
-                                        } else if (user.role === 'partner') {
-                                            onPageChange('partner-dashboard');
-                                        } else {
-                                            onPageChange('dashboard');
-                                        }
-                                    } else {
-                                        onPageChange('login');
-                                    }
-                                }}
-                                className="font-bold text-gray-700 py-3 px-6 hover:text-green-600 transition"
-                            >
-                                My Progress
-                            </button>
-                        </div>
-                    </div>
-                    <div className="bg-green-50 p-6 rounded-2xl text-center">
-                        <p>Leaderboard Illustration Placeholder</p>
-                    </div>
-                </div>
-            </section>
+      <main className="pt-24 pb-12">
+        {/* Header */}
+        <section className="container mx-auto px-4 mb-12">
+          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+              {/* FIXED: Replaced text-dark-green with text-green-900 */}
+              <h2 className="text-4xl font-extrabold text-green-900 mb-2">Hall of Fame</h2>
+              <p className="text-gray-600 max-w-lg">Celebrate our environmental champions and see how you rank among the eco-heroes making a real difference in the world!</p>
+              <div className="flex items-center gap-4 mt-6">
+                {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
+                <button
+                  onClick={() => {
+                    const leaderboardSection = document.querySelector('#leaderboard-section');
+                    if (leaderboardSection) {
+                      leaderboardSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
+                >
+                  View Rankings
+                </button>
+                <button
+                  onClick={() => {
+                    if (user) {
+                      if (user.role === 'admin') {
+                        onPageChange('admin-dashboard');
+                      } else if (user.role === 'partner') {
+                        onPageChange('partner-dashboard');
+                      } else {
+                        onPageChange('dashboard');
+                      }
+                    } else {
+                      onPageChange('login');
+                    }
+                  }}
+                  className="font-bold text-gray-700 py-3 px-6 hover:text-green-600 transition"
+                >
+                  My Progress
+                </button>
+              </div>
+            </div>
+            <div className="bg-green-50 p-6 rounded-2xl text-center">
+              <p>Leaderboard Illustration Placeholder</p>
+            </div>
+          </div>
+        </section>
 
-            {/* Stats Bar */}
-            <section className="container mx-auto px-4 mb-12 grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Users className="w-8 h-8 text-blue-500 mx-auto mb-2"/><p className="text-2xl font-bold">{stats.totalUsers}</p><p className="text-sm text-gray-500">Active Champions</p></div>
-                <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Swords className="w-8 h-8 text-yellow-500 mx-auto mb-2"/><p className="text-2xl font-bold">{stats.totalQuests}</p><p className="text-sm text-gray-500">Quests Completed</p></div>
-                <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Users2 className="w-8 h-8 text-purple-500 mx-auto mb-2"/><p className="text-2xl font-bold">{stats.totalUsers}</p><p className="text-sm text-gray-500">Green Participants</p></div>
-                <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Leaf className="w-8 h-8 text-green-500 mx-auto mb-2"/><p className="text-2xl font-bold">{stats.totalPoints}</p><p className="text-sm text-gray-500">Total Points</p></div>
-            </section>
+        {/* Department Filter */}
+        <section className="container mx-auto px-4 mb-8">
+          <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Filter by Department</h3>
+                <p className="text-gray-600">View rankings for specific departments or see all participants</p>
+              </div>
+              <div className="w-full md:w-80">
+                <select
+                  value={selectedDepartment}
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent font-medium"
+                >
+                  {departmentOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        </section>
 
-            {/* Leaderboard Section */}
-            <section id="leaderboard-section" className="container mx-auto px-4">
+        {/* Stats Bar */}
+        <section className="container mx-auto px-4 mb-12 grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Users className="w-8 h-8 text-blue-500 mx-auto mb-2" /><p className="text-2xl font-bold">{stats.totalUsers}</p><p className="text-sm text-gray-500">Active Champions</p></div>
+          <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Swords className="w-8 h-8 text-yellow-500 mx-auto mb-2" /><p className="text-2xl font-bold">{stats.totalQuests}</p><p className="text-sm text-gray-500">Quests Completed</p></div>
+          <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Users2 className="w-8 h-8 text-purple-500 mx-auto mb-2" /><p className="text-2xl font-bold">{stats.totalUsers}</p><p className="text-sm text-gray-500">Green Participants</p></div>
+          <div className="bg-white p-4 rounded-2xl shadow-md border text-center"><Leaf className="w-8 h-8 text-green-500 mx-auto mb-2" /><p className="text-2xl font-bold">{stats.totalPoints}</p><p className="text-sm text-gray-500">Total Points</p></div>
+        </section>
 
-                {/* Top Champions */}
-                <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold">🏆 Top Environmental Champions 🏆</h2>
-                </div>
-                
-                {sortedUsers.length >= 3 ? (
-                    <>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                            <TopChampionCard user={sortedUsers[1]} rank={2} onPageChange={onPageChange} />
-                            <TopChampionCard user={sortedUsers[0]} rank={1} onPageChange={onPageChange} />
-                            <TopChampionCard user={sortedUsers[2]} rank={3} onPageChange={onPageChange} />
-                        </div>
+        {/* Leaderboard Section */}
+        <section id="leaderboard-section" className="container mx-auto px-4">
 
-                        {/* Complete Leaderboard */}
-                        <div className="bg-white p-6 rounded-2xl shadow-xl border">
-                          <h3 className="text-2xl font-bold mb-4">Complete Leaderboard</h3>
-                          {sortedUsers.slice(3, displayCount).map((user, index) => (
-                              <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={index + 4} onPageChange={onPageChange} />
-                          ))}
-                          
-                          {/* Show More Button */}
-                          {displayCount < sortedUsers.length && (
-                              <div className="text-center mt-6">
-                                  <button 
-                                      onClick={handleShowMore}
-                                      className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
-                                  >
-                                      Show More (+10)
-                                  </button>
-                              </div>
-                          )}
-                        </div>
-                    </>
-                ) : (
-                    <div className="bg-white p-12 rounded-2xl shadow-xl border text-center">
-                        <Sprout className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-gray-600 mb-2">No Champions Yet</h3>
-                        <p className="text-gray-500">Be the first to complete quests and climb the leaderboard!</p>
-                    </div>
+          {/* Top Champions */}
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold">
+              🏆 Top Environmental Champions 🏆
+            </h2>
+            {selectedDepartment !== 'all' && (
+              <p className="text-lg text-gray-600 mt-2">
+                {departmentOptions.find(d => d.value === selectedDepartment)?.label}
+              </p>
+            )}
+          </div>
+
+          {sortedUsers.length >= 3 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <TopChampionCard user={sortedUsers[1]} rank={2} onPageChange={onPageChange} />
+                <TopChampionCard user={sortedUsers[0]} rank={1} onPageChange={onPageChange} />
+                <TopChampionCard user={sortedUsers[2]} rank={3} onPageChange={onPageChange} />
+              </div>
+
+              {/* Complete Leaderboard */}
+              <div className="bg-white p-6 rounded-2xl shadow-xl border">
+                <h3 className="text-2xl font-bold mb-4">Complete Leaderboard</h3>
+                {sortedUsers.slice(3, displayCount).map((user, index) => (
+                  <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={index + 4} onPageChange={onPageChange} />
+                ))}
+
+                {/* Show More Button */}
+                {displayCount < sortedUsers.length && (
+                  <div className="text-center mt-6">
+                    <button
+                      onClick={handleShowMore}
+                      className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
+                    >
+                      Show More (+10)
+                    </button>
+                  </div>
                 )}
-            </section>
+              </div>
+            </>
+          ) : (
+            <div className="bg-white p-12 rounded-2xl shadow-xl border text-center">
+              <Sprout className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-gray-600 mb-2">No Champions Yet</h3>
+              <p className="text-gray-500">Be the first to complete quests and climb the leaderboard!</p>
+            </div>
+          )}
+        </section>
 
-             {/* CTA */}
-            <section className="container mx-auto px-4 mt-24">
-                <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center flex flex-col items-center">
-                    {/* FIXED: Replaced text-primary-green with text-green-500 */}
-                    <Rocket className="w-12 h-12 text-green-500 mb-4"/>
-                    <h2 className="text-3xl font-bold text-gray-800 mb-2">Climb the Eco-Hero Rankings!</h2>
-                    <p className="text-gray-600 max-w-lg mx-auto mb-6">Complete quests, attend events, and make environmental impact to earn points and climb the leaderboard. Every action counts towards a sustainable future!</p>
-                    <div className="flex gap-4">
-                        {/* --- CHANGE: Made this button functional --- */}
-                        <button 
-                          onClick={() => onPageChange('quests')}
-                          className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
-                        >
-                          Start New Quest
-                        </button>
-                    </div>
-                </div>
-            </section>
-        </main>
+        {/* CTA */}
+        <section className="container mx-auto px-4 mt-24">
+          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center flex flex-col items-center">
+            {/* FIXED: Replaced text-primary-green with text-green-500 */}
+            <Rocket className="w-12 h-12 text-green-500 mb-4" />
+            <h2 className="text-3xl font-bold text-gray-800 mb-2">Climb the Eco-Hero Rankings!</h2>
+            <p className="text-gray-600 max-w-lg mx-auto mb-6">Complete quests, attend events, and make environmental impact to earn points and climb the leaderboard. Every action counts towards a sustainable future!</p>
+            <div className="flex gap-4">
+              {/* --- CHANGE: Made this button functional --- */}
+              <button
+                onClick={() => onPageChange('quests')}
+                className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
+              >
+                Start New Quest
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
 
-        {/* Footer */}
+      {/* Footer */}
       <footer className="bg-green-700 text-white pt-16 pb-8 px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
           {/* Brand */}

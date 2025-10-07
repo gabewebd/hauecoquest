@@ -9,14 +9,14 @@ const getHeaders = (includeAuth = true) => {
   const headers = {
     'Content-Type': 'application/json',
   };
-  
+
   if (includeAuth) {
     const token = getAuthToken();
     if (token) {
       headers['x-auth-token'] = token;
     }
   }
-  
+
   return headers;
 };
 
@@ -88,8 +88,12 @@ export const userAPI = {
     return handleApiResponse(response);
   },
 
-  getLeaderboard: async () => {
-    const response = await fetch(`${API_URL}/users/leaderboard`, {
+  getLeaderboard: async (department = 'all') => {
+    const params = new URLSearchParams();
+    if (department && department !== 'all') {
+      params.append('department', department);
+    }
+    const response = await fetch(`${API_URL}/users/leaderboard?${params}`, {
       headers: getHeaders(false),
     });
     return handleApiResponse(response);
@@ -210,7 +214,7 @@ export const postAPI = {
 
   createPost: async (postData) => {
     const token = getAuthToken();
-    
+
     // If there's a file, use FormData, otherwise use JSON
     if (postData.photo) {
       const formData = new FormData();

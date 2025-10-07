@@ -1,8 +1,8 @@
 //Josh Andrei Aguiluz
 import React, { useState } from "react";
 import axios from "axios";
-import { useUser } from '../context/UserContext'; 
-import { Check, Sprout, Users, Crown, ChevronLeft, GraduationCap, Mail, Lock } from "lucide-react";
+import { useUser } from '../context/UserContext';
+import { Check, Sprout, Users, Crown, ChevronLeft, GraduationCap, Mail, Lock, Building2 } from "lucide-react";
 
 const StyledInput = ({ label, placeholder, type, icon, name, value, onChange }) => (
     <div>
@@ -24,40 +24,89 @@ const StyledInput = ({ label, placeholder, type, icon, name, value, onChange }) 
     </div>
 );
 
+const StyledSelect = ({ label, icon, name, value, onChange, options }) => (
+    <div>
+        <label className="block text-sm font-bold text-gray-700 mb-2">{label}</label>
+        <div className="relative">
+            <select
+                required
+                name={name}
+                value={value}
+                onChange={onChange}
+                className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all font-medium appearance-none"
+            >
+                <option value="">Select your department</option>
+                {options.map(option => (
+                    <option key={option.value} value={option.value}>
+                        {option.label}
+                    </option>
+                ))}
+            </select>
+            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+                {icon}
+            </div>
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+        </div>
+    </div>
+);
+
 const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
+    const departmentOptions = [
+        { value: 'SOC', label: 'School of Computing (SOC)' },
+        { value: 'SAS', label: 'School of Arts and Sciences (SAS)' },
+        { value: 'SEA', label: 'School of Engineering and Architecture (SEA)' },
+        { value: 'SBA', label: 'School of Business and Accountancy (SBA)' },
+        { value: 'SED', label: 'School of Education (SED)' },
+        { value: 'CCJEF', label: 'College of Criminal Justice Education and Forensics (CCJEF)' },
+        { value: 'SHTM', label: 'School of Hospitality and Tourism Management (SHTM)' },
+        { value: 'SNAMS', label: 'School of Nursing and Allied Medical Sciences (SNAMS)' }
+    ];
+
     return (
         <form className="space-y-5" onSubmit={(e) => { e.preventDefault(); goToStep(2); }}>
-            <StyledInput 
-                label="Full Name" 
-                placeholder="Enter your full name" 
-                type="text" 
-                icon={<GraduationCap className="w-5 h-5" />} 
+            <StyledInput
+                label="Full Name"
+                placeholder="Enter your full name"
+                type="text"
+                icon={<GraduationCap className="w-5 h-5" />}
                 name="username"
                 value={formData.username}
                 onChange={handleInputChange}
             />
-            <StyledInput 
-                label="Email Address" 
-                placeholder="your.email@hau.edu.ph" 
-                type="email" 
+            <StyledInput
+                label="Email Address"
+                placeholder="your.email@hau.edu.ph"
+                type="email"
                 icon={<Mail className="w-5 h-5" />}
                 name="email"
                 value={formData.email}
-                onChange={handleInputChange} 
+                onChange={handleInputChange}
             />
-            <StyledInput 
-                label="Password" 
-                placeholder="Create a strong password" 
-                type="password" 
+            <StyledSelect
+                label="Department"
+                icon={<Building2 className="w-5 h-5" />}
+                name="department"
+                value={formData.department}
+                onChange={handleInputChange}
+                options={departmentOptions}
+            />
+            <StyledInput
+                label="Password"
+                placeholder="Create a strong password"
+                type="password"
                 icon={<Lock className="w-5 h-5" />}
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
             />
-            <StyledInput 
-                label="Confirm Password" 
-                placeholder="Confirm your password" 
-                type="password" 
+            <StyledInput
+                label="Confirm Password"
+                placeholder="Confirm your password"
+                type="password"
                 icon={<Lock className="w-5 h-5" />}
                 name="confirmPassword"
                 value={formData.confirmPassword}
@@ -76,7 +125,7 @@ const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
 const AgreementForm = ({ agreedToTerms, setAgreedToTerms, goToStep, handleSubmit, loading }) => {
     return (
         <form className="space-y-6" onSubmit={handleSubmit}>
-            
+
             <div className="bg-green-50 border-2 border-green-200 p-5 rounded-2xl">
                 <div className="flex items-start gap-3 mb-3">
                     <div className="bg-gradient-to-br from-green-400 to-emerald-600 p-2 rounded-xl shadow-lg flex-shrink-0">
@@ -85,12 +134,12 @@ const AgreementForm = ({ agreedToTerms, setAgreedToTerms, goToStep, handleSubmit
                     <div>
                         <h3 className="font-bold text-lg text-gray-800">Welcome to HAU Eco-Quest!</h3>
                         <p className="text-gray-600 text-sm mt-1">
-                            Start your environmental journey as an Eco-Hero. You can request additional roles 
+                            Start your environmental journey as an Eco-Hero. You can request additional roles
                             like Partner or Admin access from your dashboard after completing your registration.
                         </p>
                     </div>
                 </div>
-                
+
                 <div className="mt-4 pt-4 border-t-2 border-green-200">
                     <h4 className="font-bold text-green-800 mb-3">Your Account Features:</h4>
                     <ul className="text-sm text-green-700 space-y-2">
@@ -113,7 +162,7 @@ const AgreementForm = ({ agreedToTerms, setAgreedToTerms, goToStep, handleSubmit
                     </ul>
                 </div>
             </div>
-            
+
             <div className="bg-white border-2 border-gray-200 p-4 rounded-2xl">
                 <label className="flex items-start text-sm text-gray-700 font-medium cursor-pointer">
                     <input
@@ -168,6 +217,7 @@ const SignUp = ({ onPageChange }) => {
     const [formData, setFormData] = useState({
         username: '',
         email: '',
+        department: '',
         password: '',
         confirmPassword: ''
     });
@@ -197,12 +247,13 @@ const SignUp = ({ onPageChange }) => {
                 formData.username,
                 formData.email,
                 formData.password,
-                'user' // Everyone starts as a user
+                'user', // Everyone starts as a user
+                formData.department
             );
 
             if (result.success && result.user) {
                 setMessage("Sign up successful! Welcome to HAU Eco-Quest! Redirecting to your dashboard...");
-                
+
                 // All new users go to dashboard
                 setTimeout(() => {
                     onPageChange('dashboard');
@@ -228,11 +279,10 @@ const SignUp = ({ onPageChange }) => {
 
     const StepIcon = ({ number, isCurrent, isComplete, label }) => (
         <div className="flex items-center gap-2">
-            <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold transition-all duration-300 ${
-                isComplete ? 'bg-green-600 text-white' :
-                isCurrent ? 'bg-green-600 text-white border-2 border-green-600' :
-                'border-2 border-gray-300 text-gray-500'
-            }`}>
+            <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold transition-all duration-300 ${isComplete ? 'bg-green-600 text-white' :
+                    isCurrent ? 'bg-green-600 text-white border-2 border-green-600' :
+                        'border-2 border-gray-300 text-gray-500'
+                }`}>
                 {isComplete ? <Check className="w-4 h-4" /> : number}
             </div>
             <span className={`font-bold ${isCurrent || isComplete ? 'text-green-600' : 'text-gray-400'}`}>
@@ -242,7 +292,7 @@ const SignUp = ({ onPageChange }) => {
     );
 
     const FormTitle = isStep1 ? "Join the Eco-Revolution!" : "Finalize Your Registration";
-    const FormSubtitle = isStep1 
+    const FormSubtitle = isStep1
         ? "Create your account and start making a positive environmental impact today"
         : "Review the terms and complete your HAU Eco-Quest registration";
 
@@ -267,7 +317,7 @@ const SignUp = ({ onPageChange }) => {
             <div className="relative min-h-screen flex items-center justify-center px-4 py-12">
                 <div className="w-full max-w-lg">
                     <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-10">
-                        
+
                         <div className="text-center mb-8">
                             <div className="inline-block bg-gradient-to-br from-green-400 to-emerald-600 p-4 rounded-2xl mb-4 shadow-lg">
                                 <GraduationCap className="w-8 h-8 text-white" />
@@ -285,21 +335,20 @@ const SignUp = ({ onPageChange }) => {
                         </div>
 
                         {message && (
-                            <div className={`p-4 rounded-2xl mb-6 text-center font-semibold border-2 ${
-                                message.includes('successful') ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'
-                            }`}>
+                            <div className={`p-4 rounded-2xl mb-6 text-center font-semibold border-2 ${message.includes('successful') ? 'bg-green-50 border-green-200 text-green-700' : 'bg-red-50 border-red-200 text-red-700'
+                                }`}>
                                 {message}
                             </div>
                         )}
 
                         {isStep1 ? (
-                            <AccountDetailsForm 
-                                goToStep={setStep} 
+                            <AccountDetailsForm
+                                goToStep={setStep}
                                 formData={formData}
                                 handleInputChange={handleInputChange}
                             />
                         ) : (
-                            <AgreementForm 
+                            <AgreementForm
                                 agreedToTerms={agreedToTerms}
                                 setAgreedToTerms={setAgreedToTerms}
                                 goToStep={setStep}

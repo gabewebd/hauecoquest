@@ -44,14 +44,14 @@ export const UserProvider = ({ children }) => {
   const fetchUser = async () => {
     try {
       const userData = await authAPI.getCurrentUser();
-      
+
       // Check if approval status changed
       if (user && userData) {
         // User was pending and now approved (role changed from user to partner/admin)
         if (user.requested_role && !user.is_approved && userData.is_approved && userData.role !== 'user' && userData.role !== user.role) {
           const roleTitle = userData.role === 'partner' ? 'Partner' : 'Admin';
           alert(`🎉 Congratulations! Your ${roleTitle} request has been approved! You now have access to additional features. Redirecting to your dashboard...`);
-          
+
           // Redirect to appropriate dashboard
           setTimeout(() => {
             if (userData.role === 'admin') {
@@ -68,7 +68,7 @@ export const UserProvider = ({ children }) => {
           alert(`Your ${roleTitle} request was not approved at this time. You can still enjoy all the regular user features!`);
         }
       }
-      
+
       setUser(userData);
     } catch (error) {
       console.error('Error fetching user:', error);
@@ -96,18 +96,18 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  const signup = async (username, email, password, role = 'user') => {
+  const signup = async (username, email, password, role = 'user', department) => {
     try {
-      console.log('Attempting signup with:', { username, email, role });
-      const data = await authAPI.signup({ username, email, password, role });
+      console.log('Attempting signup with:', { username, email, role, department });
+      const data = await authAPI.signup({ username, email, password, role, department });
       console.log('Signup response data:', data);
 
       if (data.success) {
         localStorage.setItem('token', data.token);
         setUser(data.user);
-        return { 
-          success: true, 
-          message: data.message, 
+        return {
+          success: true,
+          message: data.message,
           user: data.user,
           pendingApproval: data.user.requested_role && !data.user.is_approved
         };
@@ -130,10 +130,10 @@ export const UserProvider = ({ children }) => {
     try {
       // Update in backend (MongoDB)
       const result = await userAPI.updateProfile(updatedData);
-      
+
       // Update local state
       setUser(prev => ({ ...prev, ...result }));
-      
+
       return { success: true };
     } catch (error) {
       console.error('Error updating user:', error);
@@ -160,7 +160,7 @@ export const UserProvider = ({ children }) => {
   const requestRole = async (roleRequested) => {
     try {
       const token = localStorage.getItem('token');
-      
+
       const response = await fetch('http://localhost:5000/api/auth/request-role', {
         method: 'POST',
         headers: {
@@ -190,13 +190,13 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ 
-      user, 
-      loading, 
-      login, 
-      signup, 
-      logout, 
-      updateUser, 
+    <UserContext.Provider value={{
+      user,
+      loading,
+      login,
+      signup,
+      logout,
+      updateUser,
       deleteAccount,
       setUser,
       refreshUser: fetchUser,

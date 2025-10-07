@@ -45,6 +45,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ''
   },
+  department: {
+    type: String,
+    enum: ['SOC', 'SAS', 'SEA', 'SBA', 'SED', 'CCJEF', 'SHTM', 'SNAMS'],
+    required: true
+  },
   avatar_theme: {
     type: String,
     default: 'Girl Avatar 1'
@@ -118,7 +123,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Hash password before saving
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
     return next();
   }
@@ -128,7 +133,7 @@ userSchema.pre('save', async function(next) {
 });
 
 // Compare password method
-userSchema.methods.comparePassword = function(candidatePassword) {
+userSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
