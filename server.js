@@ -33,9 +33,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Ensure img directory structure exists
+// Ensure client/img directory structure exists
 const fs = require('fs');
-const imgDir = path.join(__dirname, 'img');
+const imgDir = path.join(__dirname, 'client', 'img');
 const postsDir = path.join(imgDir, 'posts');
 const questsDir = path.join(imgDir, 'quests');
 const challengesDir = path.join(imgDir, 'challenges');
@@ -48,7 +48,7 @@ const challengesDir = path.join(imgDir, 'challenges');
   }
 });
 
-// Serve uploaded files statically from img directory
+// Serve uploaded files statically from client/img directory
 app.use('/img', express.static(imgDir, {
   setHeaders: (res, path) => {
     res.setHeader('Access-Control-Allow-Origin', '*');

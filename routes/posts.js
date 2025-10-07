@@ -7,8 +7,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Create img/posts directory if it doesn't exist
-const uploadDir = 'img/posts';
+// Create client/img/posts directory if it doesn't exist
+const uploadDir = 'client/img/posts';
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
