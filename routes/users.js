@@ -11,7 +11,7 @@ router.get('/profile', auth, async (req, res) => {
     const user = await User.findById(req.user.id)
       .select('-password')
       .populate('questsCompleted', 'title points');
-    
+
     res.json(user);
   } catch (err) {
     console.error(err.message);
@@ -25,16 +25,16 @@ router.get('/profile', auth, async (req, res) => {
 router.put('/profile', auth, async (req, res) => {
   try {
     const { username, hau_affiliation, avatar_theme, header_theme } = req.body;
-    
+
     const user = await User.findById(req.user.id);
-    
+
     if (username) user.username = username;
     if (hau_affiliation) user.hau_affiliation = hau_affiliation;
     if (avatar_theme) user.avatar_theme = avatar_theme;
     if (header_theme) user.header_theme = header_theme;
-    
+
     await user.save();
-    
+
     const updatedUser = await User.findById(req.user.id).select('-password');
     res.json(updatedUser);
   } catch (err) {
@@ -48,11 +48,19 @@ router.put('/profile', auth, async (req, res) => {
 // @access  Public
 router.get('/leaderboard', async (req, res) => {
   try {
-    const users = await User.find()
-      .select('username eco_score points questsCompleted avatar_theme role')
+    const { department } = req.query;
+
+    // Build query object
+    const query = {};
+    if (department && department !== 'all') {
+      query.department = department;
+    }
+
+    const users = await User.find(query)
+      .select('username eco_score points questsCompleted avatar_theme role department')
       .sort({ eco_score: -1 })
       .limit(100);
-    
+
     const leaderboard = users.map((user, index) => ({
       rank: index + 1,
       username: user.username,
@@ -60,9 +68,10 @@ router.get('/leaderboard', async (req, res) => {
       points: user.points,
       questsCompleted: user.questsCompleted.length,
       avatar_theme: user.avatar_theme,
-      role: user.role
+      role: user.role,
+      department: user.department
     }));
-    
+
     res.json(leaderboard);
   } catch (err) {
     console.error(err.message);
@@ -78,11 +87,11 @@ router.get('/:id/stats', async (req, res) => {
     const user = await User.findById(req.params.id)
       .select('-password')
       .populate('questsCompleted', 'title points category');
-    
+
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
-    
+
     const stats = {
       username: user.username,
       eco_score: user.eco_score,
@@ -92,7 +101,7 @@ router.get('/:id/stats', async (req, res) => {
       role: user.role,
       completedQuests: user.questsCompleted
     };
-    
+
     res.json(stats);
   } catch (err) {
     console.error(err.message);
@@ -106,13 +115,13 @@ router.get('/:id/stats', async (req, res) => {
 router.delete('/profile', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    
+
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
 
     await User.findByIdAndDelete(req.user.id);
-    
+
     res.json({ msg: 'Account deleted successfully' });
   } catch (err) {
     console.error(err.message);
@@ -126,14 +135,14 @@ router.delete('/profile', auth, async (req, res) => {
 router.get('/photos', auth, async (req, res) => {
   try {
     const QuestSubmission = require('../models/QuestSubmission');
-    
-    const submissions = await QuestSubmission.find({ 
+
+    const submissions = await QuestSubmission.find({
       user_id: req.user.id,
       photo_url: { $exists: true, $ne: '' }
     })
-    .populate('quest_id', 'title category')
-    .sort({ submitted_at: -1 });
-    
+      .populate('quest_id', 'title category')
+      .sort({ submitted_at: -1 });
+
     const photos = submissions.map(submission => ({
       id: submission._id,
       photo_url: submission.photo_url,
@@ -142,7 +151,7 @@ router.get('/photos', auth, async (req, res) => {
       submitted_at: submission.submitted_at,
       status: submission.status
     }));
-    
+
     res.json(photos);
   } catch (err) {
     console.error(err.message);

@@ -10,8 +10,8 @@ const auth = require('../middleware/auth');
 // @access  Public
 router.post('/signup', async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
-    console.log('Signup request:', { username, email });
+    const { username, email, password, role, department } = req.body;
+    console.log('Signup request:', { username, email, department });
 
     // Check if a user with this email already exists
     let user = await User.findOne({ email });
@@ -24,6 +24,7 @@ router.post('/signup', async (req, res) => {
       username,
       email,
       password,
+      department,
       role: 'user', // Everyone starts as user
       requested_role: null, // No role requests during signup
       eco_score: 0,
@@ -37,10 +38,10 @@ router.post('/signup', async (req, res) => {
       questsCompleted: [],
       created_at: new Date()
     });
-    
+
     await user.save();
     console.log('User created successfully:', user._id);
-    
+
     // Create token
     const payload = {
       user: {
@@ -51,7 +52,7 @@ router.post('/signup', async (req, res) => {
 
     console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
     console.log('JWT_SECRET length:', process.env.JWT_SECRET ? process.env.JWT_SECRET.length : 'undefined');
-    
+
     jwt.sign(
       payload,
       process.env.JWT_SECRET,
@@ -62,14 +63,15 @@ router.post('/signup', async (req, res) => {
           return res.status(500).json({ success: false, error: "Token generation failed" });
         }
         console.log('Token generated successfully');
-        res.status(201).json({ 
-          success: true, 
+        res.status(201).json({
+          success: true,
           message: 'User created successfully!',
           token,
           user: {
             _id: user._id,
             username: user.username,
             email: user.email,
+            department: user.department,
             role: user.role,
             requested_role: user.requested_role,
             eco_score: user.eco_score,
@@ -139,13 +141,14 @@ router.post('/login', async (req, res) => {
       { expiresIn: '7d' },
       (err, token) => {
         if (err) throw err;
-        res.json({ 
-          success: true, 
+        res.json({
+          success: true,
           token,
           user: {
             _id: user._id,
             username: user.username,
             email: user.email,
+            department: user.department,
             role: user.role,
             requested_role: user.requested_role,
             eco_score: user.eco_score,
@@ -191,51 +194,51 @@ router.post('/request-role', auth, async (req, res) => {
   console.log('=== ROLE REQUEST ENDPOINT HIT ===');
   console.log('Request body:', req.body);
   console.log('User from middleware:', req.user);
-  
+
   try {
     const { roleRequested } = req.body;
     console.log('Role request received:', { roleRequested, userId: req.user.id });
-    
+
     // Validate input
     if (!roleRequested || !['partner', 'admin'].includes(roleRequested)) {
       console.log('Invalid role requested:', roleRequested);
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        msg: 'Invalid role requested. Must be partner or admin.' 
+        msg: 'Invalid role requested. Must be partner or admin.'
       });
     }
 
     // Find user in database
     const user = await User.findById(req.user.id);
-    console.log('User found:', { 
-      id: user?._id, 
-      role: user?.role, 
+    console.log('User found:', {
+      id: user?._id,
+      role: user?.role,
       requested_role: user?.requested_role,
-      is_approved: user?.is_approved 
+      is_approved: user?.is_approved
     });
-    
+
     if (!user) {
       console.log('User not found in database');
-      return res.status(404).json({ 
+      return res.status(404).json({
         success: false,
-        msg: 'User not found' 
+        msg: 'User not found'
       });
     }
 
     // Validate user can make request
     if (user.role !== 'user') {
       console.log('User is not a regular user, role:', user.role);
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        msg: 'Only regular users can request role upgrades' 
+        msg: 'Only regular users can request role upgrades'
       });
     }
 
     if (user.requested_role) {
       console.log('User already has pending request:', user.requested_role);
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        msg: 'You already have a pending role request' 
+        msg: 'You already have a pending role request'
       });
     }
 
@@ -243,15 +246,15 @@ router.post('/request-role', auth, async (req, res) => {
     user.requested_role = roleRequested;
     user.is_approved = false;
     await user.save();
-    
-    console.log('Role request saved successfully:', { 
-      requested_role: user.requested_role, 
-      is_approved: user.is_approved 
+
+    console.log('Role request saved successfully:', {
+      requested_role: user.requested_role,
+      is_approved: user.is_approved
     });
 
     const roleTitle = roleRequested === 'partner' ? 'Partner' : 'Admin';
-    
-    const response = { 
+
+    const response = {
       success: true,
       msg: `${roleTitle} access requested successfully. Awaiting admin approval.`,
       user: {
@@ -263,16 +266,16 @@ router.post('/request-role', auth, async (req, res) => {
         is_approved: user.is_approved
       }
     };
-    
+
     console.log('Sending response:', response);
     res.status(200).json(response);
-    
+
   } catch (err) {
     console.error('Role request error:', err);
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
       msg: 'Server error',
-      error: err.message 
+      error: err.message
     });
   }
 });
@@ -282,15 +285,15 @@ router.post('/request-role', auth, async (req, res) => {
 // @access  Private
 router.get('/test-role', auth, async (req, res) => {
   try {
-    res.json({ 
+    res.json({
       success: true,
       msg: 'Role test endpoint working',
       user: req.user
     });
   } catch (err) {
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      msg: 'Test endpoint error' 
+      msg: 'Test endpoint error'
     });
   }
 });
