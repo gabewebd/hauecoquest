@@ -99,6 +99,7 @@ const LeaderboardPage = ({ onPageChange }) => {
   const { user } = useUser();
   const [users, setUsers] = useState([]);
   const [departmentData, setDepartmentData] = useState(null);
+  const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [stats, setStats] = useState({
@@ -121,6 +122,7 @@ const LeaderboardPage = ({ onPageChange }) => {
   ];
 
   useEffect(() => {
+    setLoading(true); // Set loading state when department changes
     fetchLeaderboard();
     setDisplayCount(10); // Reset display count when department changes
   }, [selectedDepartment]);
@@ -134,7 +136,8 @@ const LeaderboardPage = ({ onPageChange }) => {
       if (selectedDepartment === 'all') {
         // Department leaderboard - show department totals
         console.log('Processing all departments view');
-        setUsers(response.leaderboard || []);
+        setUsers([]); // Clear users array for department view
+        setDepartments(response.leaderboard || []); // Set department data
         setDepartmentData(null);
 
         // Calculate stats for all departments
@@ -160,6 +163,7 @@ const LeaderboardPage = ({ onPageChange }) => {
         }));
 
         setUsers(transformedUsers);
+        setDepartments([]); // Clear departments array for individual view
         setDepartmentData({
           department: response.department,
           totalPoints: response.departmentTotal,
@@ -313,7 +317,7 @@ const LeaderboardPage = ({ onPageChange }) => {
           </div>
           <div className="bg-white p-4 rounded-2xl shadow-md border text-center">
             <Users2 className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-            <p className="text-2xl font-bold">{selectedDepartment === 'all' ? users.length : stats.totalUsers}</p>
+            <p className="text-2xl font-bold">{selectedDepartment === 'all' ? departments.length : stats.totalUsers}</p>
             <p className="text-sm text-gray-500">
               {selectedDepartment === 'all' ? 'Departments' : 'Active Students'}
             </p>
@@ -356,7 +360,7 @@ const LeaderboardPage = ({ onPageChange }) => {
             // Department leaderboard
             <div className="bg-white p-6 rounded-2xl shadow-xl border">
               <h3 className="text-2xl font-bold mb-6">Department Rankings</h3>
-              {users.map((department, index) => (
+              {departments.map((department, index) => (
                 <DepartmentRow
                   key={department.department}
                   department={department}
