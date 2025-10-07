@@ -12,6 +12,12 @@
   --color-text-muted: #6b7280;
 }
 
+/* FIX: Apply overflow prevention to both html and body */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   margin: 0;
   background-color: var(--color-body-bg);
