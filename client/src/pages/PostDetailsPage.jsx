@@ -46,7 +46,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
           'x-auth-token': token
         }
       });
-      
+
       if (response.ok) {
         const updatedPost = await response.json();
         setLikeCount(updatedPost.likes?.length || 0);
@@ -77,7 +77,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
         },
         body: JSON.stringify({ text: commentText })
       });
-      
+
       if (response.ok) {
         const updatedPost = await response.json();
         setPost(updatedPost);
@@ -111,7 +111,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-600 mb-4">Post Not Found</h1>
-          <button 
+          <button
             onClick={() => onPageChange('community')}
             className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600"
           >
@@ -127,7 +127,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <button 
+          <button
             onClick={() => onPageChange('community')}
             className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition"
           >
@@ -140,22 +140,21 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
         <div className="bg-white rounded-2xl shadow-lg border p-8 mb-8">
           {/* Author Info */}
           <div className="flex items-center gap-4 mb-6">
-            <img 
-              src={`https://i.pravatar.cc/150?u=${post.author?.username || 'user'}`} 
-              alt={post.author?.username} 
+            <img
+              src={`https://i.pravatar.cc/150?u=${post.author?.username || 'user'}`}
+              alt={post.author?.username}
               className="w-12 h-12 rounded-full"
             />
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-lg">{post.author?.username || 'Anonymous'}</h3>
                 <span className="text-blue-500">✔️</span>
-                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                  post.author?.role === 'admin' ? 'bg-red-100 text-red-700' :
-                  post.author?.role === 'partner' ? 'bg-purple-100 text-purple-700' :
-                  'bg-blue-100 text-blue-700'
-                }`}>
-                  {post.author?.role === 'admin' ? 'Admin' : 
-                   post.author?.role === 'partner' ? 'Partner' : 'Student'}
+                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.author?.role === 'admin' ? 'bg-red-100 text-red-700' :
+                    post.author?.role === 'partner' ? 'bg-purple-100 text-purple-700' :
+                      'bg-blue-100 text-blue-700'
+                  }`}>
+                  {post.author?.role === 'admin' ? 'Admin' :
+                    post.author?.role === 'partner' ? 'Partner' : 'Student'}
                 </span>
               </div>
               <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -182,9 +181,9 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
           {/* Post Image */}
           {post.image_url && (
             <div className="mb-6">
-              <img 
-                src={`http://localhost:5000${post.image_url}`} 
-                alt="Post content" 
+              <img
+                src={`${post.image_url}`}
+                alt="Post content"
                 className="rounded-lg w-full max-h-96 object-cover"
               />
             </div>
@@ -196,7 +195,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
               <Tag className="w-4 h-4 text-gray-500" />
               <div className="flex flex-wrap gap-2">
                 {post.tags.map((tag, index) => (
-                  <span 
+                  <span
                     key={index}
                     className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm"
                   >
@@ -210,11 +209,10 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
           {/* Actions */}
           <div className="flex items-center justify-between border-t border-gray-100 pt-6">
             <div className="flex items-center gap-6">
-              <button 
+              <button
                 onClick={handleLike}
-                className={`flex items-center gap-2 hover:text-red-500 transition ${
-                  isLiked ? 'text-red-500' : 'text-gray-500'
-                }`}
+                className={`flex items-center gap-2 hover:text-red-500 transition ${isLiked ? 'text-red-500' : 'text-gray-500'
+                  }`}
               >
                 <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
                 <span className="font-semibold">{likeCount}</span>
@@ -223,7 +221,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
                 <MessageCircle className="w-6 h-6" />
                 <span className="font-semibold">{post.comments?.length || 0}</span>
               </div>
-              <button 
+              <button
                 onClick={handleShare}
                 className="flex items-center gap-2 text-gray-500 hover:text-green-500 transition"
               >
@@ -244,9 +242,9 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
           {user ? (
             <form onSubmit={handleComment} className="mb-8">
               <div className="flex gap-4">
-                <img 
-                  src={`https://i.pravatar.cc/150?u=${user.username}`} 
-                  alt={user.username} 
+                <img
+                  src={`https://i.pravatar.cc/150?u=${user.username}`}
+                  alt={user.username}
                   className="w-10 h-10 rounded-full"
                 />
                 <div className="flex-1">
@@ -273,7 +271,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
           ) : (
             <div className="text-center py-8">
               <p className="text-gray-500 mb-4">Please log in to comment</p>
-              <button 
+              <button
                 onClick={() => onPageChange('login')}
                 className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600"
               >
@@ -287,9 +285,9 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
             {post.comments && post.comments.length > 0 ? (
               post.comments.map((comment, index) => (
                 <div key={index} className="flex gap-4">
-                  <img 
-                    src={`https://i.pravatar.cc/150?u=${comment.user?.username || 'user'}`} 
-                    alt={comment.user?.username} 
+                  <img
+                    src={`https://i.pravatar.cc/150?u=${comment.user?.username || 'user'}`}
+                    alt={comment.user?.username}
                     className="w-10 h-10 rounded-full"
                   />
                   <div className="flex-1">

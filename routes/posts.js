@@ -23,14 +23,14 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: function (req, file, cb) {
     const allowedTypes = /jpeg|jpg|png|gif/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
-    
+
     if (mimetype && extname) {
       return cb(null, true);
     } else {
@@ -58,12 +58,12 @@ router.get('/', async (req, res) => {
   try {
     const { category, limit = 50 } = req.query;
     const filter = category ? { category } : {};
-    
+
     const posts = await Post.find(filter)
       .populate('author', 'username role')
       .sort({ created_at: -1 })
       .limit(parseInt(limit));
-    
+
     res.json(posts);
   } catch (err) {
     console.error(err.message);
@@ -79,7 +79,7 @@ router.get('/:id', async (req, res) => {
     const post = await Post.findById(req.params.id)
       .populate('author', 'username role avatar_theme')
       .populate('comments.user', 'username avatar_theme');
-    
+
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
     }
@@ -87,7 +87,7 @@ router.get('/:id', async (req, res) => {
     // Increment views
     post.views += 1;
     await post.save();
-    
+
     res.json(post);
   } catch (err) {
     console.error(err.message);
@@ -101,8 +101,13 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/posts
 // @desc    Create a new post (All users can post)
 // @access  Private
-router.post('/', auth, upload.single('image'), handleUploadError, async (req, res) => {
+router.post('/', auth, upload.single('image'), async (req, res) => {
   try {
+    // Handle multer errors
+    if (req.fileValidationError) {
+      return res.status(400).json({ msg: req.fileValidationError });
+    }
+
     const { title, content, category, tags, image_url } = req.body;
 
     // Handle tags - they might come as string or array
@@ -129,10 +134,10 @@ router.post('/', auth, upload.single('image'), handleUploadError, async (req, re
     });
 
     await post.save();
-    
+
     const populatedPost = await Post.findById(post._id)
       .populate('author', 'username role');
-    
+
     res.json(populatedPost);
   } catch (err) {
     console.error(err.message);
@@ -146,7 +151,7 @@ router.post('/', auth, upload.single('image'), handleUploadError, async (req, re
 router.put('/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-    
+
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
     }
@@ -157,7 +162,7 @@ router.put('/:id', auth, async (req, res) => {
     }
 
     const { title, content, category, tags, image_url } = req.body;
-    
+
     if (title) post.title = title;
     if (content) post.content = content;
     if (category) post.category = category;
@@ -166,10 +171,10 @@ router.put('/:id', auth, async (req, res) => {
     post.updated_at = Date.now();
 
     await post.save();
-    
+
     const updatedPost = await Post.findById(post._id)
       .populate('author', 'username role');
-    
+
     res.json(updatedPost);
   } catch (err) {
     console.error(err.message);
@@ -183,7 +188,7 @@ router.put('/:id', auth, async (req, res) => {
 router.delete('/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-    
+
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
     }
@@ -199,7 +204,7 @@ router.delete('/:id', auth, async (req, res) => {
     }
 
     await Post.findByIdAndDelete(req.params.id);
-    
+
     res.json({ msg: 'Post removed' });
   } catch (err) {
     console.error(err.message);
@@ -213,14 +218,14 @@ router.delete('/:id', auth, async (req, res) => {
 router.post('/:id/like', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-    
+
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
     }
 
     // Check if already liked
     const likeIndex = post.likes.indexOf(req.user.id);
-    
+
     if (likeIndex > -1) {
       // Unlike
       post.likes.splice(likeIndex, 1);
@@ -243,13 +248,13 @@ router.post('/:id/like', auth, async (req, res) => {
 router.post('/:id/comment', auth, async (req, res) => {
   try {
     const { text } = req.body;
-    
+
     if (!text) {
       return res.status(400).json({ msg: 'Comment text is required' });
     }
 
     const post = await Post.findById(req.params.id);
-    
+
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
     }
@@ -260,11 +265,11 @@ router.post('/:id/comment', auth, async (req, res) => {
     });
 
     await post.save();
-    
+
     const updatedPost = await Post.findById(post._id)
       .populate('author', 'username role')
       .populate('comments.user', 'username avatar_theme');
-    
+
     res.json(updatedPost);
   } catch (err) {
     console.error(err.message);
@@ -278,7 +283,7 @@ router.post('/:id/comment', auth, async (req, res) => {
 router.put('/:id/pin', [auth, roleCheck('admin')], async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-    
+
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
     }
