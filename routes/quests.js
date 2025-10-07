@@ -41,6 +41,18 @@ const upload = multer({
   }
 });
 
+// Error handling middleware for multer
+const handleUploadError = (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ msg: 'File too large. Maximum size is 5MB.' });
+    }
+  } else if (err.message === 'Only images and videos are allowed!') {
+    return res.status(400).json({ msg: 'Only images and videos are allowed!' });
+  }
+  next(err);
+};
+
 // @route   GET /api/quests
 // @desc    Get all active quests
 // @access  Public
@@ -88,7 +100,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/quests
 // @desc    Create a new quest
 // @access  Private (Partner/Admin only)
-router.post('/', [auth, checkRole('partner', 'admin'), upload.single('photo')], async (req, res) => {
+router.post('/', [auth, checkRole('partner', 'admin'), upload.single('photo'), handleUploadError], async (req, res) => {
   try {
     const {
       title,
@@ -205,7 +217,7 @@ router.delete('/:id', [auth, checkRole('admin')], async (req, res) => {
 // @route   POST /api/quests/:id/submit
 // @desc    Submit a quest completion
 // @access  Private (User)
-router.post('/:id/submit', [auth, upload.single('photo')], async (req, res) => {
+router.post('/:id/submit', [auth, upload.single('photo'), handleUploadError], async (req, res) => {
   try {
     const quest = await Quest.findById(req.params.id);
     
@@ -233,7 +245,7 @@ router.post('/:id/submit', [auth, upload.single('photo')], async (req, res) => {
     const submission = new QuestSubmission({
       user_id: req.user.id,
       quest_id: req.params.id,
-      photo_url: req.file ? req.file.path : '',
+      photo_url: req.file ? `/uploads/${req.file.filename}` : '',
       reflection_text: reflection_text || '',
       status: isAdmin ? 'approved' : 'pending',
       reviewed_by: isAdmin ? req.user.id : null,

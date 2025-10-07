@@ -33,8 +33,22 @@ app.use((req, res, next) => {
   next();
 });
 
+// Ensure uploads directory exists
+const fs = require('fs');
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log('📁 Created uploads directory');
+}
+
 // Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(uploadsDir, {
+  setHeaders: (res, path) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+  }
+}));
 
 // Define Routes with error handling
 try {
@@ -55,11 +69,19 @@ try {
 
 // Health check route
 app.get('/api/health', (req, res) => {
+  const uploadsExists = fs.existsSync(uploadsDir);
+  const uploadsFiles = uploadsExists ? fs.readdirSync(uploadsDir).length : 0;
+  
   res.json({ 
     status: 'ok', 
     message: 'HAU Eco-Quest API is running',
     timestamp: new Date().toISOString(),
-    port: PORT 
+    port: PORT,
+    uploads: {
+      directory: uploadsDir,
+      exists: uploadsExists,
+      fileCount: uploadsFiles
+    }
   });
 });
 

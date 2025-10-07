@@ -39,6 +39,18 @@ const upload = multer({
   }
 });
 
+// Error handling middleware for multer
+const handleUploadError = (err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      return res.status(400).json({ msg: 'File too large. Maximum size is 5MB.' });
+    }
+  } else if (err.message === 'Only images are allowed!') {
+    return res.status(400).json({ msg: 'Only images are allowed!' });
+  }
+  next(err);
+};
+
 // @route   GET /api/posts
 // @desc    Get all posts
 // @access  Public
@@ -89,7 +101,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/posts
 // @desc    Create a new post (All users can post)
 // @access  Private
-router.post('/', auth, upload.single('image'), async (req, res) => {
+router.post('/', auth, upload.single('image'), handleUploadError, async (req, res) => {
   try {
     const { title, content, category, tags, image_url } = req.body;
 
@@ -113,7 +125,7 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
       category: category || 'Updates',
       author: req.user.id,
       tags: processedTags,
-      image_url: req.file ? `/uploads/${req.file.filename}` : (image_url || '')
+      image_url: req.file ? `/uploads/${req.file.filename}` : (image_url || null)
     });
 
     await post.save();
@@ -150,7 +162,7 @@ router.put('/:id', auth, async (req, res) => {
     if (content) post.content = content;
     if (category) post.category = category;
     if (tags) post.tags = tags;
-    if (image_url !== undefined) post.image_url = image_url;
+    if (image_url !== undefined) post.image_url = image_url || null;
     post.updated_at = Date.now();
 
     await post.save();
