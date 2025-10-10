@@ -764,7 +764,7 @@ const OverviewTab = ({ quests, posts, setActiveTab }) => {
 
     const questStatusData = [
         { label: 'Active', value: activeQuests },
-        { label: 'Completed', value: quests.filter(q => !q.isActive).length },
+        { label: 'Completed', value: quests.filter(q => q.completions && q.completions.length > 0).length },
         { label: 'Draft', value: quests.filter(q => q.status === 'draft').length }
     ];
 
@@ -1384,7 +1384,8 @@ const CommunityTab = ({ posts, setPosts }) => {
 const AnalyticsTab = ({ quests }) => {
     const totalQuests = quests.length;
     const activeQuests = quests.filter(q => q.isActive).length;
-    const completedQuests = quests.filter(q => !q.isActive).length;
+    // Fix: Count quests that have actual completions, not just inactive quests
+    const completedQuests = quests.filter(q => q.completions && q.completions.length > 0).length;
     const totalParticipants = quests.reduce((sum, q) => sum + (q.completions?.length || 0), 0);
     const avgParticipants = totalQuests > 0 ? Math.round(totalParticipants / totalQuests) : 0;
 
