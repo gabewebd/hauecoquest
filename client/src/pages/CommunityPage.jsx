@@ -553,7 +553,11 @@ const CommunityPage = ({ onPageChange }) => {
     if (activeFilter === 'Recent Activity') {
         unpinnedPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     } else if (activeFilter === 'Most Popular') {
-        unpinnedPosts.sort((a, b) => (b.likes + b.comments) - (a.likes + a.comments));
+        unpinnedPosts.sort((a, b) => {
+          const aTotal = (a.likes?.length || 0) + (a.comments || 0);
+          const bTotal = (b.likes?.length || 0) + (b.comments || 0);
+          return bTotal - aTotal;
+        });
     }
 
     setPosts([...pinnedPosts, ...unpinnedPosts]);
