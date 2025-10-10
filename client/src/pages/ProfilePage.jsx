@@ -9,12 +9,18 @@ import {
   Trash2,
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
+import { userAPI } from "../utils/api";
 import FacebookIcon from '../img/Facebook.png';
 import InstagramIcon from '../img/Instagram.png';
 import TiktokIcon from '../img/Tiktok.png';
 
-const ProfilePage = ({ onPageChange }) => {
+const ProfilePage = ({ onPageChange, userId }) => {
   const { user, updateUser, deleteAccount } = useUser();
+  
+  // Determine if we're viewing own profile or someone else's
+  const isOwnProfile = !userId || userId === user?._id;
+  const profileUserId = userId || user?._id;
+  
   
   const [activeTab, setActiveTab] = useState("Activity");
   const [userCreatedQuests, setUserCreatedQuests] = useState([]);
@@ -30,6 +36,12 @@ const ProfilePage = ({ onPageChange }) => {
   const [userAchievements, setUserAchievements] = useState([]);
   const [userPhotos, setUserPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
+  
+  // Profile user state (the user being viewed)
+  const [profileUser, setProfileUser] = useState(null);
+  
+  // Current display user (either logged-in user or profile user)
+  const displayUser = isOwnProfile ? user : profileUser;
 
   // Update local state when user context changes
   useEffect(() => {
@@ -40,14 +52,38 @@ const ProfilePage = ({ onPageChange }) => {
     }
   }, [user]);
 
-  // Fetch user data when component mounts or user changes
+  // Fetch profile user data when component mounts or userId changes
   useEffect(() => {
-    if (user) {
+    if (profileUserId) {
+      fetchProfileUserData();
+    }
+  }, [profileUserId]);
+
+  // Fetch user data when component mounts or user changes (for own profile)
+  useEffect(() => {
+    if (user && isOwnProfile) {
       fetchUserData();
     }
-  }, [user]);
+  }, [user, isOwnProfile]);
 
-    const fetchUserData = async () => {
+  const fetchProfileUserData = async () => {
+    if (isOwnProfile) {
+      setProfileUser(user);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const profileData = await userAPI.getUserProfile(profileUserId);
+      setProfileUser(profileData);
+    } catch (error) {
+      console.error('Error fetching profile user data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserData = async () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
@@ -164,13 +200,42 @@ const ProfilePage = ({ onPageChange }) => {
     }
   };
 
-  const currentAvatar = avatars.find((a) => a.name === (user?.avatar_theme || selectedAvatar));
-  const level = Math.floor((user?.points || 0) / 100) + 1;
+  const currentAvatar = avatars.find((a) => a.name === (displayUser?.avatar_theme || selectedAvatar));
+  const level = Math.floor((displayUser?.points || 0) / 100) + 1;
+
+  // Show loading if we don't have the display user data yet
+  if (!displayUser && loading) {
+    return (
+      <div className="pt-20 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if we can't load the profile
+  if (!displayUser && !loading) {
+    return (
+      <div className="pt-20 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-600 text-lg">Profile not found</p>
+          <button 
+            onClick={() => onPageChange('home')}
+            className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+          >
+            Go Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-20 flex flex-col min-h-screen">
       {/* Banner */}
-      <div className={`h-48 bg-gradient-to-r ${headerThemes[user?.header_theme || headerTheme]} relative`}>
+      <div className={`h-48 bg-gradient-to-r ${headerThemes[displayUser?.header_theme || headerTheme]} relative`}>
         {/* Profile Card */}
         <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-20 w-full max-w-4xl px-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 flex items-center relative">
@@ -187,18 +252,18 @@ const ProfilePage = ({ onPageChange }) => {
             {/* Info */}
             <div className="ml-6 flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-2xl font-bold">{user?.username || "Guest"}</h2>
+                <h2 className="text-2xl font-bold">{displayUser?.username || "Guest"}</h2>
                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  user?.role === 'admin' 
+                  displayUser?.role === 'admin' 
                     ? 'bg-red-100 text-red-700' 
-                    : user?.role === 'partner'
+                    : displayUser?.role === 'partner'
                     ? 'bg-purple-100 text-purple-700'
                     : 'bg-blue-100 text-blue-700'
                 }`}>
-                  {user?.role === 'admin' ? 'Admin' : user?.role === 'partner' ? 'Partner' : 'Student'}
+                  {displayUser?.role === 'admin' ? 'Admin' : displayUser?.role === 'partner' ? 'Partner' : 'Student'}
                 </span>
               </div>
-              <p className="text-gray-600">{user?.hau_affiliation || "HAU Student"}</p>
+              <p className="text-gray-600">{displayUser?.hau_affiliation || "HAU Student"}</p>
               <p className="text-sm text-gray-500 mt-1">
                 Environmental science student passionate about making a
                 difference on campus.
@@ -207,29 +272,31 @@ const ProfilePage = ({ onPageChange }) => {
               {/* Stats */}
               <div className="flex gap-6 mt-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
-                  <Trophy className="w-4 h-4 text-yellow-500" /> {user?.points || 0} points
+                  <Trophy className="w-4 h-4 text-yellow-500" /> {displayUser?.points || 0} points
                 </div>
                 <div className="flex items-center gap-1">
-                  <Award className="w-4 h-4 text-orange-500" /> {user?.questsCompleted?.length || 0} quests completed
+                  <Award className="w-4 h-4 text-orange-500" /> {displayUser?.questsCompleted?.length || 0} quests completed
                 </div>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-2 absolute top-4 right-4">
-              <button
-                onClick={() => { 
-                  setSelectedAvatar(user?.avatar_theme || "Girl Avatar 1");
-                  setHeaderTheme(user?.header_theme || "orange");
-                  setEditedUsername(user?.username || "");
-                  setEditTab("profile"); 
-                  setIsEditOpen(true); 
-                }}
-                className="px-3 py-1 bg-gray-100 rounded-lg text-sm flex items-center gap-1 hover:bg-gray-200"
-              >
-                <Edit className="w-4 h-4" /> Edit Profile
-              </button>
-            </div>
+            {/* Actions - Only show edit button for own profile */}
+            {isOwnProfile && (
+              <div className="flex gap-2 absolute top-4 right-4">
+                <button
+                  onClick={() => { 
+                    setSelectedAvatar(displayUser?.avatar_theme || "Girl Avatar 1");
+                    setHeaderTheme(displayUser?.header_theme || "orange");
+                    setEditedUsername(displayUser?.username || "");
+                    setEditTab("profile"); 
+                    setIsEditOpen(true); 
+                  }}
+                  className="px-3 py-1 bg-gray-100 rounded-lg text-sm flex items-center gap-1 hover:bg-gray-200"
+                >
+                  <Edit className="w-4 h-4" /> Edit Profile
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -237,7 +304,7 @@ const ProfilePage = ({ onPageChange }) => {
       {/* Tabs Section */}
       <div className="mt-28 max-w-4xl mx-auto px-4 flex-grow">
         <div className="flex justify-center gap-8 border-b pb-2">
-          {user?.role === 'user' ? 
+          {displayUser?.role === 'user' ? 
             ["Activity", "Quests", "Photo History", "Achievements"].map((tab) => (
               <button
                 key={tab}

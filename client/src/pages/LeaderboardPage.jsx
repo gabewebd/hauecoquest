@@ -161,7 +161,7 @@ const LeaderboardPage = ({ onPageChange }) => {
         // Individual department leaderboard
         console.log('Processing individual department view');
         const transformedUsers = (response.leaderboard || []).map(user => ({
-          id: user._id || user.username, // Use username as fallback ID
+          id: user._id, // Use the MongoDB _id
           name: user.username,
           role: user.role, // Ensure role is included for filtering
           title: getRoleTitle(user.role, user.questsCompleted),

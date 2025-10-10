@@ -135,7 +135,7 @@ const AppContent = () => {
       case 'leaderboard':
         return <LeaderboardPage onPageChange={handlePageChange} />;
       case 'profile':
-        return <ProfilePage onPageChange={handlePageChange} />;
+        return <ProfilePage onPageChange={handlePageChange} userId={pageParams?.userId} />;
       case 'dashboard':
         return <DashboardPage onPageChange={handlePageChange} />;
       case 'partner-dashboard':
