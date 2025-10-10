@@ -85,9 +85,13 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
           {user && user.role === 'admin' && (
             <button
               onClick={() => onPin && onPin(postId)}
-              className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 font-semibold transition-colors"
+              className={`text-xs text-white px-3 py-1.5 rounded-lg font-semibold transition-colors ${
+                isPinned
+                  ? 'bg-amber-600 hover:bg-amber-700'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
             >
-              Pin
+              {isPinned ? 'Unpin' : 'Pin'}
             </button>
           )}
         </div>
@@ -415,11 +419,11 @@ const CommunityPage = ({ onPageChange }) => {
 
       if (response.ok) {
         fetchCommunityData();
-        alert('Post pinned successfully!');
+        alert('Post pin status updated successfully!');
       }
     } catch (error) {
       console.error('Error pinning post:', error);
-      alert('Failed to pin post');
+      alert('Failed to update pin status');
     }
   };
 
@@ -500,7 +504,7 @@ const CommunityPage = ({ onPageChange }) => {
       });
 
       setAllPosts(transformedPosts);
-      setPosts(transformedPosts);
+      // setPosts will be updated by the useEffect hook
       setLoading(false);
     } catch (error) {
       console.error('Error fetching community data:', error);
@@ -540,13 +544,21 @@ const CommunityPage = ({ onPageChange }) => {
       );
     }
 
+    // --- FIX START ---
+    // Separate pinned and unpinned posts
+    const pinnedPosts = filteredPosts.filter(post => post.isPinned);
+    const unpinnedPosts = filteredPosts.filter(post => !post.isPinned);
+
+    // Sort the unpinned posts based on the active filter
     if (activeFilter === 'Recent Activity') {
-      filteredPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        unpinnedPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     } else if (activeFilter === 'Most Popular') {
-      filteredPosts.sort((a, b) => (b.likes + b.comments) - (a.likes + a.comments));
+        unpinnedPosts.sort((a, b) => (b.likes + b.comments) - (a.likes + a.comments));
     }
 
-    setPosts(filteredPosts);
+    // Combine the arrays, with pinned posts at the top
+    setPosts([...pinnedPosts, ...unpinnedPosts]);
+    // --- FIX END ---
   }, [allPosts, searchTerm, activeFilter]);
 
   const handleFilterChange = (filter) => {
@@ -763,8 +775,8 @@ const CommunityPage = ({ onPageChange }) => {
                         key={filter}
                         onClick={() => handleFilterChange(filter)}
                         className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeFilter === filter
-                          ? 'bg-green-600 text-white shadow-md'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-green-600 text-white shadow-md'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                           }`}
                       >
                         {filter}
