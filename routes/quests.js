@@ -3,11 +3,17 @@ const router = express.Router();
 const Quest = require('../models/Quest');
 const QuestSubmission = require('../models/QuestSubmission');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const auth = require('../middleware/auth');
 const checkRole = require('../middleware/roleCheck');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+
+// Debug: Log when quest routes are loaded
+console.log('🎯 QUEST ROUTES: Quest routes file loaded successfully');
+
+// Debug: Test endpoint removed to avoid conflicts
 
 // Create client/img/quests directory if it doesn't exist
 const uploadDir = 'client/img/quests';
@@ -299,7 +305,7 @@ router.post('/:id/submit', [auth, upload.single('photo'), handleUploadError], as
 router.get('/submissions/user/:userId', async (req, res) => {
   try {
     const submissions = await QuestSubmission.find({ user_id: req.params.userId })
-      .populate('quest_id', 'title points category')
+      .populate('quest_id', 'title points category description difficulty')
       .sort({ submitted_at: -1 });
     
     res.json(submissions);
@@ -365,7 +371,18 @@ router.get('/submissions/pending', [auth, checkRole('admin')], async (req, res) 
 // @desc    Approve or reject a submission
 // @access  Private (Admin only - Partners cannot review)
 router.put('/submissions/:id/review', [auth, checkRole('admin')], async (req, res) => {
+  console.log('🔥🔥🔥 QUEST REVIEW ENDPOINT HIT! 🔥🔥🔥');
+  console.log('🔥 Method:', req.method);
+  console.log('🔥 URL:', req.originalUrl);
+  console.log('🔥 Body:', req.body);
+  console.log('🔥 Params:', req.params);
+  console.log('🔥 User:', req.user ? req.user.username : 'NO USER');
+  
   try {
+    console.log('🔥 QUEST REVIEW ENDPOINT CALLED');
+    console.log('🔥 Review request:', { status: req.body.status, submissionId: req.params.id });
+    console.log('🔥 User making review:', req.user.username, 'Role:', req.user.role);
+    
     const { status, rejection_reason } = req.body;
     
     if (!['approved', 'rejected'].includes(status)) {
@@ -398,6 +415,7 @@ router.put('/submissions/:id/review', [auth, checkRole('admin')], async (req, re
 
     // If approved, award points to user (only if not previously approved)
     if (status === 'approved' && previousStatus !== 'approved') {
+      console.log('🎯 QUEST APPROVAL: Starting approval process...');
       const user = submission.user_id;
       const quest = submission.quest_id;
       
@@ -412,13 +430,14 @@ router.put('/submissions/:id/review', [auth, checkRole('admin')], async (req, re
       user.points = currentPoints + quest.points;
       user.eco_score = currentEcoScore + quest.points;
       
-      console.log(`Adding ${quest.points} points to user ${user.username}. Previous: ${currentPoints}, New: ${user.points}`);
+      console.log(`🎯 QUEST APPROVAL: Adding ${quest.points} points to user ${user.username}. Previous: ${currentPoints}, New: ${user.points}`);
       
       if (!user.questsCompleted.includes(quest._id)) {
         user.questsCompleted.push(quest._id);
       }
       
       await user.save();
+      console.log('🎯 QUEST APPROVAL: User points updated successfully');
 
       // Update quest completions (check for duplicates)
       const alreadyCompleted = quest.completions.some(c => c.user.toString() === user._id.toString());
@@ -428,6 +447,55 @@ router.put('/submissions/:id/review', [auth, checkRole('admin')], async (req, re
           proof: submission.photo_url
         });
         await quest.save();
+      }
+
+      // Create notification for approved submission
+      try {
+        console.log('🎯 NOTIFICATION: Creating notification for user:', user._id, 'Username:', user.username);
+        console.log('🎯 NOTIFICATION: Quest title:', quest.title, 'Points:', quest.points);
+        
+        const notification = new Notification({
+          user_id: user._id,
+          type: 'submission_approved',
+          title: 'Quest submission approved!',
+          message: `Your submission for "${quest.title}" has been approved and you earned ${quest.points} points!`,
+          data: {
+            questId: quest._id,
+            questTitle: quest.title,
+            points: quest.points,
+            submissionId: submission._id
+          }
+        });
+        
+        console.log('🎯 NOTIFICATION: Notification object created, saving to database...');
+        await notification.save();
+        console.log('✅ NOTIFICATION CREATED: User:', user.username, 'Quest:', quest.title, 'ID:', notification._id);
+      } catch (notificationError) {
+        console.error('❌ NOTIFICATION ERROR:', notificationError);
+        console.error('❌ Error details:', notificationError.message);
+        console.error('❌ Full error:', notificationError);
+      }
+    } else if (status === 'rejected') {
+      // Create notification for rejected submission
+      try {
+        console.log('Creating rejection notification for user:', submission.user_id._id, 'Username:', submission.user_id.username);
+        const notification = new Notification({
+          user_id: submission.user_id._id,
+          type: 'submission_rejected',
+          title: 'Quest submission rejected',
+          message: `Your submission for "${submission.quest_id.title}" was rejected. ${rejection_reason ? 'Reason: ' + rejection_reason : ''}`,
+          data: {
+            questId: submission.quest_id._id,
+            questTitle: submission.quest_id.title,
+            submissionId: submission._id,
+            rejectionReason: rejection_reason
+          }
+        });
+        await notification.save();
+        console.log('✅ Rejection notification created successfully for user:', submission.user_id.username, 'Type:', 'submission_rejected', 'Notification ID:', notification._id);
+      } catch (notificationError) {
+        console.error('❌ Error creating rejection notification:', notificationError);
+        console.error('Rejection notification error details:', notificationError.message);
       }
     }
 

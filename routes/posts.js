@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const roleCheck = require('../middleware/roleCheck');
 const Post = require('../models/Post');
+const Notification = require('../models/Notification');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -232,6 +233,29 @@ router.post('/:id/like', auth, async (req, res) => {
     } else {
       // Like
       post.likes.push(req.user.id);
+      
+      // Create notification for post author (if not the same person)
+      if (post.author.toString() !== req.user.id) {
+        try {
+          console.log('🔥 POST LIKE: Creating notification for post author:', post.author);
+          console.log('🔥 POST LIKE: Liked by:', req.user.username, req.user.id);
+          const notification = new Notification({
+            user_id: post.author,
+            type: 'post_liked',
+            title: 'Your post was liked!',
+            message: `${req.user.username} liked your post`,
+            data: {
+              postId: post._id,
+              likedBy: req.user.id,
+              likedByUsername: req.user.username
+            }
+          });
+          await notification.save();
+          console.log('✅ POST LIKE: Notification created successfully:', notification._id);
+        } catch (notificationError) {
+          console.error('❌ POST LIKE: Error creating notification:', notificationError);
+        }
+      }
     }
 
     await post.save();
@@ -263,6 +287,31 @@ router.post('/:id/comment', auth, async (req, res) => {
       user: req.user.id,
       text
     });
+
+    // Create notification for post author (if not the same person)
+    if (post.author.toString() !== req.user.id) {
+      try {
+        console.log('🔥 POST COMMENT: Creating notification for post author:', post.author);
+        console.log('🔥 POST COMMENT: Commented by:', req.user.username, req.user.id);
+        console.log('🔥 POST COMMENT: Comment text:', text);
+        const notification = new Notification({
+          user_id: post.author,
+          type: 'post_commented',
+          title: 'New comment on your post!',
+          message: `${req.user.username} commented on your post`,
+          data: {
+            postId: post._id,
+            commentBy: req.user.id,
+            commentByUsername: req.user.username,
+            commentText: text
+          }
+        });
+        await notification.save();
+        console.log('✅ POST COMMENT: Notification created successfully:', notification._id);
+      } catch (notificationError) {
+        console.error('❌ POST COMMENT: Error creating notification:', notificationError);
+      }
+    }
 
     await post.save();
 

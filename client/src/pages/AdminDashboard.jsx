@@ -2041,8 +2041,10 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
     };
 
     const handleApprove = async (submissionId) => {
+        console.log('🚀 FRONTEND: handleApprove called with submissionId:', submissionId);
         try {
             const token = localStorage.getItem('token');
+            console.log('🚀 FRONTEND: Making API call to approve submission:', submissionId);
             const response = await fetch(`/api/quests/submissions/${submissionId}/review`, {
                 method: 'PUT',
                 headers: {
@@ -2051,6 +2053,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                 },
                 body: JSON.stringify({ status: 'approved' })
             });
+            console.log('🚀 FRONTEND: API response status:', response.status);
 
             if (response.ok) {
                 fetchSubmissions();
@@ -2265,7 +2268,12 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                                         {submission.status === 'pending' && (
                                             <>
                                                 <button
-                                                    onClick={() => handleApprove(submission._id)}
+                                                    onClick={(e) => {
+                                                        console.log('🚀 BUTTON CLICKED: Approve button clicked for submission:', submission._id);
+                                                        console.log('🚀 BUTTON CLICKED: Submission status:', submission.status);
+                                                        console.log('🚀 BUTTON CLICKED: Event:', e);
+                                                        handleApprove(submission._id);
+                                                    }}
                                                     className="p-2 hover:bg-green-50 hover:shadow-md rounded-lg transition-all duration-200 border border-green-200 hover:border-green-400 transform hover:scale-105"
                                                     title="Approve"
                                                 >
@@ -2344,7 +2352,12 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                             {selectedSubmission.status === 'pending' && (
                                 <div className="flex gap-3 pt-4 border-t">
                                     <button
-                                        onClick={() => handleApprove(selectedSubmission._id)}
+                                        onClick={(e) => {
+                                            console.log('🚀 MODAL BUTTON CLICKED: Approve button clicked for submission:', selectedSubmission._id);
+                                            console.log('🚀 MODAL BUTTON CLICKED: Submission status:', selectedSubmission.status);
+                                            console.log('🚀 MODAL BUTTON CLICKED: Event:', e);
+                                            handleApprove(selectedSubmission._id);
+                                        }}
                                         className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2"
                                     >
                                         <CheckCircle className="w-5 h-5" />
