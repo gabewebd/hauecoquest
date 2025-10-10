@@ -12,14 +12,14 @@ client/node_modules/
 client/dist/
 client/build/
 
-# # Uploads
-# uploads/
-# *.jpg
-# *.jpeg
-# *.png
-# *.gif
-# *.mp4
-# *.mov
+# Uploads
+uploads/
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.mp4
+*.mov
 
 # IDE
 .vscode/

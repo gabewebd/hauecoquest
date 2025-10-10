@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Rocket, ArrowRight, Target, Users, Trophy, Sparkles, BookOpen, BarChart, Zap } from "lucide-react";
+import { Rocket, ArrowRight, Target, Users, Trophy, BarChart, Zap } from "lucide-react";
 import { questAPI, userAPI } from "../utils/api";
 import FacebookIcon from '../img/Facebook.png';
 import InstagramIcon from '../img/Instagram.png';
@@ -13,7 +13,6 @@ export default function HomePage({ onPageChange }) {
     totalUsers: 0,
     totalPoints: 0
   });
-  const [featuredQuests, setFeaturedQuests] = useState([]);
   const [challenge, setChallenge] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -23,24 +22,35 @@ export default function HomePage({ onPageChange }) {
 
   const fetchHomeData = async () => {
     try {
+      // Fetch quests data
       const questsData = await questAPI.getAllQuests();
-      const leaderboardData = await userAPI.getLeaderboard();
-      const totalPoints = leaderboardData.reduce((sum, user) => sum + (user.eco_score || user.points || 0), 0);
+      console.log('Quests data:', questsData);
       
+      // Fetch leaderboard data
+      const leaderboardData = await userAPI.getLeaderboard();
+      console.log('Leaderboard data:', leaderboardData);
+      
+      // Calculate total points from all users
+      const totalPoints = leaderboardData.reduce((sum, user) => {
+        return sum + (user.eco_score || user.points || 0);
+      }, 0);
+      
+      // Update stats with actual data
       setStats({
-        totalQuests: questsData.length,
-        totalUsers: leaderboardData.length,
-        totalPoints: totalPoints
+        totalQuests: questsData ? questsData.length : 0,
+        totalUsers: leaderboardData ? leaderboardData.length : 0,
+        totalPoints: totalPoints || 0
       });
 
-      const activeQuests = questsData.filter(q => q.isActive).slice(0, 3);
-      setFeaturedQuests(activeQuests);
 
+      // Fetch challenge data
       try {
         const challengeRes = await fetch('/api/challenges');
-        const challengesData = await challengeRes.json();
-        if (challengesData.length > 0) {
-          setChallenge(challengesData[0]);
+        if (challengeRes.ok) {
+          const challengesData = await challengeRes.json();
+          if (challengesData && challengesData.length > 0) {
+            setChallenge(challengesData[0]);
+          }
         }
       } catch (error) {
         console.error('Error fetching challenge:', error);
@@ -49,17 +59,16 @@ export default function HomePage({ onPageChange }) {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching home data:', error);
+      // Set fallback values
+      setStats({
+        totalQuests: 0,
+        totalUsers: 0,
+        totalPoints: 0
+      });
       setLoading(false);
     }
   };
   
-  const handleJoinQuest = () => {
-    if (user) {
-      onPageChange('quests');
-    } else {
-      onPageChange('login');
-    }
-  };
 
   return (
     <div className="font-sans bg-white text-gray-900 overflow-x-hidden">
@@ -118,12 +127,14 @@ export default function HomePage({ onPageChange }) {
 
             <div className="relative z-10 hidden md:block">
               <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-white border-opacity-20">
-                <div className="aspect-square bg-gradient-to-br from-green-200 to-emerald-300 rounded-2xl flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="./assets/designs/planting.png" 
-                    alt="Students on eco-adventure" 
-                    className="w-full h-full object-cover"
-                  />
+                <div className="aspect-square bg-gradient-to-br from-green-200 to-emerald-300 rounded-2xl flex items-center justify-center">
+                  <div className="text-center text-green-700">
+                    <div className="w-32 h-32 bg-white bg-opacity-50 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                      <span className="text-4xl font-black">IMG</span>
+                    </div>
+                    <p className="font-bold text-xl">Hero Illustration</p>
+                    <p className="text-sm opacity-75">Students on eco-adventure</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -135,22 +146,22 @@ export default function HomePage({ onPageChange }) {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                <img src="/assets/icons/earth-icon.png" alt="Earth" className="w-full h-full object-cover" />
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Target className="w-8 h-8 text-green-600" />
               </div>
               <h2 className="text-4xl font-black text-green-600 mb-2">{loading ? '...' : stats.totalQuests}</h2>
               <p className="text-gray-600 font-semibold">Active Quests</p>
             </div>
             <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                <img src="/assets/icons/recycle-icon.png" alt="Recycle" className="w-full h-full object-cover" />
+              <div className="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-emerald-600" />
               </div>
               <h2 className="text-4xl font-black text-emerald-600 mb-2">{loading ? '...' : stats.totalUsers}+</h2>
               <p className="text-gray-600 font-semibold">Eco-Warriors</p>
             </div>
             <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
-                <img src="/assets/icons/trophy-icon.png" alt="Trophy" className="w-full h-full object-cover" />
+              <div className="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trophy className="w-8 h-8 text-amber-600" />
               </div>
               <h2 className="text-4xl font-black text-amber-600 mb-2">{loading ? '...' : stats.totalPoints}</h2>
               <p className="text-gray-600 font-semibold">Points Earned</p>
@@ -238,68 +249,6 @@ export default function HomePage({ onPageChange }) {
               </p>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="py-24 px-6 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl md:text-6xl font-black mb-6 text-gray-900">
-              RELIABLE ECO-TECH FOR STUDENTS
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Low-effort sustainability missions? Go for it. Ready for epic environmental challenges? We've got those too. HAU Eco-Quest adapts to your schedule and commitment level.
-            </p>
-          </div>
-
-          {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="w-16 h-16 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : featuredQuests.length === 0 ? (
-            <div className="bg-white p-16 rounded-3xl shadow-xl text-center">
-              <BookOpen className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-              <h3 className="text-2xl font-bold text-gray-600 mb-3">No Quests Available Yet</h3>
-              <p className="text-gray-500 text-lg">Check back soon for exciting eco-adventures!</p>
-            </div>
-          ) : (
-            <div className="grid gap-8 md:grid-cols-3">
-              {featuredQuests.map((quest) => (
-                <div key={quest._id} className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all overflow-hidden group">
-                  <div className="bg-gradient-to-br from-green-400 to-emerald-600 h-48 flex items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
-                    <div className="w-20 h-20 bg-white bg-opacity-30 rounded-2xl flex items-center justify-center">
-                      <span className="text-white text-3xl font-black">IMG</span>
-                    </div>
-                  </div>
-                  <div className="p-8">
-                    <div className="flex items-center justify-between mb-4">
-                      <span className={`px-4 py-2 rounded-full text-sm font-bold ${
-                        quest.difficulty === 'Easy' ? 'bg-green-100 text-green-700' :
-                        quest.difficulty === 'Medium' ? 'bg-amber-100 text-amber-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
-                        {quest.difficulty}
-                      </span>
-                      <span className="text-green-600 font-bold text-lg">{quest.points} pts</span>
-                    </div>
-                    <h3 className="text-2xl font-black mb-3 text-gray-900">
-                      {quest.title}
-                    </h3>
-                    <p className="text-gray-600 mb-6 line-clamp-2">
-                      {quest.description}
-                    </p>
-                    <button 
-                      onClick={handleJoinQuest} 
-                      className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-full transition-all transform hover:scale-105 shadow-lg"
-                    >
-                      Join Quest
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 
@@ -498,4 +447,4 @@ export default function HomePage({ onPageChange }) {
       </footer>
     </div>
   );
-};
+}
