@@ -61,6 +61,7 @@ router.get('/leaderboard', async (req, res) => {
       const departmentTotal = users.reduce((sum, user) => sum + (user.eco_score || user.points || 0), 0);
 
       const leaderboard = users.map((user, index) => ({
+        _id: user._id,
         rank: index + 1,
         username: user.username,
         eco_score: user.eco_score,
@@ -103,6 +104,7 @@ router.get('/leaderboard', async (req, res) => {
         // Keep top 3 users per department
         if (departmentTotals[dept].topUsers.length < 3) {
           departmentTotals[dept].topUsers.push({
+            _id: user._id,
             username: user.username,
             points: user.eco_score || user.points || 0,
             avatar_theme: user.avatar_theme
@@ -126,6 +128,26 @@ router.get('/leaderboard', async (req, res) => {
         type: 'department'
       });
     }
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   GET /api/users/:id
+// @desc    Get user profile by ID
+// @access  Public
+router.get('/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select('-password')
+      .populate('questsCompleted', 'title points category');
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    res.json(user);
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ msg: 'Server error' });

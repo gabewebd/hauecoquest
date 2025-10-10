@@ -99,6 +99,13 @@ export const userAPI = {
     return handleApiResponse(response);
   },
 
+  getUserProfile: async (userId) => {
+    const response = await fetch(`${API_URL}/users/${userId}`, {
+      headers: getHeaders(false),
+    });
+    return handleApiResponse(response);
+  },
+
   getUserStats: async (userId) => {
     const response = await fetch(`${API_URL}/users/${userId}/stats`, {
       headers: getHeaders(false),
