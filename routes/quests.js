@@ -5,6 +5,7 @@ const QuestSubmission = require('../models/QuestSubmission');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 const checkRole = require('../middleware/roleCheck');
+const { createNotification } = require('./notifications');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -471,7 +472,6 @@ router.put('/submissions/:id/review', [auth, checkRole('admin')], async (req, re
         return res.status(404).json({ msg: 'User or Quest not found' });
       }
 
-
       // Add points to existing points
       const currentPoints = user.points || 0;
       const currentEcoScore = user.eco_score || 0;
@@ -487,7 +487,6 @@ router.put('/submissions/:id/review', [auth, checkRole('admin')], async (req, re
      
       await user.save();
 
-
       // Update quest completions (check for duplicates)
       const alreadyCompleted = quest.completions.some(c => c.user.toString() === user._id.toString());
       if (!alreadyCompleted) {
@@ -497,8 +496,40 @@ router.put('/submissions/:id/review', [auth, checkRole('admin')], async (req, re
         });
         await quest.save();
       }
-    }
 
+      // Create notification for quest approval
+      await createNotification(
+        user._id,
+        'submission_approved',
+        'Quest Approved!',
+        `Your quest submission for "${quest.title}" has been approved! You earned ${quest.points} points.`,
+        {
+          questId: quest._id,
+          questTitle: quest.title,
+          pointsEarned: quest.points,
+          submissionId: submission._id
+        }
+      );
+    } else if (status === 'rejected' && previousStatus !== 'rejected') {
+      // Create notification for quest rejection
+      const user = submission.user_id;
+      const quest = submission.quest_id;
+      
+      if (user && quest) {
+        await createNotification(
+          user._id,
+          'submission_rejected',
+          'Quest Submission Rejected',
+          `Your quest submission for "${quest.title}" was rejected.${rejection_reason ? ' Reason: ' + rejection_reason : ''}`,
+          {
+            questId: quest._id,
+            questTitle: quest.title,
+            submissionId: submission._id,
+            rejectionReason: rejection_reason
+          }
+        );
+      }
+    }
 
     res.json({ msg: `Submission ${status}`, submission });
   } catch (err) {

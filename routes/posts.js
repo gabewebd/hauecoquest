@@ -3,6 +3,8 @@ const router = express.Router();
 const auth = require('../middleware/auth');
 const roleCheck = require('../middleware/roleCheck');
 const Post = require('../models/Post');
+const User = require('../models/User');
+const { createNotification } = require('./notifications');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -271,26 +273,38 @@ router.delete('/:id', auth, async (req, res) => {
 // @access  Private
 router.post('/:id/like', auth, async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
-
+    const post = await Post.findById(req.params.id).populate('author', 'username');
 
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
     }
 
-
     // Check if already liked
     const likeIndex = post.likes.indexOf(req.user.id);
+    const wasLiked = likeIndex > -1;
 
-
-    if (likeIndex > -1) {
+    if (wasLiked) {
       // Unlike
       post.likes.splice(likeIndex, 1);
     } else {
       // Like
       post.likes.push(req.user.id);
+      
+      // Create notification for post author (don't notify if user is liking their own post)
+      if (post.author._id.toString() !== req.user.id) {
+        await createNotification(
+          post.author._id,
+          'post_liked',
+          'Your post was liked!',
+          `${req.user.username} liked your post "${post.title}"`,
+          {
+            postId: post._id,
+            likerId: req.user.id,
+            likerUsername: req.user.username
+          }
+        );
+      }
     }
-
 
     await post.save();
     res.json(post);
@@ -308,33 +322,42 @@ router.post('/:id/comment', auth, async (req, res) => {
   try {
     const { text } = req.body;
 
-
     if (!text) {
       return res.status(400).json({ msg: 'Comment text is required' });
     }
 
-
-    const post = await Post.findById(req.params.id);
-
+    const post = await Post.findById(req.params.id).populate('author', 'username');
 
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
     }
-
 
     post.comments.push({
       user: req.user.id,
       text
     });
 
-
     await post.save();
 
+    // Create notification for post author (don't notify if user is commenting on their own post)
+    if (post.author._id.toString() !== req.user.id) {
+      await createNotification(
+        post.author._id,
+        'post_commented',
+        'New comment on your post!',
+        `${req.user.username} commented on your post "${post.title}"`,
+        {
+          postId: post._id,
+          commenterId: req.user.id,
+          commenterUsername: req.user.username,
+          commentText: text
+        }
+      );
+    }
 
     const updatedPost = await Post.findById(post._id)
       .populate('author', 'username role')
       .populate('comments.user', 'username avatar_theme');
-
 
     res.json(updatedPost);
   } catch (err) {
