@@ -13,8 +13,8 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [commentText, setCommentText] = useState('');
 
-  // The 'isLiked' state can be kept for immediate visual feedback, but the count comes from props.
-  const [isLiked, setIsLiked] = useState(false); 
+  // Check if current user has liked this post based on the likes array
+  const isLiked = user && likes && likes.includes(user._id); 
 
   const handleLike = () => {
     if (!user) {
@@ -25,8 +25,7 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
     if (onLike) {
       onLike(postId);
     }
-    // Toggle heart for immediate feedback. The actual count will update when parent re-renders.
-    setIsLiked(!isLiked);
+    // The isLiked state will update automatically when the parent re-renders with new data
   };
 
   const handleComment = () => {
@@ -119,8 +118,8 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
             className={`flex items-center gap-2 hover:text-red-500 transition-colors font-medium ${isLiked ? 'text-red-500' : ''}`}
           >
             <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-            {/* Display count directly from props */}
-            <span className="text-sm">{likes}</span>
+            {/* Display count from likes array length */}
+            <span className="text-sm">{likes?.length || 0}</span>
           </button>
           <button
             onClick={() => setShowCommentInput(!showCommentInput)}
@@ -499,7 +498,7 @@ const CommunityPage = ({ onPageChange }) => {
           text: post.content,
           quest: post.category === 'Updates' ? null : post.category,
           image: post.image_url ? post.image_url : null,
-          likes: post.likes?.length || 0,
+          likes: post.likes || [], // Pass the actual likes array, not just the count
           comments: post.comments?.length || 0,
           shares: 0,
           created_at: post.created_at,

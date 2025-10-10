@@ -293,18 +293,27 @@ router.post('/:id/like', auth, async (req, res) => {
       // Create notification for post author (don't notify if user is liking their own post)
       if (post.author._id.toString() !== req.user.id) {
         console.log(`Creating like notification: ${req.user.username} liked post by ${post.author.username}`);
-        await createNotification(
-          post.author._id,
-          'post_liked',
-          'Your post was liked!',
-          `${req.user.username} liked your post "${post.title}"`,
-          {
-            postId: post._id,
-            likerId: req.user.id,
-            likerUsername: req.user.username,
-            likerRole: req.user.role
+        try {
+          const notification = await createNotification(
+            post.author._id,
+            'post_liked',
+            'Your post was liked!',
+            `${req.user.username} liked your post "${post.title}"`,
+            {
+              postId: post._id,
+              likerId: req.user.id,
+              likerUsername: req.user.username,
+              likerRole: req.user.role
+            }
+          );
+          if (notification) {
+            console.log(`✅ Like notification created successfully for ${post.author.username}:`, notification._id);
+          } else {
+            console.log(`❌ Failed to create like notification for ${post.author.username}`);
           }
-        );
+        } catch (notificationError) {
+          console.error(`❌ Error creating like notification for ${post.author.username}:`, notificationError);
+        }
       } else {
         console.log(`Skipping like notification: User ${req.user.username} liked their own post`);
       }
@@ -346,19 +355,28 @@ router.post('/:id/comment', auth, async (req, res) => {
     // Create notification for post author (don't notify if user is commenting on their own post)
     if (post.author._id.toString() !== req.user.id) {
       console.log(`Creating comment notification: ${req.user.username} commented on post by ${post.author.username}`);
-      await createNotification(
-        post.author._id,
-        'post_commented',
-        'New comment on your post!',
-        `${req.user.username} commented on your post "${post.title}"`,
-        {
-          postId: post._id,
-          commenterId: req.user.id,
-          commenterUsername: req.user.username,
-          commenterRole: req.user.role,
-          commentText: text
+      try {
+        const notification = await createNotification(
+          post.author._id,
+          'post_commented',
+          'New comment on your post!',
+          `${req.user.username} commented on your post "${post.title}"`,
+          {
+            postId: post._id,
+            commenterId: req.user.id,
+            commenterUsername: req.user.username,
+            commenterRole: req.user.role,
+            commentText: text
+          }
+        );
+        if (notification) {
+          console.log(`✅ Comment notification created successfully for ${post.author.username}:`, notification._id);
+        } else {
+          console.log(`❌ Failed to create comment notification for ${post.author.username}`);
         }
-      );
+      } catch (notificationError) {
+        console.error(`❌ Error creating comment notification for ${post.author.username}:`, notificationError);
+      }
     } else {
       console.log(`Skipping comment notification: User ${req.user.username} commented on their own post`);
     }
