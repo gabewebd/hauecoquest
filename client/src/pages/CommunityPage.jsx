@@ -7,24 +7,26 @@ import TiktokIcon from '../img/Tiktok.png';
 import { postAPI, questAPI, userAPI } from '../utils/api';
 import { useUser } from '../context/UserContext';
 
-// Reusable component for each post in the community feed
+// --- FIX START: PostCard no longer manages its own like/comment count ---
 const PostCard = ({ avatar, name, title, time, text, quest, image, likes, comments, onLike, onComment, postId, user, onPageChange, isPinned, onPin }) => {
-  const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(likes);
+  // Local state is only for UI interactions that don't affect sorting, like the comment input box.
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [commentText, setCommentText] = useState('');
-  const [commentCount, setCommentCount] = useState(comments);
+
+  // The 'isLiked' state can be kept for immediate visual feedback, but the count comes from props.
+  const [isLiked, setIsLiked] = useState(false); 
 
   const handleLike = () => {
     if (!user) {
       onPageChange('login');
       return;
     }
+    // Call the parent handler which will refetch all data, ensuring consistency.
     if (onLike) {
       onLike(postId);
     }
+    // Toggle heart for immediate feedback. The actual count will update when parent re-renders.
     setIsLiked(!isLiked);
-    setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
   };
 
   const handleComment = () => {
@@ -37,7 +39,6 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
         onComment(postId, commentText);
       }
       setCommentText('');
-      setCommentCount(prev => prev + 1);
       setShowCommentInput(false);
     }
   };
@@ -118,14 +119,16 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
             className={`flex items-center gap-2 hover:text-red-500 transition-colors font-medium ${isLiked ? 'text-red-500' : ''}`}
           >
             <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
-            <span className="text-sm">{likeCount}</span>
+            {/* Display count directly from props */}
+            <span className="text-sm">{likes}</span>
           </button>
           <button
             onClick={() => setShowCommentInput(!showCommentInput)}
             className="flex items-center gap-2 hover:text-blue-500 transition-colors font-medium"
           >
             <MessageCircle className="w-5 h-5" />
-            <span className="text-sm">{commentCount}</span>
+            {/* Display count directly from props */}
+            <span className="text-sm">{comments}</span>
           </button>
           <button
             onClick={handleShare}
@@ -170,6 +173,7 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
     </div>
   );
 };
+// --- FIX END ---
 
 // Create Post Modal Component
 const CreatePostModal = ({ isOpen, onClose, onSubmit, user }) => {
@@ -544,21 +548,16 @@ const CommunityPage = ({ onPageChange }) => {
       );
     }
 
-    // --- FIX START ---
-    // Separate pinned and unpinned posts
     const pinnedPosts = filteredPosts.filter(post => post.isPinned);
     const unpinnedPosts = filteredPosts.filter(post => !post.isPinned);
 
-    // Sort the unpinned posts based on the active filter
     if (activeFilter === 'Recent Activity') {
         unpinnedPosts.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     } else if (activeFilter === 'Most Popular') {
         unpinnedPosts.sort((a, b) => (b.likes + b.comments) - (a.likes + a.comments));
     }
 
-    // Combine the arrays, with pinned posts at the top
     setPosts([...pinnedPosts, ...unpinnedPosts]);
-    // --- FIX END ---
   }, [allPosts, searchTerm, activeFilter]);
 
   const handleFilterChange = (filter) => {
