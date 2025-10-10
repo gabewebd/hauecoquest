@@ -204,6 +204,35 @@ router.delete('/profile', auth, async (req, res) => {
   }
 });
 
+// @route   GET /api/users/:userId/photos
+// @desc    Get specific user's photo history from quest submissions
+// @access  Public
+router.get('/:userId/photos', async (req, res) => {
+  try {
+    const QuestSubmission = require('../models/QuestSubmission');
+
+    const submissions = await QuestSubmission.find({
+      user_id: req.params.userId,
+      photo_url: { $exists: true, $ne: '' }
+    })
+      .populate('quest_id', 'title category')
+      .sort({ submitted_at: -1 });
+
+    const photos = submissions.map(submission => ({
+      id: submission._id,
+      image_url: submission.photo_url,
+      quest_title: submission.quest_id.title,
+      quest_category: submission.quest_id.category,
+      submitted_at: submission.submitted_at
+    }));
+
+    res.json(photos);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 // @route   GET /api/users/photos
 // @desc    Get user's photo history from quest submissions
 // @access  Private

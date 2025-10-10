@@ -59,6 +59,13 @@ const ProfilePage = ({ onPageChange, userId }) => {
     }
   }, [profileUserId]);
 
+  // Fetch tabs data after profile user is loaded
+  useEffect(() => {
+    if (profileUser && !isOwnProfile) {
+      fetchProfileUserTabsData();
+    }
+  }, [profileUser, isOwnProfile]);
+
   // Fetch user data when component mounts or user changes (for own profile)
   useEffect(() => {
     if (user && isOwnProfile) {
@@ -80,6 +87,56 @@ const ProfilePage = ({ onPageChange, userId }) => {
       console.error('Error fetching profile user data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProfileUserTabsData = async () => {
+    if (isOwnProfile) {
+      return; // Don't fetch tabs data for own profile, it's handled by fetchUserData
+    }
+
+    try {
+      // Fetch profile user's quest submissions
+      if (displayUser?.role === 'user') {
+        const questsRes = await fetch(`/api/quests/submissions/user/${profileUserId}`);
+        if (questsRes.ok) {
+          const questsData = await questsRes.json();
+          setUserQuests(questsData);
+        }
+      } else {
+        // For admin and partner, fetch quests they created
+        const questsRes = await fetch('/api/quests');
+        if (questsRes.ok) {
+          const questsData = await questsRes.json();
+          const createdQuests = questsData.filter(quest => quest.createdBy && quest.createdBy._id === profileUserId);
+          setUserCreatedQuests(createdQuests);
+        }
+      }
+
+      // Fetch profile user's posts/activity
+      const postsRes = await fetch('/api/posts');
+      if (postsRes.ok) {
+        const postsData = await postsRes.json();
+        const userPosts = postsData.filter(post => post.author?._id === profileUserId || post.author === profileUserId);
+        setUserActivity(userPosts);
+      }
+
+      // Fetch profile user's badges/achievements
+      const badgesRes = await fetch(`/api/badges/user/${profileUserId}`);
+      if (badgesRes.ok) {
+        const badgesData = await badgesRes.json();
+        setUserAchievements(badgesData);
+      }
+
+      // Fetch profile user's photo history
+      const photosRes = await fetch(`/api/users/${profileUserId}/photos`);
+      if (photosRes.ok) {
+        const photosData = await photosRes.json();
+        setUserPhotos(photosData);
+      }
+
+    } catch (error) {
+      console.error('Error fetching profile user tabs data:', error);
     }
   };
 

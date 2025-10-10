@@ -293,6 +293,22 @@ router.post('/:id/submit', [auth, upload.single('photo'), handleUploadError], as
   }
 });
 
+// @route   GET /api/quests/submissions/user/:userId
+// @desc    Get specific user's quest submissions
+// @access  Public
+router.get('/submissions/user/:userId', async (req, res) => {
+  try {
+    const submissions = await QuestSubmission.find({ user_id: req.params.userId })
+      .populate('quest_id', 'title points category')
+      .sort({ submitted_at: -1 });
+    
+    res.json(submissions);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ msg: 'Server error' });
+  }
+});
+
 // @route   GET /api/quests/submissions/my
 // @desc    Get user's submissions
 // @access  Private
