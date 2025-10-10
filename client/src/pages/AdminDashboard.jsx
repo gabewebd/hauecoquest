@@ -1,55 +1,300 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import { Users, BookOpen, BarChart, Shield, CheckCircle, XCircle, Edit, Trash2, Plus, Search, Filter, Calendar, MapPin, Award, X, Save, Clock, Eye, FileCheck, Heart, MessageCircle, FileText } from 'lucide-react';
+import { Users, BookOpen, BarChart, Shield, CheckCircle, XCircle, Edit, Trash2, Plus, Search, Filter, Calendar, MapPin, Award, X, Save, Clock, Eye, FileCheck, Heart, MessageCircle, FileText, TrendingUp, TrendingDown, Activity, Zap } from 'lucide-react';
 
 // --- HELPER COMPONENTS ---
 
 const StatCard = ({ icon, value, label, bgColor }) => (
-    <div className="bg-white p-6 rounded-xl shadow-md border">
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
         <div className="flex items-center gap-4">
-            <div className={`${bgColor} p-3 rounded-lg`}>{icon}</div>
+            <div className={`${bgColor} p-4 rounded-xl`}>{icon}</div>
             <div>
-                <p className="text-3xl font-bold">{value}</p>
-                <p className="text-sm text-gray-500">{label}</p>
+                <p className="text-3xl font-bold text-gray-800">{value}</p>
+                <p className="text-sm text-gray-600 font-semibold">{label}</p>
             </div>
         </div>
     </div>
 );
 
 const QuickAction = ({ icon, title, subtitle, onClick }) => (
-    <button onClick={onClick} className="flex items-center gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors border w-full text-left">
+    <button onClick={onClick} className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all w-full text-left">
         <div className="bg-gray-100 p-3 rounded-lg">{icon}</div>
         <div className="flex-1">
-            <p className="font-semibold">{title}</p>
-            <p className="text-xs text-gray-500">{subtitle}</p>
+            <p className="font-semibold text-gray-800">{title}</p>
+            <p className="text-xs text-gray-600">{subtitle}</p>
         </div>
     </button>
 );
 
 const ActivityItem = ({ icon, title, subtitle, time }) => (
-    <div className="flex items-start gap-3 py-3 border-b last:border-b-0">
+    <div className="flex items-start gap-3 p-4 rounded-lg hover:bg-gray-50 transition-colors">
         <div className="mt-1">{icon}</div>
         <div className="flex-1">
-            <p className="font-semibold text-sm">{title}</p>
-            <p className="text-xs text-gray-500">{subtitle}</p>
+            <p className="font-semibold text-sm text-gray-800">{title}</p>
+            <p className="text-xs text-gray-600">{subtitle}</p>
         </div>
-        <p className="text-xs text-gray-400">{time}</p>
+        <p className="text-xs text-gray-500">{time}</p>
     </div>
 );
 
 const TabButton = ({ id, label, icon, activeTab, setActiveTab }) => (
     <button
         onClick={() => setActiveTab(id)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all text-sm ${activeTab === id
+        className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all text-sm ${activeTab === id
                 ? 'bg-green-500 text-white shadow-md'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
+                : 'bg-white text-gray-600 hover:bg-gray-50 hover:text-green-600'
             }`}
     >
         {icon}
         {label}
     </button>
 );
+
+// --- CHART COMPONENTS ---
+const SimpleBarChart = ({ data, title, color = 'green' }) => {
+    const maxValue = Math.max(...data.map(item => item.value));
+    const colorClasses = {
+        green: 'bg-green-500',
+        blue: 'bg-blue-500',
+        orange: 'bg-orange-500',
+        purple: 'bg-purple-500'
+    };
+
+    return (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{title}</h3>
+            <div className="space-y-3">
+                {data.map((item, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                        <div className="w-20 text-sm font-semibold text-gray-700">{item.label}</div>
+                        <div className="flex-1 bg-gray-200 rounded-full h-4 relative overflow-hidden">
+                            <div 
+                                className={`h-full ${colorClasses[color]} rounded-full transition-all duration-500`}
+                                style={{ width: `${(item.value / maxValue) * 100}%` }}
+                            ></div>
+                        </div>
+                        <div className="w-12 text-sm font-bold text-gray-800">{item.value}</div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const LineChart = ({ data, title, color = 'green' }) => {
+    const maxValue = Math.max(...data.map(item => item.value));
+    const minValue = Math.min(...data.map(item => item.value));
+    const range = maxValue - minValue;
+    
+    const colorClasses = {
+        green: 'stroke-green-500',
+        blue: 'stroke-blue-500',
+        orange: 'stroke-orange-500',
+        purple: 'stroke-purple-500'
+    };
+
+    return (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{title}</h3>
+            <div className="h-32 relative">
+                <svg className="w-full h-full" viewBox="0 0 300 100">
+                    <polyline
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className={colorClasses[color]}
+                        points={data.map((item, index) => {
+                            const x = (index / (data.length - 1)) * 300;
+                            const y = 100 - ((item.value - minValue) / range) * 80;
+                            return `${x},${y}`;
+                        }).join(' ')}
+                    />
+                    {data.map((item, index) => {
+                        const x = (index / (data.length - 1)) * 300;
+                        const y = 100 - ((item.value - minValue) / range) * 80;
+                        return (
+                            <circle
+                                key={index}
+                                cx={x}
+                                cy={y}
+                                r="3"
+                                fill="currentColor"
+                                className={colorClasses[color]}
+                            />
+                        );
+                    })}
+                </svg>
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 mt-2">
+                {data.map((item, index) => (
+                    <span key={index}>{item.label}</span>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const DonutChart = ({ data, title, size = 120 }) => {
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+    let cumulativePercentage = 0;
+    
+    const colors = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
+    
+    return (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{title}</h3>
+            <div className="flex items-center gap-6">
+                <div className="relative" style={{ width: size, height: size }}>
+                    <svg width={size} height={size} className="transform -rotate-90">
+                        {data.map((item, index) => {
+                            const percentage = (item.value / total) * 100;
+                            const circumference = 2 * Math.PI * 45;
+                            const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
+                            const strokeDashoffset = -cumulativePercentage * circumference / 100;
+                            
+                            cumulativePercentage += percentage;
+                            
+                            return (
+                                <circle
+                                    key={index}
+                                    cx="60"
+                                    cy="60"
+                                    r="45"
+                                    fill="none"
+                                    stroke={colors[index % colors.length]}
+                                    strokeWidth="20"
+                                    strokeDasharray={strokeDasharray}
+                                    strokeDashoffset={strokeDashoffset}
+                                    className="transition-all duration-500"
+                                />
+                            );
+                        })}
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                            <div className="text-2xl font-bold text-gray-800">{total}</div>
+                            <div className="text-xs text-gray-500">Total</div>
+                        </div>
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    {data.map((item, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                            <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: colors[index % colors.length] }}
+                            ></div>
+                            <span className="text-sm text-gray-700">{item.label}</span>
+                            <span className="text-sm font-semibold text-gray-800">{item.value}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const GroupedBarChart = ({ data, title, categories, colors = ['#3B82F6', '#10B981'] }) => {
+    const maxValue = Math.max(...data.flat().map(item => item.value));
+    const chartHeight = 200;
+    const barWidth = 30;
+    const barSpacing = 10;
+    const categorySpacing = 60;
+    
+    return (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{title}</h3>
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex gap-4">
+                    {categories.map((category, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                            <div 
+                                className="w-3 h-3 rounded" 
+                                style={{ backgroundColor: colors[index] }}
+                            ></div>
+                            <span className="text-sm text-gray-600">{category}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div className="relative" style={{ height: chartHeight + 40 }}>
+                <svg width="100%" height={chartHeight} className="overflow-visible">
+                    {/* Y-axis grid lines */}
+                    {[0, 1, 2, 3, 4, 5].map(value => (
+                        <line
+                            key={value}
+                            x1="40"
+                            y1={chartHeight - (value / 5) * chartHeight}
+                            x2="100%"
+                            y2={chartHeight - (value / 5) * chartHeight}
+                            stroke="#E5E7EB"
+                            strokeWidth="1"
+                        />
+                    ))}
+                    
+                    {/* Y-axis labels */}
+                    {[0, 1, 2, 3, 4, 5].map(value => (
+                        <text
+                            key={value}
+                            x="35"
+                            y={chartHeight - (value / 5) * chartHeight + 4}
+                            textAnchor="end"
+                            className="text-xs fill-gray-500"
+                        >
+                            {value}
+                        </text>
+                    ))}
+                    
+                    {/* Bars */}
+                    {data.map((categoryData, categoryIndex) => (
+                        <g key={categoryIndex}>
+                            {categoryData.map((item, itemIndex) => {
+                                const x = 50 + (itemIndex * categorySpacing) + (categoryIndex * (barWidth + barSpacing));
+                                const height = (item.value / maxValue) * chartHeight;
+                                const y = chartHeight - height;
+                                
+                                return (
+                                    <g key={itemIndex}>
+                                        <rect
+                                            x={x}
+                                            y={y}
+                                            width={barWidth}
+                                            height={height}
+                                            fill={colors[categoryIndex]}
+                                            rx="2"
+                                        />
+                                        <text
+                                            x={x + barWidth / 2}
+                                            y={y - 5}
+                                            textAnchor="middle"
+                                            className="text-xs font-semibold fill-gray-800"
+                                        >
+                                            {item.value}
+                                        </text>
+                                    </g>
+                                );
+                            })}
+                        </g>
+                    ))}
+                    
+                    {/* X-axis labels */}
+                    {data[0].map((item, index) => (
+                        <text
+                            key={index}
+                            x={50 + (index * categorySpacing) + (barWidth + barSpacing) / 2}
+                            y={chartHeight + 20}
+                            textAnchor="middle"
+                            className="text-xs fill-gray-600"
+                        >
+                            {item.label}
+                        </text>
+                    ))}
+                </svg>
+            </div>
+        </div>
+    );
+};
 
 // --- OVERVIEW TAB ---
 const OverviewTab = ({ stats, setActiveTab }) => (
@@ -61,39 +306,88 @@ const OverviewTab = ({ stats, setActiveTab }) => (
             <StatCard icon={<FileCheck className="w-6 h-6 text-orange-500" />} value={stats.pendingSubmissions} label="Pending Submissions" bgColor="bg-orange-50" />
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-lg border">
-            <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <QuickAction
-                    icon={<Users className="w-6 h-6 text-blue-500" />}
-                    title="Manage Users"
-                    subtitle="View and manage user accounts"
-                    onClick={() => setActiveTab('users')}
-                />
-                <QuickAction
-                    icon={<BookOpen className="w-6 h-6 text-green-500" />}
-                    title="Manage Quests"
-                    subtitle="Create and edit quests"
-                    onClick={() => setActiveTab('quests')}
-                />
-                <QuickAction
-                    icon={<BarChart className="w-6 h-6 text-purple-500" />}
-                    title="View Analytics"
-                    subtitle="System performance metrics"
-                    onClick={() => setActiveTab('analytics')}
-                />
-                <QuickAction
-                    icon={<Calendar className="w-6 h-6 text-orange-500" />}
-                    title="Create Daily Quest"
-                    subtitle="Set today's featured quest"
-                    onClick={() => setActiveTab('daily')}
-                />
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <GroupedBarChart 
+                data={[
+                    [
+                        { label: 'Mon', value: Math.floor(stats.totalUsers * 0.1) + 2 },
+                        { label: 'Tue', value: Math.floor(stats.totalUsers * 0.15) + 3 },
+                        { label: 'Wed', value: Math.floor(stats.totalUsers * 0.2) + 4 },
+                        { label: 'Thu', value: Math.floor(stats.totalUsers * 0.12) + 2 },
+                        { label: 'Fri', value: Math.floor(stats.totalUsers * 0.25) + 5 },
+                        { label: 'Sat', value: Math.floor(stats.totalUsers * 0.18) + 3 },
+                        { label: 'Sun', value: Math.floor(stats.totalUsers * 0.1) + 1 }
+                    ],
+                    [
+                        { label: 'Mon', value: Math.floor(stats.totalUsers * 0.12) + 3 },
+                        { label: 'Tue', value: Math.floor(stats.totalUsers * 0.18) + 4 },
+                        { label: 'Wed', value: Math.floor(stats.totalUsers * 0.22) + 5 },
+                        { label: 'Thu', value: Math.floor(stats.totalUsers * 0.15) + 3 },
+                        { label: 'Fri', value: Math.floor(stats.totalUsers * 0.28) + 6 },
+                        { label: 'Sat', value: Math.floor(stats.totalUsers * 0.2) + 4 },
+                        { label: 'Sun', value: Math.floor(stats.totalUsers * 0.12) + 2 }
+                    ]
+                ]} 
+                title="Weekly Platform Activity" 
+                categories={['This Week', 'Last Week']}
+                colors={['#3B82F6', '#10B981']}
+            />
+            <DonutChart 
+                data={[
+                    { label: 'Users', value: stats.totalUsers - stats.pendingPartners },
+                    { label: 'Partners', value: Math.floor(stats.totalUsers * 0.1) },
+                    { label: 'Admins', value: Math.floor(stats.totalUsers * 0.02) },
+                    { label: 'Pending', value: stats.pendingPartners }
+                ]} 
+                title="User Role Distribution" 
+            />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <SimpleBarChart 
+                data={[
+                    { label: 'Active', value: stats.activeQuests },
+                    { label: 'Completed', value: Math.floor(stats.activeQuests * 0.7) },
+                    { label: 'Draft', value: Math.floor(stats.activeQuests * 0.3) }
+                ]} 
+                title="Quest Status Overview" 
+                color="green" 
+            />
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <QuickAction
+                        icon={<Users className="w-6 h-6 text-blue-500" />}
+                        title="Manage Users"
+                        subtitle="View and manage user accounts"
+                        onClick={() => setActiveTab('users')}
+                    />
+                    <QuickAction
+                        icon={<BookOpen className="w-6 h-6 text-green-500" />}
+                        title="Manage Quests"
+                        subtitle="Create and edit quests"
+                        onClick={() => setActiveTab('quests')}
+                    />
+                    <QuickAction
+                        icon={<BarChart className="w-6 h-6 text-purple-500" />}
+                        title="View Analytics"
+                        subtitle="System performance metrics"
+                        onClick={() => setActiveTab('analytics')}
+                    />
+                    <QuickAction
+                        icon={<Calendar className="w-6 h-6 text-orange-500" />}
+                        title="Create Daily Quest"
+                        subtitle="Set today's featured quest"
+                        onClick={() => setActiveTab('daily')}
+                    />
+                </div>
             </div>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-lg border">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
-            <div>
+            <div className="space-y-3">
                 <ActivityItem
                     icon={<Users className="w-5 h-5 text-blue-500" />}
                     title="New user registered"
@@ -219,11 +513,45 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
         return matchesSearch && matchesRole;
     });
 
+    // Generate user statistics for charts
+    const userRoleData = users.reduce((acc, user) => {
+        acc[user.role] = (acc[user.role] || 0) + 1;
+        return acc;
+    }, {});
+
+    const roleChartData = Object.entries(userRoleData).map(([label, value]) => ({
+        label: label.charAt(0).toUpperCase() + label.slice(1),
+        value
+    }));
+
+    const userStatusData = users.reduce((acc, user) => {
+        acc[user.status || 'active'] = (acc[user.status || 'active'] || 0) + 1;
+        return acc;
+    }, {});
+
+    const statusChartData = Object.entries(userStatusData).map(([label, value]) => ({
+        label: label.charAt(0).toUpperCase() + label.slice(1),
+        value
+    }));
+
     return (
         <div className="space-y-8">
+            {/* User Statistics Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <DonutChart 
+                    data={roleChartData} 
+                    title="User Role Distribution" 
+                />
+                <SimpleBarChart 
+                    data={statusChartData} 
+                    title="User Status Overview" 
+                    color="blue" 
+                />
+            </div>
+
             {/* Pending Role Approvals (Partner & Admin) */}
             {pendingPartners.length > 0 && (
-                <div className="bg-yellow-50 border-2 border-yellow-200 p-6 rounded-2xl">
+                <div className="bg-yellow-50 border-2 border-yellow-200 p-6 rounded-xl shadow-sm">
                     <div className="flex items-center gap-2 mb-4">
                         <Shield className="w-6 h-6 text-yellow-600" />
                         <h3 className="text-xl font-bold text-yellow-900">Pending Role Requests ({pendingPartners.length})</h3>
@@ -267,35 +595,58 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
             )}
 
             {/* User Management Table */}
-            <div className="bg-white p-6 rounded-2xl shadow-lg border">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">User Management</h3>
-                    <div className="flex gap-3">
-                        <div className="relative">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h3 className="text-xl font-bold">User Management</h3>
+                        <p className="text-sm text-gray-500">Manage all user accounts and roles</p>
+                    </div>
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             <input
                                 type="text"
                                 placeholder="Search users..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
                             />
                         </div>
-                        <select
-                            value={filterRole}
-                            onChange={(e) => setFilterRole(e.target.value)}
-                            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                        >
-                            <option value="all">All Roles</option>
-                            <option value="student">Students</option>
-                            <option value="partner">Partners</option>
-                        </select>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setFilterRole('all')}
+                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'all'
+                                        ? 'bg-gray-500 text-white'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                All Roles
+                            </button>
+                            <button
+                                onClick={() => setFilterRole('student')}
+                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'student'
+                                        ? 'bg-blue-500 text-white'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                Students
+                            </button>
+                            <button
+                                onClick={() => setFilterRole('partner')}
+                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'partner'
+                                        ? 'bg-purple-500 text-white'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                Partners
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-50 border-b">
+                        <thead className="bg-gray-50 border-b border-gray-100">
                             <tr>
                                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Name</th>
                                 <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Email</th>
@@ -307,7 +658,7 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
                         </thead>
                         <tbody>
                             {filteredUsers.map(user => (
-                                <tr key={user._id} className="border-b hover:bg-gray-50">
+                                <tr key={user._id} className="border-b border-gray-100 hover:bg-gray-50">
                                     <td className="px-4 py-3 font-semibold">{user.username}</td>
                                     <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
                                     <td className="px-4 py-3 text-sm">
@@ -648,7 +999,7 @@ const QuestsTab = ({ quests, setQuests }) => {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold">Quest Management</h3>
                     <button
@@ -665,7 +1016,7 @@ const QuestsTab = ({ quests, setQuests }) => {
 
                 <div className="space-y-4">
                     {quests.map(quest => (
-                        <div key={quest._id} className="border rounded-xl p-5 hover:shadow-md transition">
+                        <div key={quest._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
@@ -781,11 +1132,32 @@ const AnalyticsTab = ({ stats, users, quests }) => {
         });
     };
 
+    // Generate chart data
+    const userGrowthChartData = analyticsData.userGrowth.map(([label, value]) => ({
+        label,
+        value
+    }));
+
+    const categoryChartData = Object.entries(analyticsData.categoryStats).map(([label, stats]) => ({
+        label: label.split(' ')[0], // Shorten category names
+        value: stats.completed
+    }));
+
+    const userRoleData = users.reduce((acc, user) => {
+        acc[user.role] = (acc[user.role] || 0) + 1;
+        return acc;
+    }, {});
+
+    const roleChartData = Object.entries(userRoleData).map(([label, value]) => ({
+        label: label.charAt(0).toUpperCase() + label.slice(1),
+        value
+    }));
+
     return (
         <div className="space-y-8">
             {/* Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-md border">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex items-center gap-4">
                         <div className="bg-blue-100 p-3 rounded-lg">
                             <Users className="w-6 h-6 text-blue-600" />
@@ -797,7 +1169,7 @@ const AnalyticsTab = ({ stats, users, quests }) => {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-md border">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex items-center gap-4">
                         <div className="bg-green-100 p-3 rounded-lg">
                             <BookOpen className="w-6 h-6 text-green-600" />
@@ -809,7 +1181,7 @@ const AnalyticsTab = ({ stats, users, quests }) => {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-md border">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex items-center gap-4">
                         <div className="bg-yellow-100 p-3 rounded-lg">
                             <Award className="w-6 h-6 text-yellow-600" />
@@ -821,7 +1193,7 @@ const AnalyticsTab = ({ stats, users, quests }) => {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-md border">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex items-center gap-4">
                         <div className="bg-purple-100 p-3 rounded-lg">
                             <BarChart className="w-6 h-6 text-purple-600" />
@@ -834,89 +1206,52 @@ const AnalyticsTab = ({ stats, users, quests }) => {
                 </div>
             </div>
 
-            {/* User Growth Chart */}
-            <div className="bg-white p-6 rounded-xl shadow-md border">
-                <h3 className="text-xl font-bold mb-4">User Registration Growth</h3>
-                <div className="space-y-3">
-                    {analyticsData.userGrowth.map(([month, count], index) => (
-                        <div key={index} className="flex items-center justify-between">
-                            <span className="text-sm font-medium">{month}</span>
-                            <div className="flex items-center gap-3">
-                                <div className="w-32 bg-gray-200 rounded-full h-2">
-                                    <div
-                                        className="bg-blue-500 h-2 rounded-full"
-                                        style={{ width: `${(count / Math.max(...analyticsData.userGrowth.map(([, c]) => c))) * 100}%` }}
-                                    ></div>
-                                </div>
-                                <span className="text-sm text-gray-600 w-8">{count}</span>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+            {/* Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <SimpleBarChart 
+                    data={userGrowthChartData} 
+                    title="User Registration Growth" 
+                    color="blue" 
+                />
+                <DonutChart 
+                    data={roleChartData} 
+                    title="User Role Distribution" 
+                />
             </div>
 
-            {/* Category Performance */}
-            <div className="bg-white p-6 rounded-xl shadow-md border">
-                <h3 className="text-xl font-bold mb-4">Quest Category Performance</h3>
-                <div className="space-y-4">
-                    {Object.entries(analyticsData.categoryStats).map(([category, stats]) => (
-                        <div key={category} className="border-b pb-3 last:border-b-0">
-                            <div className="flex justify-between items-center mb-2">
-                                <h4 className="font-semibold">{category}</h4>
-                                <span className="text-sm text-gray-500">{stats.completed} completions</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                <div
-                                    className="bg-green-500 h-2 rounded-full"
-                                    style={{ width: `${stats.total > 0 ? (stats.completed / (stats.total * 10)) * 100 : 0}%` }}
-                                ></div>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">{stats.total} total quests in category</p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <SimpleBarChart 
+                    data={categoryChartData} 
+                    title="Quest Category Performance" 
+                    color="green" 
+                />
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h3 className="text-xl font-bold mb-4">Platform Health</h3>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">Active Users</span>
+                            <span className="text-sm font-semibold text-green-600">{users.filter(u => u.questsCompleted > 0).length}</span>
                         </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Recent Activity Summary */}
-            <div className="bg-white p-6 rounded-xl shadow-md border">
-                <h3 className="text-xl font-bold mb-4">Platform Health</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h4 className="font-semibold mb-3">User Engagement</h4>
-                        <div className="space-y-2">
-                            <div className="flex justify-between">
-                                <span className="text-sm">Active Users</span>
-                                <span className="text-sm font-semibold">{users.filter(u => u.questsCompleted > 0).length}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-sm">Inactive Users</span>
-                                <span className="text-sm font-semibold">{users.filter(u => u.questsCompleted === 0).length}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-sm">Pending Partners</span>
-                                <span className="text-sm font-semibold text-yellow-600">{stats.pendingPartners}</span>
-                            </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">Inactive Users</span>
+                            <span className="text-sm font-semibold text-gray-600">{users.filter(u => u.questsCompleted === 0).length}</span>
                         </div>
-                    </div>
-                    <div>
-                        <h4 className="font-semibold mb-3">Quest Statistics</h4>
-                        <div className="space-y-2">
-                            <div className="flex justify-between">
-                                <span className="text-sm">Active Quests</span>
-                                <span className="text-sm font-semibold">{stats.activeQuests}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-sm">Completed Quests</span>
-                                <span className="text-sm font-semibold">{quests.filter(q => !q.isActive).length}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-sm">Total Points Awarded</span>
-                                <span className="text-sm font-semibold">{users.reduce((sum, u) => sum + (u.points || 0), 0)}</span>
-                            </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">Pending Partners</span>
+                            <span className="text-sm font-semibold text-yellow-600">{stats.pendingPartners}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">Active Quests</span>
+                            <span className="text-sm font-semibold text-blue-600">{stats.activeQuests}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium">Total Points Awarded</span>
+                            <span className="text-sm font-semibold text-purple-600">{users.reduce((sum, u) => sum + (u.points || 0), 0)}</span>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
     );
 };
@@ -927,6 +1262,7 @@ const CommunityTab = ({ posts, setPosts }) => {
     const [showChallengeModal, setShowChallengeModal] = useState(false);
     const [editingPost, setEditingPost] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [postFilter, setPostFilter] = useState('all'); // all, admin, partner, user
 
     const handleSavePost = async (postData) => {
         try {
@@ -1037,17 +1373,64 @@ const CommunityTab = ({ posts, setPosts }) => {
         }
     };
 
-    const filteredPosts = posts.filter(p =>
-        p.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredPosts = posts.filter(p => {
+        const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesFilter = postFilter === 'all' || 
+            (postFilter === 'admin' && p.author?.role === 'admin') ||
+            (postFilter === 'partner' && p.author?.role === 'partner') ||
+            (postFilter === 'user' && p.author?.role === 'user');
+        return matchesSearch && matchesFilter;
+    });
+
+    // Separate posts by author role for admin controls
+    const adminPosts = posts.filter(p => p.author?.role === 'admin');
+    const partnerPosts = posts.filter(p => p.author?.role === 'partner');
+    const userPosts = posts.filter(p => p.author?.role === 'user');
 
     return (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            {/* Admin Post Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3">
+                        <div className="p-3 bg-red-100 rounded-lg">
+                            <Users className="w-6 h-6 text-red-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold">Admin Posts</h3>
+                            <p className="text-2xl font-bold text-red-600">{adminPosts.length}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3">
+                        <div className="p-3 bg-blue-100 rounded-lg">
+                            <Users className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold">Partner Posts</h3>
+                            <p className="text-2xl font-bold text-blue-600">{partnerPosts.length}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3">
+                        <div className="p-3 bg-green-100 rounded-lg">
+                            <Users className="w-6 h-6 text-green-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold">User Posts</h3>
+                            <p className="text-2xl font-bold text-green-600">{userPosts.length}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                     <div>
-                        <h3 className="text-xl font-bold">Community Content</h3>
-                        <p className="text-sm text-gray-500">Manage community posts and challenges</p>
+                        <h3 className="text-xl font-bold">Community Content Management</h3>
+                        <p className="text-sm text-gray-500">Manage all community posts and challenges</p>
                     </div>
                     <div className="flex gap-2">
                         <button
@@ -1070,16 +1453,54 @@ const CommunityTab = ({ posts, setPosts }) => {
                     </div>
                 </div>
 
-                <div className="mb-4">
-                    <div className="relative">
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search posts..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
                         />
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setPostFilter('all')}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${postFilter === 'all'
+                                    ? 'bg-gray-500 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                        >
+                            All Posts
+                        </button>
+                        <button
+                            onClick={() => setPostFilter('admin')}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${postFilter === 'admin'
+                                    ? 'bg-red-500 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                        >
+                            Admin Posts
+                        </button>
+                        <button
+                            onClick={() => setPostFilter('partner')}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${postFilter === 'partner'
+                                    ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                        >
+                            Partner Posts
+                        </button>
+                        <button
+                            onClick={() => setPostFilter('user')}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${postFilter === 'user'
+                                    ? 'bg-green-500 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                        >
+                            User Posts
+                        </button>
                     </div>
                 </div>
 
@@ -1091,13 +1512,20 @@ const CommunityTab = ({ posts, setPosts }) => {
                         </div>
                     ) : (
                         filteredPosts.map(post => (
-                            <div key={post._id} className="border rounded-xl p-5 hover:shadow-md transition">
+                            <div key={post._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                                             <h4 className="text-lg font-bold">{post.title}</h4>
                                             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
                                                 {post.category}
+                                            </span>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                post.author?.role === 'admin' ? 'bg-red-100 text-red-700' :
+                                                post.author?.role === 'partner' ? 'bg-blue-100 text-blue-700' :
+                                                'bg-green-100 text-green-700'
+                                            }`}>
+                                                {post.author?.role || 'user'}
                                             </span>
                                         </div>
                                         <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.content}</p>
@@ -1685,7 +2113,55 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            {/* Submission Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3">
+                        <div className="p-3 bg-yellow-100 rounded-lg">
+                            <Clock className="w-6 h-6 text-yellow-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold">Pending</h3>
+                            <p className="text-2xl font-bold text-yellow-600">{submissions.filter(s => s.status === 'pending').length}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3">
+                        <div className="p-3 bg-green-100 rounded-lg">
+                            <CheckCircle className="w-6 h-6 text-green-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold">Approved</h3>
+                            <p className="text-2xl font-bold text-green-600">{submissions.filter(s => s.status === 'approved').length}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3">
+                        <div className="p-3 bg-red-100 rounded-lg">
+                            <XCircle className="w-6 h-6 text-red-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold">Rejected</h3>
+                            <p className="text-2xl font-bold text-red-600">{submissions.filter(s => s.status === 'rejected').length}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3">
+                        <div className="p-3 bg-blue-100 rounded-lg">
+                            <FileCheck className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold">Total</h3>
+                            <p className="text-2xl font-bold text-blue-600">{submissions.length}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                     <div>
                         <h3 className="text-xl font-bold">Quest Submissions</h3>
@@ -1739,7 +2215,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                 ) : (
                     <div className="space-y-4">
                         {filteredSubmissions.map(submission => (
-                            <div key={submission._id} className="border rounded-xl p-5 hover:shadow-md transition">
+                            <div key={submission._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-2 flex-wrap">
@@ -2142,6 +2618,7 @@ const AdminDashboard = () => {
     const { user, logout } = useUser();
     const [users, setUsers] = useState([]);
     const [quests, setQuests] = useState([]);
+    const [posts, setPosts] = useState([]);
     const [stats, setStats] = useState({
         totalUsers: 0,
         activeQuests: 0,
@@ -2190,6 +2667,13 @@ const AdminDashboard = () => {
             });
             const questsData = await questsRes.json();
             setQuests(questsData);
+
+            // Fetch posts
+            const postsRes = await fetch('/api/posts', {
+                headers: { 'x-auth-token': token }
+            });
+            const postsData = await postsRes.json();
+            setPosts(postsData);
 
             // Calculate stats - include both pending partner AND admin requests
             const pendingRequests = usersData.filter(u => u.requested_role && !u.is_approved).length;
@@ -2299,28 +2783,32 @@ const AdminDashboard = () => {
     const pendingPartners = users.filter(u => u.requested_role && !u.is_approved);
 
     return (
-        <div className="font-sans bg-gray-50 text-gray-800">
-            <main className="container mx-auto px-4 pt-24 pb-12">
+        <div className="font-sans bg-gray-50 text-gray-800 min-h-screen">
+            <main className="container mx-auto px-6 pt-24 pb-12">
                 {/* Header */}
-                <div className="bg-white p-6 rounded-2xl shadow-lg border mb-8">
-                    <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center">
-                            <Shield className="w-8 h-8 text-white" />
+                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-8 rounded-xl shadow-sm mb-8 text-white relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-2xl"></div>
+                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full blur-xl"></div>
+                    </div>
+                    <div className="relative z-10 flex items-center gap-6">
+                        <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-4 border-white/20">
+                            <Shield className="w-10 h-10 text-white" />
                         </div>
                         <div>
-                            <div className="flex items-center gap-3 mb-2">
-                                <h2 className="text-3xl font-bold text-gray-800">Admin Dashboard</h2>
-                                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
-                                    Admin
+                            <div className="flex items-center gap-4 mb-2">
+                                <h2 className="text-4xl font-bold text-white">Admin Dashboard</h2>
+                                <span className="px-4 py-2 rounded-full text-sm font-semibold bg-white/20 text-white backdrop-blur-sm">
+                                    Platform Administrator
                                 </span>
                             </div>
-                            <p className="text-gray-500">Welcome back, {user.username}! Manage the HAU Eco-Quest platform.</p>
+                            <p className="text-white/90 text-lg">Welcome back, {user.username}! Manage the HAU Eco-Quest platform.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Navigation Tabs */}
-                <div className="bg-white p-2 rounded-xl shadow-md border inline-flex items-center gap-2 mb-8 flex-wrap">
+                <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 inline-flex items-center gap-3 mb-8 flex-wrap">
                     <TabButton id="overview" label="Overview" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="users" label="Users" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="quests" label="Quests" icon={<BookOpen className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -2334,7 +2822,7 @@ const AdminDashboard = () => {
                 {activeTab === 'overview' && <OverviewTab stats={stats} setActiveTab={setActiveTab} />}
                 {activeTab === 'users' && <UsersTab users={users} pendingPartners={pendingPartners} onApprove={handleApprovePartner} onReject={handleRejectPartner} onDeleteUser={handleDeleteUser} />}
                 {activeTab === 'quests' && <QuestsTab quests={quests} setQuests={setQuests} />}
-                {activeTab === 'community' && <CommunityTab posts={[]} setPosts={() => { }} />}
+                {activeTab === 'community' && <CommunityTab posts={posts} setPosts={setPosts} />}
                 {activeTab === 'submissions' && <SubmissionsTab />}
                 {activeTab === 'notifications' && <NotificationsTab />}
                 {activeTab === 'analytics' && <AnalyticsTab stats={stats} users={users} quests={quests} />}

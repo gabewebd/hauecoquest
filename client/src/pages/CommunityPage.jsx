@@ -767,7 +767,7 @@ const CommunityPage = ({ onPageChange }) => {
             {/* Right Content - Posts Feed (2 columns) */}
             <div className="lg:col-span-2">
               {/* Filters - Made Sticky with proper z-index and backdrop */}
-              <div className="sticky top-20 z-40 bg-white rounded-xl shadow-md border border-gray-200 p-4 mb-6 backdrop-blur-sm">
+              <div className="sticky top-20 z-40 bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200 p-4 mb-6">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                   <div className="flex gap-2">
                     {['Recent Activity', 'Most Popular'].map((filter) => (
@@ -796,10 +796,8 @@ const CommunityPage = ({ onPageChange }) => {
                 </div>
               </div>
 
-              {/* Posts Container - with proper overflow clipping */}
-              <div className="relative">
-                <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-gray-50 to-transparent pointer-events-none z-30"></div>
-
+              {/* Posts Container - Scrollable with proper spacing */}
+              <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                 {/* Posts */}
                 {loading ? (
                   <div className="flex justify-center items-center py-16">
@@ -814,7 +812,7 @@ const CommunityPage = ({ onPageChange }) => {
                     </p>
                   </div>
                 ) : (
-                  <div>
+                  <div className="space-y-4">
                     {posts.map((post, index) => (
                       <PostCard
                         key={index}

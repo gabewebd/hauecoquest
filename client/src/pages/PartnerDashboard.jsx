@@ -4,19 +4,20 @@ import { useUser } from '../context/UserContext';
 import {
     BookOpen, BarChart, Users, TrendingUp, Plus, Edit, Trash2,
     Search, Calendar, MapPin, Award, Target, CheckCircle, Clock,
-    FileText, Share2, Eye, MessageCircle, Heart, X, Save, Camera
+    FileText, Share2, Eye, MessageCircle, Heart, X, Save, Camera,
+    TrendingDown, Activity, Zap
 } from 'lucide-react';
 
 // --- HELPER COMPONENTS ---
 
 const StatCard = ({ icon, value, label, bgColor, trend }) => (
-    <div className="bg-white p-6 rounded-xl shadow-md border">
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
         <div className="flex items-center gap-4">
-            <div className={`${bgColor} p-3 rounded-lg`}>{icon}</div>
+            <div className={`${bgColor} p-4 rounded-xl`}>{icon}</div>
             <div className="flex-1">
-                <p className="text-3xl font-bold">{value}</p>
-                <p className="text-sm text-gray-500">{label}</p>
-                {trend && <p className="text-xs text-green-600 font-semibold mt-1">↑ {trend}</p>}
+                <p className="text-3xl font-bold text-gray-800">{value}</p>
+                <p className="text-sm text-gray-600 font-semibold">{label}</p>
+                {trend && <p className="text-xs text-green-600 font-semibold mt-2">↑ {trend}</p>}
             </div>
         </div>
     </div>
@@ -25,20 +26,265 @@ const StatCard = ({ icon, value, label, bgColor, trend }) => (
 const TabButton = ({ id, label, icon, activeTab, setActiveTab, badge }) => (
     <button
         onClick={() => setActiveTab(id)}
-        className={`relative flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all text-sm ${activeTab === id
+        className={`relative flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all text-sm ${activeTab === id
                 ? 'bg-green-500 text-white shadow-md'
-                : 'bg-white text-gray-600 hover:bg-gray-100'
+                : 'bg-white text-gray-600 hover:bg-gray-50 hover:text-green-600'
             }`}
     >
         {icon}
         {label}
         {badge && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
                 {badge}
             </span>
         )}
     </button>
 );
+
+// --- CHART COMPONENTS ---
+const SimpleBarChart = ({ data, title, color = 'green' }) => {
+    const maxValue = Math.max(...data.map(item => item.value));
+    const colorClasses = {
+        green: 'bg-green-500',
+        blue: 'bg-blue-500',
+        orange: 'bg-orange-500',
+        purple: 'bg-purple-500'
+    };
+
+    return (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{title}</h3>
+            <div className="space-y-3">
+                {data.map((item, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                        <div className="w-20 text-sm font-semibold text-gray-700">{item.label}</div>
+                        <div className="flex-1 bg-gray-200 rounded-full h-4 relative overflow-hidden">
+                            <div 
+                                className={`h-full ${colorClasses[color]} rounded-full transition-all duration-500`}
+                                style={{ width: `${(item.value / maxValue) * 100}%` }}
+                            ></div>
+                        </div>
+                        <div className="w-12 text-sm font-bold text-gray-800">{item.value}</div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const LineChart = ({ data, title, color = 'green' }) => {
+    const maxValue = Math.max(...data.map(item => item.value));
+    const minValue = Math.min(...data.map(item => item.value));
+    const range = maxValue - minValue;
+    
+    const colorClasses = {
+        green: 'stroke-green-500',
+        blue: 'stroke-blue-500',
+        orange: 'stroke-orange-500',
+        purple: 'stroke-purple-500'
+    };
+
+    return (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{title}</h3>
+            <div className="h-32 relative">
+                <svg className="w-full h-full" viewBox="0 0 300 100">
+                    <polyline
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className={colorClasses[color]}
+                        points={data.map((item, index) => {
+                            const x = (index / (data.length - 1)) * 300;
+                            const y = 100 - ((item.value - minValue) / range) * 80;
+                            return `${x},${y}`;
+                        }).join(' ')}
+                    />
+                    {data.map((item, index) => {
+                        const x = (index / (data.length - 1)) * 300;
+                        const y = 100 - ((item.value - minValue) / range) * 80;
+                        return (
+                            <circle
+                                key={index}
+                                cx={x}
+                                cy={y}
+                                r="3"
+                                fill="currentColor"
+                                className={colorClasses[color]}
+                            />
+                        );
+                    })}
+                </svg>
+            </div>
+            <div className="flex justify-between text-xs text-gray-500 mt-2">
+                {data.map((item, index) => (
+                    <span key={index}>{item.label}</span>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const DonutChart = ({ data, title, size = 120 }) => {
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+    let cumulativePercentage = 0;
+    
+    const colors = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
+    
+    return (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{title}</h3>
+            <div className="flex items-center gap-6">
+                <div className="relative" style={{ width: size, height: size }}>
+                    <svg width={size} height={size} className="transform -rotate-90">
+                        {data.map((item, index) => {
+                            const percentage = (item.value / total) * 100;
+                            const circumference = 2 * Math.PI * 45;
+                            const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
+                            const strokeDashoffset = -cumulativePercentage * circumference / 100;
+                            
+                            cumulativePercentage += percentage;
+                            
+                            return (
+                                <circle
+                                    key={index}
+                                    cx="60"
+                                    cy="60"
+                                    r="45"
+                                    fill="none"
+                                    stroke={colors[index % colors.length]}
+                                    strokeWidth="20"
+                                    strokeDasharray={strokeDasharray}
+                                    strokeDashoffset={strokeDashoffset}
+                                    className="transition-all duration-500"
+                                />
+                            );
+                        })}
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="text-center">
+                            <div className="text-2xl font-bold text-gray-800">{total}</div>
+                            <div className="text-xs text-gray-500">Total</div>
+                        </div>
+                    </div>
+                </div>
+                <div className="space-y-2">
+                    {data.map((item, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                            <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: colors[index % colors.length] }}
+                            ></div>
+                            <span className="text-sm text-gray-700">{item.label}</span>
+                            <span className="text-sm font-semibold text-gray-800">{item.value}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const GroupedBarChart = ({ data, title, categories, colors = ['#3B82F6', '#10B981'] }) => {
+    const maxValue = Math.max(...data.flat().map(item => item.value));
+    const chartHeight = 200;
+    const barWidth = 30;
+    const barSpacing = 10;
+    const categorySpacing = 60;
+    
+    return (
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{title}</h3>
+            <div className="flex items-center justify-between mb-4">
+                <div className="flex gap-4">
+                    {categories.map((category, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                            <div 
+                                className="w-3 h-3 rounded" 
+                                style={{ backgroundColor: colors[index] }}
+                            ></div>
+                            <span className="text-sm text-gray-600">{category}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            <div className="relative" style={{ height: chartHeight + 40 }}>
+                <svg width="100%" height={chartHeight} className="overflow-visible">
+                    {/* Y-axis grid lines */}
+                    {[0, 1, 2, 3, 4, 5].map(value => (
+                        <line
+                            key={value}
+                            x1="40"
+                            y1={chartHeight - (value / 5) * chartHeight}
+                            x2="100%"
+                            y2={chartHeight - (value / 5) * chartHeight}
+                            stroke="#E5E7EB"
+                            strokeWidth="1"
+                        />
+                    ))}
+                    
+                    {/* Y-axis labels */}
+                    {[0, 1, 2, 3, 4, 5].map(value => (
+                        <text
+                            key={value}
+                            x="35"
+                            y={chartHeight - (value / 5) * chartHeight + 4}
+                            textAnchor="end"
+                            className="text-xs fill-gray-500"
+                        >
+                            {value}
+                        </text>
+                    ))}
+                    
+                    {/* Bars */}
+                    {data.map((categoryData, categoryIndex) => (
+                        <g key={categoryIndex}>
+                            {categoryData.map((item, itemIndex) => {
+                                const x = 50 + (itemIndex * categorySpacing) + (categoryIndex * (barWidth + barSpacing));
+                                const height = (item.value / maxValue) * chartHeight;
+                                const y = chartHeight - height;
+                                
+                                return (
+                                    <g key={itemIndex}>
+                                        <rect
+                                            x={x}
+                                            y={y}
+                                            width={barWidth}
+                                            height={height}
+                                            fill={colors[categoryIndex]}
+                                            rx="2"
+                                        />
+                                        <text
+                                            x={x + barWidth / 2}
+                                            y={y - 5}
+                                            textAnchor="middle"
+                                            className="text-xs font-semibold fill-gray-800"
+                                        >
+                                            {item.value}
+                                        </text>
+                                    </g>
+                                );
+                            })}
+                        </g>
+                    ))}
+                    
+                    {/* X-axis labels */}
+                    {data[0].map((item, index) => (
+                        <text
+                            key={index}
+                            x={50 + (index * categorySpacing) + (barWidth + barSpacing) / 2}
+                            y={chartHeight + 20}
+                            textAnchor="middle"
+                            className="text-xs fill-gray-600"
+                        >
+                            {item.label}
+                        </text>
+                    ))}
+                </svg>
+            </div>
+        </div>
+    );
+};
 
 // --- QUEST FORM MODAL ---
 const QuestModal = ({ quest, onClose, onSave }) => {
@@ -469,8 +715,62 @@ const OverviewTab = ({ quests, posts, setActiveTab }) => {
     const totalParticipants = quests.reduce((sum, q) => sum + (q.completions?.length || 0), 0);
     const totalPoints = quests.reduce((sum, q) => sum + q.points, 0);
 
+    // Generate chart data from real quest data based on creation dates
+    const getWeeklyActivity = (quests, isThisWeek = true) => {
+        const now = new Date();
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay() + (isThisWeek ? 0 : -7));
+        weekStart.setHours(0, 0, 0, 0);
+        
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+        
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        return days.map(day => {
+            const dayIndex = days.indexOf(day);
+            const dayStart = new Date(weekStart);
+            dayStart.setDate(weekStart.getDate() + dayIndex);
+            dayStart.setHours(0, 0, 0, 0);
+            
+            const dayEnd = new Date(dayStart);
+            dayEnd.setHours(23, 59, 59, 999);
+            
+            const questsOnDay = quests.filter(quest => {
+                const questDate = new Date(quest.created_at);
+                return questDate >= dayStart && questDate <= dayEnd;
+            }).length;
+            
+            return { label: day, value: questsOnDay };
+        });
+    };
+
+    const weeklyProgressData = getWeeklyActivity(quests, true);
+    const lastWeekData = getWeeklyActivity(quests, false);
+
+    const categoryData = quests.reduce((acc, quest) => {
+        const category = quest.category;
+        if (!acc[category]) {
+            acc[category] = 0;
+        }
+        acc[category]++;
+        return acc;
+    }, {});
+
+    const categoryChartData = Object.entries(categoryData).map(([label, value]) => ({
+        label: label.split(' ')[0], // Shorten category names
+        value
+    }));
+
+    const questStatusData = [
+        { label: 'Active', value: activeQuests },
+        { label: 'Completed', value: quests.filter(q => !q.isActive).length },
+        { label: 'Draft', value: quests.filter(q => q.status === 'draft').length }
+    ];
+
     return (
         <div className="space-y-8">
+            {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     icon={<BookOpen className="w-6 h-6 text-green-500" />}
@@ -500,52 +800,22 @@ const OverviewTab = ({ quests, posts, setActiveTab }) => {
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-2xl shadow-lg border">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-xl font-bold">Quick Actions</h3>
-                    </div>
-                    <div className="space-y-3">
-                        <button
-                            onClick={() => setActiveTab('quests')}
-                            className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-green-50 transition-colors border"
-                        >
-                            <div className="bg-green-100 p-3 rounded-lg">
-                                <Plus className="w-6 h-6 text-green-600" />
-                            </div>
-                            <div className="text-left flex-1">
-                                <p className="font-semibold">Create Quest</p>
-                                <p className="text-xs text-gray-500">Add a new environmental quest</p>
-                            </div>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('community')}
-                            className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-blue-50 transition-colors border"
-                        >
-                            <div className="bg-blue-100 p-3 rounded-lg">
-                                <FileText className="w-6 h-6 text-blue-600" />
-                            </div>
-                            <div className="text-left flex-1">
-                                <p className="font-semibold">Create Post</p>
-                                <p className="text-xs text-gray-500">Share updates with community</p>
-                            </div>
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('analytics')}
-                            className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-purple-50 transition-colors border"
-                        >
-                            <div className="bg-purple-100 p-3 rounded-lg">
-                                <BarChart className="w-6 h-6 text-purple-600" />
-                            </div>
-                            <div className="text-left flex-1">
-                                <p className="font-semibold">View Analytics</p>
-                                <p className="text-xs text-gray-500">Check quest performance</p>
-                            </div>
-                        </button>
-                    </div>
-                </div>
+            {/* Dashboard Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <GroupedBarChart 
+                    data={[weeklyProgressData, lastWeekData]} 
+                    title="Weekly Quest Activity" 
+                    categories={['This Week', 'Last Week']}
+                    colors={['#10B981', '#3B82F6']}
+                />
+                <DonutChart 
+                    data={questStatusData} 
+                    title="Quest Status Distribution" 
+                />
+            </div>
 
-                <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
                     <div className="space-y-3">
                         <div className="flex items-start gap-3 py-2">
@@ -572,6 +842,55 @@ const OverviewTab = ({ quests, posts, setActiveTab }) => {
                             </div>
                             <p className="text-xs text-gray-400">1d ago</p>
                         </div>
+                        <div className="flex items-start gap-3 py-2">
+                            <Award className="w-5 h-5 text-yellow-500 mt-1" />
+                            <div className="flex-1">
+                                <p className="font-semibold text-sm">Quest Approved</p>
+                                <p className="text-xs text-gray-500">Your new quest was approved</p>
+                            </div>
+                            <p className="text-xs text-gray-400">3d ago</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => setActiveTab('quests')}
+                            className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                            <div className="bg-gray-100 p-3 rounded-lg">
+                                <Plus className="w-6 h-6 text-green-600" />
+                            </div>
+                            <div className="text-left flex-1">
+                                <p className="font-semibold">Create Quest</p>
+                                <p className="text-xs text-gray-500">Add a new environmental quest</p>
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('community')}
+                            className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                            <div className="bg-gray-100 p-3 rounded-lg">
+                                <FileText className="w-6 h-6 text-blue-600" />
+                            </div>
+                            <div className="text-left flex-1">
+                                <p className="font-semibold">Create Post</p>
+                                <p className="text-xs text-gray-500">Share updates with community</p>
+                            </div>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('analytics')}
+                            className="w-full flex items-center gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors"
+                        >
+                            <div className="bg-gray-100 p-3 rounded-lg">
+                                <BarChart className="w-6 h-6 text-purple-600" />
+                            </div>
+                            <div className="text-left flex-1">
+                                <p className="font-semibold">View Analytics</p>
+                                <p className="text-xs text-gray-500">Check quest performance</p>
+                            </div>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -692,7 +1011,7 @@ const QuestsTab = ({ quests, setQuests }) => {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                     <div>
                         <h3 className="text-xl font-bold">Quest Management</h3>
@@ -718,7 +1037,7 @@ const QuestsTab = ({ quests, setQuests }) => {
                             placeholder="Search quests..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
                         />
                     </div>
                 </div>
@@ -731,7 +1050,7 @@ const QuestsTab = ({ quests, setQuests }) => {
                         </div>
                     ) : (
                         filteredQuests.map(quest => (
-                            <div key={quest._id} className="border rounded-xl p-5 hover:shadow-md transition">
+                            <div key={quest._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-2 flex-wrap">
@@ -781,13 +1100,13 @@ const QuestsTab = ({ quests, setQuests }) => {
                                                 setEditingQuest(quest);
                                                 setShowModal(true);
                                             }}
-                                            className="p-2 hover:bg-blue-50 rounded-lg transition border border-blue-200"
+                                            className="p-2 hover:bg-blue-50 rounded-lg transition"
                                         >
                                             <Edit className="w-5 h-5 text-blue-600" />
                                         </button>
                                         <button
                                             onClick={() => handleDeleteQuest(quest._id)}
-                                            className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
+                                            className="p-2 hover:bg-red-50 rounded-lg transition"
                                         >
                                             <Trash2 className="w-5 h-5 text-red-600" />
                                         </button>
@@ -930,7 +1249,7 @@ const CommunityTab = ({ posts, setPosts }) => {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                     <div>
                         <h3 className="text-xl font-bold">Community Content</h3>
@@ -965,7 +1284,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                             placeholder="Search posts..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
                         />
                     </div>
                 </div>
@@ -978,7 +1297,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                         </div>
                     ) : (
                         filteredPosts.map(post => (
-                            <div key={post._id} className="border rounded-xl p-5 hover:shadow-md transition">
+                            <div key={post._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-2 flex-wrap">
@@ -1022,13 +1341,13 @@ const CommunityTab = ({ posts, setPosts }) => {
                                                 setEditingPost({ ...post, tags: post.tags?.join(', ') || '' });
                                                 setShowModal(true);
                                             }}
-                                            className="p-2 hover:bg-blue-50 rounded-lg transition border border-blue-200"
+                                            className="p-2 hover:bg-blue-50 rounded-lg transition"
                                         >
                                             <Edit className="w-5 h-5 text-blue-600" />
                                         </button>
                                         <button
                                             onClick={() => handleDeletePost(post._id)}
-                                            className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
+                                            className="p-2 hover:bg-red-50 rounded-lg transition"
                                         >
                                             <Trash2 className="w-5 h-5 text-red-600" />
                                         </button>
@@ -1074,10 +1393,56 @@ const AnalyticsTab = ({ quests }) => {
         categoryStats[q.category] = (categoryStats[q.category] || 0) + 1;
     });
 
+    // Generate chart data
+    const categoryData = Object.entries(categoryStats).map(([label, value]) => ({
+        label: label.split(' ')[0], // Shorten category names
+        value
+    }));
+
+    // Generate chart data from real quest data based on creation dates
+    const getWeeklyActivity = (quests, isThisWeek = true) => {
+        const now = new Date();
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay() + (isThisWeek ? 0 : -7));
+        weekStart.setHours(0, 0, 0, 0);
+        
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+        
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        return days.map(day => {
+            const dayIndex = days.indexOf(day);
+            const dayStart = new Date(weekStart);
+            dayStart.setDate(weekStart.getDate() + dayIndex);
+            dayStart.setHours(0, 0, 0, 0);
+            
+            const dayEnd = new Date(dayStart);
+            dayEnd.setHours(23, 59, 59, 999);
+            
+            const questsOnDay = quests.filter(quest => {
+                const questDate = new Date(quest.created_at);
+                return questDate >= dayStart && questDate <= dayEnd;
+            }).length;
+            
+            return { label: day, value: questsOnDay };
+        });
+    };
+
+    const weeklyData = getWeeklyActivity(quests, true);
+    const lastWeekData = getWeeklyActivity(quests, false);
+
+    const questStatusData = [
+        { label: 'Active', value: activeQuests },
+        { label: 'Completed', value: completedQuests },
+        { label: 'Draft', value: quests.filter(q => q.status === 'draft').length }
+    ];
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
+            {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-md border">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-sm text-gray-500">Total Quests</p>
                         <BookOpen className="w-5 h-5 text-green-500" />
@@ -1088,7 +1453,7 @@ const AnalyticsTab = ({ quests }) => {
                     </p>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-md border">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-sm text-gray-500">Total Participants</p>
                         <Users className="w-5 h-5 text-blue-500" />
@@ -1099,7 +1464,7 @@ const AnalyticsTab = ({ quests }) => {
                     </p>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-md border">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-sm text-gray-500">Completion Rate</p>
                         <TrendingUp className="w-5 h-5 text-purple-500" />
@@ -1113,49 +1478,48 @@ const AnalyticsTab = ({ quests }) => {
                 </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border">
-                <h3 className="text-xl font-bold mb-4">Quest Categories Distribution</h3>
-                <div className="space-y-3">
-                    {Object.entries(categoryStats).map(([category, count]) => (
-                        <div key={category} className="flex items-center gap-3">
-                            <div className="w-32 text-sm font-semibold text-gray-700">{category}</div>
-                            <div className="flex-1 bg-gray-100 rounded-full h-8 relative overflow-hidden">
-                                <div
-                                    className="bg-green-500 h-full rounded-full flex items-center justify-end pr-3 text-white text-sm font-semibold"
-                                    style={{ width: `${(count / totalQuests) * 100}%` }}
-                                >
-                                    {count}
-                                </div>
-                            </div>
-                            <div className="w-16 text-sm text-gray-500 text-right">
-                                {Math.round((count / totalQuests) * 100)}%
-                            </div>
-                        </div>
-                    ))}
-                </div>
+            {/* Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <GroupedBarChart 
+                    data={[weeklyData, lastWeekData]} 
+                    title="Weekly Quest Activity" 
+                    categories={['This Week', 'Last Week']}
+                    colors={['#10B981', '#3B82F6']}
+                />
+                <DonutChart 
+                    data={questStatusData} 
+                    title="Quest Status Distribution" 
+                />
             </div>
 
-            <div className="bg-white p-6 rounded-2xl shadow-lg border">
-                <h3 className="text-xl font-bold mb-4">Top Performing Quests</h3>
-                <div className="space-y-3">
-                    {quests
-                        .sort((a, b) => (b.completions?.length || 0) - (a.completions?.length || 0))
-                        .slice(0, 5)
-                        .map((quest, idx) => (
-                            <div key={quest._id} className="flex items-center gap-4 p-3 border rounded-lg">
-                                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700">
-                                    {idx + 1}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <SimpleBarChart 
+                    data={categoryData} 
+                    title="Quests by Category" 
+                    color="blue" 
+                />
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h3 className="text-xl font-bold mb-4">Top Performing Quests</h3>
+                    <div className="space-y-3">
+                        {quests
+                            .sort((a, b) => (b.completions?.length || 0) - (a.completions?.length || 0))
+                            .slice(0, 5)
+                            .map((quest, idx) => (
+                                <div key={quest._id} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg">
+                                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700">
+                                        {idx + 1}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="font-semibold">{quest.title}</p>
+                                        <p className="text-sm text-gray-500">{quest.category}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="font-bold text-green-600">{quest.completions?.length || 0}</p>
+                                        <p className="text-xs text-gray-500">participants</p>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <p className="font-semibold">{quest.title}</p>
-                                    <p className="text-sm text-gray-500">{quest.category}</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="font-bold text-green-600">{quest.completions?.length || 0}</p>
-                                    <p className="text-xs text-gray-500">participants</p>
-                                </div>
-                            </div>
-                        ))}
+                            ))}
+                    </div>
                 </div>
             </div>
         </div>
@@ -1225,7 +1589,7 @@ const NotificationsTab = () => {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold">Notifications</h3>
                     <button
@@ -1252,7 +1616,7 @@ const NotificationsTab = () => {
                         {notifications.map(notification => (
                             <div
                                 key={notification._id}
-                                className={`p-4 rounded-lg border transition ${notification.is_read ? 'bg-gray-50' : 'bg-white shadow-sm'
+                                className={`p-4 rounded-lg border border-gray-200 transition ${notification.is_read ? 'bg-gray-50' : 'bg-white shadow-sm'
                                     }`}
                             >
                                 <div className="flex items-start justify-between">
@@ -1541,27 +1905,31 @@ const PartnerDashboard = () => {
 
     return (
         <div className="font-sans bg-gray-50 text-gray-800 min-h-screen">
-            <main className="container mx-auto px-4 pt-24 pb-12">
+            <main className="container mx-auto px-6 pt-24 pb-12">
                 {/* Header */}
-                <div className="bg-white p-6 rounded-2xl shadow-lg border mb-8">
-                    <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center">
-                            <BookOpen className="w-8 h-8 text-white" />
+                <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-8 rounded-xl shadow-sm mb-8 text-white relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-2xl"></div>
+                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full blur-xl"></div>
+                    </div>
+                    <div className="relative z-10 flex items-center gap-6">
+                        <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-4 border-white/20">
+                            <BookOpen className="w-10 h-10 text-white" />
                         </div>
                         <div>
-                            <div className="flex items-center gap-3 mb-2">
-                                <h2 className="text-3xl font-bold text-gray-800">Partner Dashboard</h2>
-                                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
-                                    Partner
+                            <div className="flex items-center gap-4 mb-2">
+                                <h2 className="text-4xl font-bold text-white">Partner Dashboard</h2>
+                                <span className="px-4 py-2 rounded-full text-sm font-semibold bg-white/20 text-white backdrop-blur-sm">
+                                    Environmental Partner
                                 </span>
                             </div>
-                            <p className="text-gray-500">Welcome back, {user.username}! Manage your environmental initiatives.</p>
+                            <p className="text-white/90 text-lg">Welcome back, {user.username}! Manage your environmental initiatives.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Navigation Tabs */}
-                <div className="bg-white p-2 rounded-xl shadow-md border inline-flex items-center gap-2 mb-8">
+                <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 inline-flex items-center gap-3 mb-8">
                     <TabButton id="overview" label="Overview" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="quests" label="My Quests" icon={<BookOpen className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} badge={quests.filter(q => q.isActive).length} />
                     <TabButton id="community" label="Community" icon={<FileText className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />

@@ -51,8 +51,8 @@ router.get('/leaderboard', async (req, res) => {
     const { department } = req.query;
 
     if (department && department !== 'all') {
-      // Department-specific leaderboard
-      const users = await User.find({ department })
+      // Department-specific leaderboard - only show regular users (exclude admin and partner roles)
+      const users = await User.find({ department, role: 'user' })
         .select('username eco_score points questsCompleted avatar_theme role department')
         .sort({ eco_score: -1 })
         .limit(100);
@@ -79,8 +79,8 @@ router.get('/leaderboard', async (req, res) => {
         totalUsers: users.length
       });
     } else {
-      // All departments leaderboard - show department totals
-      const allUsers = await User.find()
+      // All departments leaderboard - show department totals (only regular users, exclude admin and partner roles)
+      const allUsers = await User.find({ role: 'user' })
         .select('username eco_score points questsCompleted avatar_theme role department')
         .sort({ eco_score: -1 })
         .limit(100);
