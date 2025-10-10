@@ -273,7 +273,7 @@ router.delete('/:id', auth, async (req, res) => {
 // @access  Private
 router.post('/:id/like', auth, async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id).populate('author', 'username');
+    const post = await Post.findById(req.params.id).populate('author', 'username role');
 
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
@@ -292,6 +292,7 @@ router.post('/:id/like', auth, async (req, res) => {
       
       // Create notification for post author (don't notify if user is liking their own post)
       if (post.author._id.toString() !== req.user.id) {
+        console.log(`Creating like notification: ${req.user.username} liked post by ${post.author.username}`);
         await createNotification(
           post.author._id,
           'post_liked',
@@ -300,9 +301,12 @@ router.post('/:id/like', auth, async (req, res) => {
           {
             postId: post._id,
             likerId: req.user.id,
-            likerUsername: req.user.username
+            likerUsername: req.user.username,
+            likerRole: req.user.role
           }
         );
+      } else {
+        console.log(`Skipping like notification: User ${req.user.username} liked their own post`);
       }
     }
 
@@ -326,7 +330,7 @@ router.post('/:id/comment', auth, async (req, res) => {
       return res.status(400).json({ msg: 'Comment text is required' });
     }
 
-    const post = await Post.findById(req.params.id).populate('author', 'username');
+    const post = await Post.findById(req.params.id).populate('author', 'username role');
 
     if (!post) {
       return res.status(404).json({ msg: 'Post not found' });
@@ -341,6 +345,7 @@ router.post('/:id/comment', auth, async (req, res) => {
 
     // Create notification for post author (don't notify if user is commenting on their own post)
     if (post.author._id.toString() !== req.user.id) {
+      console.log(`Creating comment notification: ${req.user.username} commented on post by ${post.author.username}`);
       await createNotification(
         post.author._id,
         'post_commented',
@@ -350,9 +355,12 @@ router.post('/:id/comment', auth, async (req, res) => {
           postId: post._id,
           commenterId: req.user.id,
           commenterUsername: req.user.username,
+          commenterRole: req.user.role,
           commentText: text
         }
       );
+    } else {
+      console.log(`Skipping comment notification: User ${req.user.username} commented on their own post`);
     }
 
     const updatedPost = await Post.findById(post._id)
