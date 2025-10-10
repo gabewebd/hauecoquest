@@ -16,7 +16,7 @@ const TopChampionCard = ({ user, rank, onPageChange }) => {
   };
   const style = rankStyles[rank];
 
-  // Points are always shown since only 'partner' users are passed to this filtered array
+  // Points are always shown since only regular 'user' role users are passed to this filtered array
   const pointsDisplay = user.points.toLocaleString();
 
   return (
@@ -44,7 +44,7 @@ const TopChampionCard = ({ user, rank, onPageChange }) => {
 
 // Helper component for the rest of the leaderboard rows (4th place and below)
 const LeaderboardRow = ({ user, rank, onPageChange }) => {
-  // Points are always shown since only 'partner' users are passed to this array
+  // Points are always shown since only regular 'user' role users are passed to this array
   const pointsDisplay = user.points.toLocaleString();
 
   return (
@@ -216,8 +216,8 @@ const LeaderboardPage = ({ onPageChange }) => {
     return 'Green Rookie';
   };
 
-  // 🟢 MODIFICATION: Filter to include ONLY 'partner' users (excludes 'admin' and 'user')
-  const filteredUsers = users.filter(user => user.role === 'partner');
+  // Filter to include ONLY 'user' role (excludes 'admin' and 'partner')
+  const filteredUsers = users.filter(user => user.role === 'user');
 
   // Sort the filtered users by points (descending)
   const sortedUsers = [...filteredUsers].sort((a, b) => b.points - a.points);
