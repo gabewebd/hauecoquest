@@ -352,7 +352,7 @@ const LeaderboardPage = ({ onPageChange }) => {
           {/* Top Champions */}
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold">
-              🏆 {selectedDepartment === 'all' ? 'Department Rankings' : 'Top Environmental Partners'} 🏆
+              🏆 {selectedDepartment === 'all' ? 'Department Rankings' : 'Top Environmental Champions'} 🏆
             </h2>
             {selectedDepartment !== 'all' && (
               <p className="text-lg text-gray-600 mt-2">
@@ -385,24 +385,37 @@ const LeaderboardPage = ({ onPageChange }) => {
               ))}
             </div>
           ) : (
-            // Individual department leaderboard (now only showing partners in that department)
-            sortedUsers.length >= 3 ? (
+            // Individual department leaderboard (now only showing regular users in that department)
+            sortedUsers.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                  <TopChampionCard user={sortedUsers[1]} rank={2} onPageChange={onPageChange} />
-                  <TopChampionCard user={sortedUsers[0]} rank={1} onPageChange={onPageChange} />
-                  <TopChampionCard user={sortedUsers[2]} rank={3} onPageChange={onPageChange} />
-                </div>
+                {/* Show top 3 champions if we have 3 or more users */}
+                {sortedUsers.length >= 3 && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    <TopChampionCard user={sortedUsers[1]} rank={2} onPageChange={onPageChange} />
+                    <TopChampionCard user={sortedUsers[0]} rank={1} onPageChange={onPageChange} />
+                    <TopChampionCard user={sortedUsers[2]} rank={3} onPageChange={onPageChange} />
+                  </div>
+                )}
 
-                {/* Complete Leaderboard */}
+                {/* Show all users in a simple list format */}
                 <div className="bg-white p-6 rounded-2xl shadow-xl border">
-                  <h3 className="text-2xl font-bold mb-4">Complete Partner Rankings</h3>
-                  {remainingUsers.map((user, index) => (
-                    <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={index + 4} onPageChange={onPageChange} />
-                  ))}
+                  <h3 className="text-2xl font-bold mb-4">
+                    {sortedUsers.length >= 3 ? 'Complete User Rankings' : 'User Rankings'}
+                  </h3>
+                  {sortedUsers.length >= 3 ? (
+                    // If we have 3+ users, show remaining users (4th place and below)
+                    remainingUsers.map((user, index) => (
+                      <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={index + 4} onPageChange={onPageChange} />
+                    ))
+                  ) : (
+                    // If we have fewer than 3 users, show all users starting from rank 1
+                    sortedUsers.map((user, index) => (
+                      <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={index + 1} onPageChange={onPageChange} />
+                    ))
+                  )}
 
                   {/* Show More Button */}
-                  {displayCount < sortedUsers.length && (
+                  {sortedUsers.length >= 3 && displayCount < sortedUsers.length && (
                     <div className="text-center mt-6">
                       <button
                         onClick={handleShowMore}
@@ -417,8 +430,8 @@ const LeaderboardPage = ({ onPageChange }) => {
             ) : (
               <div className="bg-white p-12 rounded-2xl shadow-xl border text-center">
                 <Sprout className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-600 mb-2">No Partners Found</h3>
-                <p className="text-gray-500">There are no environmental partners registered in this department yet.</p>
+                <h3 className="text-xl font-bold text-gray-600 mb-2">No Users Found</h3>
+                <p className="text-gray-500">There are no users registered in this department yet.</p>
               </div>
             )
           )}

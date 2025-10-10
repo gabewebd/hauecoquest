@@ -63,9 +63,60 @@ const AppContent = () => {
   const [pageParams, setPageParams] = useState(null);
   const { notification, dismissNotification } = useUser();
 
+  // Initialize page from URL on first load
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageFromUrl = urlParams.get('page') || 'home';
+    const paramsFromUrl = urlParams.get('params');
+    
+    setCurrentPage(pageFromUrl);
+    setPageParams(paramsFromUrl ? JSON.parse(decodeURIComponent(paramsFromUrl)) : null);
+    
+    // Set initial state in browser history if not already set
+    if (!window.history.state) {
+      const state = { page: pageFromUrl, params: paramsFromUrl ? JSON.parse(decodeURIComponent(paramsFromUrl)) : null };
+      window.history.replaceState(state, '', window.location.href);
+    }
+  }, []);
+
+  // Listen for browser back/forward button
+  React.useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state) {
+        setCurrentPage(event.state.page);
+        setPageParams(event.state.params);
+        console.log(`Browser navigation to: ${event.state.page}`, event.state.params ? `with params: ${event.state.params}` : '');
+      } else {
+        // Handle direct URL navigation (like refresh or direct link)
+        const urlParams = new URLSearchParams(window.location.search);
+        const pageFromUrl = urlParams.get('page') || 'home';
+        const paramsFromUrl = urlParams.get('params');
+        
+        setCurrentPage(pageFromUrl);
+        setPageParams(paramsFromUrl ? JSON.parse(decodeURIComponent(paramsFromUrl)) : null);
+        console.log(`Direct URL navigation to: ${pageFromUrl}`, paramsFromUrl ? `with params: ${paramsFromUrl}` : '');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handlePageChange = (page, params = null) => {
     setCurrentPage(page);
     setPageParams(params);
+    
+    // Push state to browser history
+    const state = { page, params };
+    const urlParams = new URLSearchParams();
+    urlParams.set('page', page);
+    if (params) {
+      urlParams.set('params', encodeURIComponent(JSON.stringify(params)));
+    }
+    
+    const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+    window.history.pushState(state, '', newUrl);
+    
     console.log(`Navigating to: ${page}`, params ? `with params: ${params}` : '');
   };
 
