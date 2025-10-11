@@ -44,3 +44,12 @@ coverage/
 # Misc
 .cache/
 .temp/
+
+# ----------------------------------------------------
+# Exception to ensure client/public/assets is NOT ignored
+# ----------------------------------------------------
+# 
+# The files below need to be UN-ignored because the rule for 
+# ignoring build output like 'client/dist/' might be too broad.
+# This ensures all assets and their content are tracked.
+!client/public/assets/
