@@ -305,18 +305,18 @@ const QuestsPage = ({ onPageChange }) => {
 
   return (
     <div className="font-sans bg-gray-50 text-gray-900">
-      <main className="pt-20 pb-12">
+      <main className="pt-16 md:pt-20 pb-12">
         {/* Page Header - Compact */}
         <section className="bg-white border-b border-gray-200 shadow-sm">
-          <div className="container mx-auto px-6 py-8">
+          <div className="container mx-auto px-4 md:px-6 py-6 md:py-8">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-3 rounded-xl shadow-lg">
-                  <Sparkles className="w-7 h-7 text-white" />
+              <div className="flex items-center gap-3 md:gap-4">
+                <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-2 md:p-3 rounded-lg md:rounded-xl shadow-lg">
+                  <Sparkles className="w-5 h-5 md:w-7 md:h-7 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-black text-gray-900 mb-1">Quests</h1>
-                  <p className="text-gray-600 text-sm">Complete quests, earn rewards, and make an impact</p>
+                  <h1 className="text-xl md:text-3xl font-black text-gray-900 mb-1">Quests</h1>
+                  <p className="text-gray-600 text-xs md:text-sm">Complete quests, earn rewards, and make an impact</p>
                 </div>
               </div>
             </div>
@@ -325,8 +325,8 @@ const QuestsPage = ({ onPageChange }) => {
 
         {/* Filters Bar */}
         <section className="bg-white border-b border-gray-200 shadow-sm sticky top-16 z-40">
-          <div className="container mx-auto px-6 py-4">
-            <div className="flex flex-col md:flex-row gap-4">
+          <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4">
               {/* Search */}
               <div className="relative flex-1">
                 <input 
@@ -334,9 +334,9 @@ const QuestsPage = ({ onPageChange }) => {
                   placeholder="Search quests..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-gray-50 text-gray-900 placeholder-gray-400 border-2 border-gray-200 rounded-lg px-4 py-2.5 pl-10 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                  className="w-full bg-gray-50 text-gray-900 placeholder-gray-400 border-2 border-gray-200 rounded-lg px-3 md:px-4 py-2 md:py-2.5 pl-8 md:pl-10 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm md:text-base" 
                 />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
               </div>
 
               {/* Category Filter */}
@@ -345,7 +345,7 @@ const QuestsPage = ({ onPageChange }) => {
                   <button 
                     key={cat}
                     onClick={() => setSelectedCategory(cat === 'All' ? 'All' : cat === 'Gardening' ? 'Gardening & Planting' : cat === 'Recycling' ? 'Recycling & Waste' : cat === 'Energy' ? 'Energy Conservation' : 'Water Conservation')}
-                    className={`px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-all ${
+                    className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-bold whitespace-nowrap transition-all ${
                       (selectedCategory === 'All' && cat === 'All') ||
                       (selectedCategory === 'Gardening & Planting' && cat === 'Gardening') ||
                       (selectedCategory === 'Recycling & Waste' && cat === 'Recycling') ||
@@ -404,7 +404,7 @@ const QuestsPage = ({ onPageChange }) => {
         )}
 
         {/* Available Quests Section */}
-        <section className="container mx-auto px-6 py-8 relative">
+        <section className="container mx-auto px-4 md:px-6 py-6 md:py-8 relative">
           {/* Discord-inspired decorative background */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             <div className="absolute top-20 right-10 w-64 h-64 bg-gradient-to-br from-green-200 to-emerald-200 rounded-full opacity-20 blur-3xl"></div>
@@ -413,24 +413,24 @@ const QuestsPage = ({ onPageChange }) => {
           </div>
           
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Available Quests</h2>
-              <span className="text-gray-600 text-sm font-semibold">{filteredQuests.length} quests available</span>
+            <div className="flex items-center justify-between mb-4 md:mb-6">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900">Available Quests</h2>
+              <span className="text-gray-600 text-xs md:text-sm font-semibold">{filteredQuests.length} quests available</span>
             </div>
 
             {/* Quest Grid */}
             {filteredQuests.length === 0 ? (
-              <div className="bg-white border-2 border-gray-200 p-16 rounded-xl text-center shadow-lg">
-                <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-600 mb-2">No Quests Found</h3>
-                <p className="text-gray-500">
+              <div className="bg-white border-2 border-gray-200 p-8 md:p-16 rounded-lg md:rounded-xl text-center shadow-lg">
+                <BookOpen className="w-12 h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg md:text-xl font-bold text-gray-600 mb-2">No Quests Found</h3>
+                <p className="text-gray-500 text-sm md:text-base">
                   {searchTerm || selectedCategory !== 'All' 
                     ? 'Try adjusting your filters' 
                     : 'No quests available at the moment'}
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {filteredQuests.map((quest) => (
                   <QuestCard key={quest.id} {...quest} onViewDetails={handleViewDetails} questData={quest} user={user} />
                 ))}
@@ -440,61 +440,61 @@ const QuestsPage = ({ onPageChange }) => {
         </section>
         
         {/* QUEST GUIDELINES SECTION */}
-        <section className="container mx-auto px-6 py-16">
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl shadow-2xl overflow-hidden">
+        <section className="container mx-auto px-4 md:px-6 py-12 md:py-16">
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl md:rounded-2xl shadow-2xl overflow-hidden">
             <div className="grid md:grid-cols-2 gap-0">
               {/* Left side - Placeholder Image */}
-              <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-12 flex items-center justify-center relative overflow-hidden">
+              <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-6 md:p-12 flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10">
-                  <div className="absolute top-10 left-10 w-32 h-32 bg-white rounded-full"></div>
-                  <div className="absolute bottom-10 right-10 w-40 h-40 bg-white rounded-full"></div>
+                  <div className="absolute top-5 left-5 md:top-10 md:left-10 w-24 h-24 md:w-32 md:h-32 bg-white rounded-full"></div>
+                  <div className="absolute bottom-5 right-5 md:bottom-10 md:right-10 w-32 h-32 md:w-40 md:h-40 bg-white rounded-full"></div>
                 </div>
                 <div className="relative text-center text-white z-10">
-                  <div className="w-48 h-48 bg-white bg-opacity-20 backdrop-blur-sm rounded-3xl mx-auto mb-6 flex items-center justify-center border-4 border-white border-opacity-30">
+                  <div className="w-32 h-32 md:w-48 md:h-48 bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl md:rounded-3xl mx-auto mb-4 md:mb-6 flex items-center justify-center border-2 md:border-4 border-white border-opacity-30">
                     <div className="text-center">
-                      <Sparkles className="w-20 h-20 mx-auto mb-3" />
-                      <span className="text-2xl font-black">Quest</span>
+                      <Sparkles className="w-12 h-12 md:w-20 md:h-20 mx-auto mb-2 md:mb-3" />
+                      <span className="text-lg md:text-2xl font-black">Quest</span>
                       <br />
-                      <span className="text-lg font-bold">Guidelines</span>
+                      <span className="text-sm md:text-lg font-bold">Guidelines</span>
                     </div>
                   </div>
-                  <p className="text-lg font-semibold text-white opacity-90">Make Every Action Count</p>
+                  <p className="text-sm md:text-lg font-semibold text-white opacity-90">Make Every Action Count</p>
                 </div>
               </div>
 
               {/* Right side - Guidelines */}
-              <div className="p-10 flex flex-col justify-center">
-                <div className="mb-8">
-                  <h2 className="text-3xl font-black text-gray-900 mb-3">Quest Guidelines</h2>
-                  <p className="text-gray-600 text-base leading-relaxed">
+              <div className="p-6 md:p-10 flex flex-col justify-center">
+                <div className="mb-6 md:mb-8">
+                  <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-3">Quest Guidelines</h2>
+                  <p className="text-gray-600 text-sm md:text-base leading-relaxed">
                     Follow these principles to ensure your environmental impact is genuine and verified
                   </p>
                 </div>
 
-                <div className="space-y-6">
-                  <div className="flex gap-4 items-start">
-                    <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Lightbulb className="w-7 h-7 text-green-600"/>
+                <div className="space-y-4 md:space-y-6">
+                  <div className="flex gap-3 md:gap-4 items-start">
+                    <div className="w-10 h-10 md:w-14 md:h-14 bg-green-100 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Lightbulb className="w-5 h-5 md:w-7 md:h-7 text-green-600"/>
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900 mb-1 text-base">Real Impact</h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">Ensure your actions contribute directly to the quest's environmental goal</p>
+                      <h4 className="font-bold text-gray-900 mb-1 text-sm md:text-base">Real Impact</h4>
+                      <p className="text-xs md:text-sm text-gray-600 leading-relaxed">Ensure your actions contribute directly to the quest's environmental goal</p>
                     </div>
                   </div>
 
-                  <div className="flex gap-4 items-start">
-                    <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Camera className="w-7 h-7 text-blue-600"/>
+                  <div className="flex gap-3 md:gap-4 items-start">
+                    <div className="w-10 h-10 md:w-14 md:h-14 bg-blue-100 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Camera className="w-5 h-5 md:w-7 md:h-7 text-blue-600"/>
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900 mb-1 text-base">Verify Progress</h4>
-                      <p className="text-sm text-gray-600 leading-relaxed">Document your completion clearly with photos or videos for verification</p>
+                      <h4 className="font-bold text-gray-900 mb-1 text-sm md:text-base">Verify Progress</h4>
+                      <p className="text-xs md:text-sm text-gray-600 leading-relaxed">Document your completion clearly with photos or videos for verification</p>
                     </div>
                   </div>
 
-                  <div className="flex gap-4 items-start">
-                    <div className="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Handshake className="w-7 h-7 text-red-600"/>
+                  <div className="flex gap-3 md:gap-4 items-start">
+                    <div className="w-10 h-10 md:w-14 md:h-14 bg-red-100 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Handshake className="w-5 h-5 md:w-7 md:h-7 text-red-600"/>
                     </div>
                     <div>
                       <h4 className="font-bold text-gray-900 mb-1 text-base">Collaborate Fairly</h4>

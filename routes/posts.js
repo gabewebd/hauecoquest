@@ -60,7 +60,7 @@ router.get('/', async (req, res) => {
 
 
     const posts = await Post.find(filter)
-      .populate('author', 'username role')
+      .populate('author', 'username role eco_score points questsCompleted avatar_theme department')
       .sort({ created_at: -1 })
       .limit(parseInt(limit));
 
@@ -79,7 +79,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
-      .populate('author', 'username role avatar_theme')
+      .populate('author', 'username role avatar_theme eco_score points questsCompleted department')
       .populate('comments.user', 'username avatar_theme');
 
 

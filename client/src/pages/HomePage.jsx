@@ -97,39 +97,39 @@ export default function HomePage({ onPageChange }) {
           </svg>
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-6 py-24 md:py-32">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24 lg:py-32">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <div className="text-center md:text-left z-10">
-              <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black mb-4 md:mb-6 leading-tight">
                 IMAGINE A PLACE...
               </h1>
-              <p className="text-lg md:text-xl mb-8 text-green-50 leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl mb-6 md:mb-8 text-green-50 leading-relaxed">
                 ...where you can save the planet and have fun doing it. Join thousands of students on eco-adventures, complete epic quests, and become an environmental hero. All while earning points and unlocking rewards!
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center md:justify-start">
                 {!user ? (
                   <>
                     <button
                       onClick={() => onPageChange('signup')}
-                      className="bg-white text-green-600 font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all flex items-center justify-center gap-2"
+                      className="bg-white text-green-600 font-bold px-6 md:px-8 py-3 md:py-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all flex items-center justify-center gap-2 text-sm md:text-base"
                     >
-                      <Rocket className="w-5 h-5" />
+                      <Rocket className="w-4 h-4 md:w-5 md:h-5" />
                       Start Your Quest
                     </button>
                     <button
                       onClick={() => window.scrollTo({ top: 800, behavior: 'smooth' })}
-                      className="text-white font-bold px-8 py-4 rounded-full hover:bg-white hover:text-green-600 hover:bg-opacity-100 transition-all flex items-center justify-center gap-2 border-2 border-white border-opacity-50"
+                      className="text-white font-bold px-6 md:px-8 py-3 md:py-4 rounded-full hover:bg-white hover:text-green-600 hover:bg-opacity-100 transition-all flex items-center justify-center gap-2 border-2 border-white border-opacity-50 text-sm md:text-base"
                     >
                       Learn More
-                      <ArrowRight className="w-5 h-5" />
+                      <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
                   </>
                 ) : (
                   <button
                     onClick={() => onPageChange('dashboard')}
-                    className="bg-white text-green-600 font-bold px-8 py-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all flex items-center justify-center gap-2"
+                    className="bg-white text-green-600 font-bold px-6 md:px-8 py-3 md:py-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all flex items-center justify-center gap-2 text-sm md:text-base"
                   >
-                    <BarChart className="w-5 h-5" />
+                    <BarChart className="w-4 h-4 md:w-5 md:h-5" />
                     Go to Dashboard
                   </button>
                 )}
@@ -153,59 +153,59 @@ export default function HomePage({ onPageChange }) {
         </div>
       </section>
 
-      <section className="py-20 px-6 bg-gray-50">
+      <section className="py-12 md:py-20 px-4 md:px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Target className="w-8 h-8 text-green-600" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
+              <div className="bg-green-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <Target className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
               </div>
-              <h2 className="text-4xl font-black text-green-600 mb-2">{loading ? '...' : stats.totalQuests}</h2>
-              <p className="text-gray-600 font-semibold">Active Quests</p>
+              <h2 className="text-2xl md:text-4xl font-black text-green-600 mb-2">{loading ? '...' : stats.totalQuests}</h2>
+              <p className="text-gray-600 font-semibold text-xs md:text-base">Active Quests</p>
             </div>
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
-              <div className="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-emerald-600" />
+            <div className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
+              <div className="bg-emerald-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <Users className="w-6 h-6 md:w-8 md:h-8 text-emerald-600" />
               </div>
-              <h2 className="text-4xl font-black text-emerald-600 mb-2">{loading ? '...' : stats.totalUsers}+</h2>
-              <p className="text-gray-600 font-semibold">Eco-Warriors</p>
+              <h2 className="text-2xl md:text-4xl font-black text-emerald-600 mb-2">{loading ? '...' : stats.totalUsers}+</h2>
+              <p className="text-gray-600 font-semibold text-xs md:text-base">Eco-Warriors</p>
             </div>
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
-              <div className="bg-amber-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Trophy className="w-8 h-8 text-amber-600" />
+            <div className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
+              <div className="bg-amber-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <Trophy className="w-6 h-6 md:w-8 md:h-8 text-amber-600" />
               </div>
-              <h2 className="text-4xl font-black text-amber-600 mb-2">{loading ? '...' : stats.totalPoints}</h2>
-              <p className="text-gray-600 font-semibold">Points Earned</p>
+              <h2 className="text-2xl md:text-4xl font-black text-amber-600 mb-2">{loading ? '...' : stats.totalPoints}</h2>
+              <p className="text-gray-600 font-semibold text-xs md:text-base">Points Earned</p>
             </div>
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
-              <div className="bg-teal-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Zap className="w-8 h-8 text-teal-600" />
+            <div className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
+              <div className="bg-teal-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <Zap className="w-6 h-6 md:w-8 md:h-8 text-teal-600" />
               </div>
-              <h2 className="text-4xl font-black text-teal-600 mb-2">{loading ? '...' : stats.totalPoints}</h2>
-              <p className="text-gray-600 font-semibold">Impact Score</p>
+              <h2 className="text-2xl md:text-4xl font-black text-teal-600 mb-2">{loading ? '...' : stats.totalPoints}</h2>
+              <p className="text-gray-600 font-semibold text-xs md:text-base">Impact Score</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-24 px-6 bg-white">
+      <section className="py-16 md:py-24 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div className="bg-green-100 rounded-3xl aspect-video flex items-center justify-center overflow-hidden relative">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+            <div className="bg-green-100 rounded-2xl md:rounded-3xl aspect-video flex items-center justify-center overflow-hidden relative">
               <div className="absolute inset-0 bg-gradient-to-br from-green-200 to-emerald-300"></div>
-              <div className="relative text-center text-green-700 p-8">
-                <div className="w-24 h-24 bg-white bg-opacity-50 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                  <span className="text-2xl font-black">IMG</span>
+              <div className="relative text-center text-green-700 p-6 md:p-8">
+                <div className="w-16 h-16 md:w-24 md:h-24 bg-white bg-opacity-50 rounded-xl md:rounded-2xl mx-auto mb-3 md:mb-4 flex items-center justify-center">
+                  <span className="text-lg md:text-2xl font-black">IMG</span>
                 </div>
-                <p className="font-bold text-lg">Quest Board Showcase</p>
-                <p className="text-sm opacity-75">Active missions interface</p>
+                <p className="font-bold text-base md:text-lg">Quest Board Showcase</p>
+                <p className="text-xs md:text-sm opacity-75">Active missions interface</p>
               </div>
             </div>
             <div>
-              <h2 className="text-5xl font-black mb-6 leading-tight text-gray-900">
+              <h2 className="text-3xl md:text-5xl font-black mb-4 md:mb-6 leading-tight text-gray-900">
                 Create eco-adventures with purpose
               </h2>
-              <p className="text-xl text-gray-600 leading-relaxed">
+              <p className="text-base md:text-xl text-gray-600 leading-relaxed">
                 HAU Eco-Quest makes it easy to join sustainability missions designed for students. From tree planting to waste reduction, every quest brings you closer to real environmental impact while earning rewards and recognition.
               </p>
             </div>
@@ -213,49 +213,49 @@ export default function HomePage({ onPageChange }) {
         </div>
       </section>
 
-      <section className="py-24 px-6 bg-gray-50">
+      <section className="py-16 md:py-24 px-4 md:px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
             <div className="order-2 md:order-1">
-              <h2 className="text-5xl font-black mb-6 leading-tight text-gray-900">
+              <h2 className="text-3xl md:text-5xl font-black mb-4 md:mb-6 leading-tight text-gray-900">
                 Where tracking your impact is simple
               </h2>
-              <p className="text-xl text-gray-600 leading-relaxed">
+              <p className="text-base md:text-xl text-gray-600 leading-relaxed">
                 See your environmental footprint grow with every completed quest. Track points, badges, and achievements on your personalized dashboard. Compete on leaderboards and unlock exclusive rewards as you level up your eco-warrior status.
               </p>
             </div>
-            <div className="bg-emerald-100 rounded-3xl aspect-video flex items-center justify-center overflow-hidden relative order-1 md:order-2">
+            <div className="bg-emerald-100 rounded-2xl md:rounded-3xl aspect-video flex items-center justify-center overflow-hidden relative order-1 md:order-2">
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-200 to-teal-300"></div>
-              <div className="relative text-center text-emerald-700 p-8">
-                <div className="w-24 h-24 bg-white bg-opacity-50 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                  <span className="text-2xl font-black">IMG</span>
+              <div className="relative text-center text-emerald-700 p-6 md:p-8">
+                <div className="w-16 h-16 md:w-24 md:h-24 bg-white bg-opacity-50 rounded-xl md:rounded-2xl mx-auto mb-3 md:mb-4 flex items-center justify-center">
+                  <span className="text-lg md:text-2xl font-black">IMG</span>
                 </div>
-                <p className="font-bold text-lg">Dashboard Interface</p>
-                <p className="text-sm opacity-75">Stats & progress tracking</p>
+                <p className="font-bold text-base md:text-lg">Dashboard Interface</p>
+                <p className="text-xs md:text-sm opacity-75">Stats & progress tracking</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-24 px-6 bg-white">
+      <section className="py-16 md:py-24 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-16 items-center">
-            <div className="bg-teal-100 rounded-3xl aspect-video flex items-center justify-center overflow-hidden relative">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+            <div className="bg-teal-100 rounded-2xl md:rounded-3xl aspect-video flex items-center justify-center overflow-hidden relative">
               <div className="absolute inset-0 bg-gradient-to-br from-teal-200 to-green-300"></div>
-              <div className="relative text-center text-teal-700 p-8">
-                <div className="w-24 h-24 bg-white bg-opacity-50 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                  <span className="text-2xl font-black">IMG</span>
+              <div className="relative text-center text-teal-700 p-6 md:p-8">
+                <div className="w-16 h-16 md:w-24 md:h-24 bg-white bg-opacity-50 rounded-xl md:rounded-2xl mx-auto mb-3 md:mb-4 flex items-center justify-center">
+                  <span className="text-lg md:text-2xl font-black">IMG</span>
                 </div>
-                <p className="font-bold text-lg">Community Hub</p>
-                <p className="text-sm opacity-75">Students collaborating</p>
+                <p className="font-bold text-base md:text-lg">Community Hub</p>
+                <p className="text-xs md:text-sm opacity-75">Students collaborating</p>
               </div>
             </div>
             <div>
-              <h2 className="text-5xl font-black mb-6 leading-tight text-gray-900">
+              <h2 className="text-3xl md:text-5xl font-black mb-4 md:mb-6 leading-tight text-gray-900">
                 From few to a student guild
               </h2>
-              <p className="text-xl text-gray-600 leading-relaxed">
+              <p className="text-base md:text-xl text-gray-600 leading-relaxed">
                 Join a thriving community of eco-conscious students. Participate in group challenges, share your achievements, and inspire others. Together, we're building a movement that proves sustainability can be exciting, rewarding, and social.
               </p>
             </div>
@@ -264,21 +264,21 @@ export default function HomePage({ onPageChange }) {
       </section>
 
 
-      <section className="py-32 px-6 bg-gray-100 text-center">
+      <section className="py-20 md:py-32 px-4 md:px-6 bg-gray-100 text-center">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-5xl md:text-6xl font-black mb-8 leading-tight text-gray-900">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 md:mb-8 leading-tight text-gray-900">
             Ready to start your<br />eco-adventure?
           </h2>
-          <p className="text-xl text-gray-600 mb-10">
+          <p className="text-base md:text-xl text-gray-600 mb-8 md:mb-10">
             Join thousands of students making a difference. Start your HAU Eco-Quest journey today and become the environmental hero you were meant to be.
           </p>
           
           {!user && (
             <button 
               onClick={() => onPageChange('signup')}
-              className="bg-green-600 hover:bg-green-700 text-white font-black px-12 py-5 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all inline-flex items-center gap-3 text-lg"
+              className="bg-green-600 hover:bg-green-700 text-white font-black px-8 md:px-12 py-4 md:py-5 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all inline-flex items-center gap-3 text-base md:text-lg"
             >
-              <Rocket className="w-6 h-6" />
+              <Rocket className="w-5 h-5 md:w-6 md:h-6" />
               Start Your Journey
             </button>
           )}
@@ -286,19 +286,19 @@ export default function HomePage({ onPageChange }) {
       </section>
 
         {/* Footer */}
-        <footer className="bg-green-700 text-white pt-16 pb-8 px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
+        <footer className="bg-green-700 text-white pt-12 md:pt-16 pb-6 md:pb-8 px-4 md:px-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 text-left">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-3 md:mb-4">
               <img
                 src="/vite.svg"
                 alt="HAU Eco-Quest Logo"
-                className="h-8 w-8 bg-white rounded-full p-1"
+                className="h-6 w-6 md:h-8 md:w-8 bg-white rounded-full p-1"
               />
-              <h3 className="text-2xl font-bold">HAU Eco-Quest</h3>
+              <h3 className="text-xl md:text-2xl font-bold">HAU Eco-Quest</h3>
             </div>
-            <p className="text-sm text-green-100">
+            <p className="text-xs md:text-sm text-green-100 leading-relaxed">
               Empowering students to become environmental champions through
               engaging sustainability adventures. Join the movement to save our
               planet!
@@ -307,8 +307,8 @@ export default function HomePage({ onPageChange }) {
 
           {/* Adventure Paths */}
           <div>
-            <h4 className="font-bold mb-4">Adventure Paths</h4>
-            <ul className="space-y-2 text-sm text-green-100">
+            <h4 className="font-bold mb-3 md:mb-4 text-sm md:text-base">Adventure Paths</h4>
+            <ul className="space-y-2 text-xs md:text-sm text-green-100">
               <li><button onClick={() => onPageChange('quests')} className="hover:text-white">Browse Epic Quests</button></li>
               <li><button onClick={() => onPageChange('community')} className="hover:text-white">Hero Community</button></li>
               <li><button onClick={() => onPageChange('leaderboard')} className="hover:text-white">Hall of Fame</button></li>
@@ -317,8 +317,8 @@ export default function HomePage({ onPageChange }) {
 
           {/* Support Guild */}
           <div>
-            <h4 className="font-bold mb-4">Support Guild</h4>
-            <ul className="space-y-2 text-sm text-green-100">
+            <h4 className="font-bold mb-3 md:mb-4 text-sm md:text-base">Support Guild</h4>
+            <ul className="space-y-2 text-xs md:text-sm text-green-100">
               <li><button onClick={() => onPageChange('contactquestmasters')} className="hover:text-white">Contact Quest Masters</button></li>
               <li><button onClick={() => onPageChange('alliancepartners')} className="hover:text-white">Alliance Partners</button></li>
             </ul>
@@ -326,21 +326,21 @@ export default function HomePage({ onPageChange }) {
 
           {/* Connect */}
           <div>
-            <h4 className="font-bold mb-4">Connect with Us</h4>
-            <div className="bg-green-600 p-4 rounded-lg text-sm">
+            <h4 className="font-bold mb-3 md:mb-4 text-sm md:text-base">Connect with Us</h4>
+            <div className="bg-green-600 p-3 md:p-4 rounded-lg text-xs md:text-sm">
               <p>eco-quest@hau.edu.ph</p>
               <p>+63 (2) 123-4567</p>
               <p>HAU Main Campus</p>
-              <div className="flex gap-4 mt-4">
-                <a href="#"><img src={FacebookIcon} alt="Facebook" className="w-6 h-6" /></a>
-                <a href="#"><img src={InstagramIcon} alt="Instagram" className="w-6 h-6" /></a>
-                <a href="#"><img src={TiktokIcon} alt="TikTok" className="w-6 h-6" /></a>
+              <div className="flex gap-3 md:gap-4 mt-3 md:mt-4">
+                <a href="#"><img src={FacebookIcon} alt="Facebook" className="w-5 h-5 md:w-6 md:h-6" /></a>
+                <a href="#"><img src={InstagramIcon} alt="Instagram" className="w-5 h-5 md:w-6 md:h-6" /></a>
+                <a href="#"><img src={TiktokIcon} alt="TikTok" className="w-5 h-5 md:w-6 md:h-6" /></a>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto text-center border-t border-green-600 mt-8 pt-6 text-green-200 text-sm">
+        <div className="max-w-6xl mx-auto text-center border-t border-green-600 mt-6 md:mt-8 pt-4 md:pt-6 text-green-200 text-xs md:text-sm">
           <p>© 2025 HAU Eco-Quest. All rights reserved. Built with for a sustainable future.</p>
         </div>
       </footer>

@@ -83,8 +83,18 @@ router.get('/:id', async (req, res) => {
         if (!challenge) {
             return res.status(404).json({ msg: 'Challenge not found' });
         }
+
+        // Calculate approved participants count
+        const approvedParticipants = challenge.participants.filter(p => p.status === 'approved').length;
         
-        res.json(challenge);
+        // Add calculated fields to the response
+        const challengeWithStats = {
+            ...challenge.toObject(),
+            approvedParticipants,
+            totalParticipants: challenge.participants.length
+        };
+        
+        res.json(challengeWithStats);
     } catch (err) {
         console.error('Error fetching challenge:', err.message);
         if (err.kind === 'ObjectId') {
@@ -94,40 +104,6 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// @route   POST /api/challenges
-// @desc    Create a new challenge (Admin/Partner only)
-// @access  Private
-router.post('/', [auth, roleCheck('admin', 'partner')], async (req, res) => {
-    try {
-        const {
-            title,
-            description,
-            goal,
-            category,
-            badgeReward,
-            endDate,
-            imageUrl
-        } = req.body;
-
-        const newChallenge = new Challenge({
-            title,
-            description,
-            goal: goal || 1000,
-            category: category || 'Environmental',
-            badgeReward: badgeReward || 'Tree Master',
-            endDate,
-            imageUrl,
-            currentProgress: 0
-        });
-
-        const challenge = await newChallenge.save();
-        console.log(`Challenge created: ${challenge.title} with goal ${challenge.goal}`);
-        res.json(challenge);
-    } catch (err) {
-        console.error('Error creating challenge:', err.message);
-        res.status(500).json({ msg: 'Server error' });
-    }
-});
 
 // @route   POST /api/challenges/:id/join
 // @desc    Join a challenge with photo proof (Users only - not admin/partner)
@@ -237,26 +213,90 @@ router.put('/:id/submissions/:participantId/review', [auth, roleCheck('admin')],
         participant.reviewed_by = req.user.id;
         participant.reviewed_at = Date.now();
 
+        // Also update the ChallengeSubmission status
+        const challengeSubmission = await ChallengeSubmission.findOne({
+            challenge_id: req.params.id,
+            user_id: participant.user
+        });
+        
+        if (challengeSubmission) {
+            challengeSubmission.status = status;
+            challengeSubmission.reviewed_by = req.user.id;
+            challengeSubmission.reviewed_at = Date.now();
+            await challengeSubmission.save();
+            console.log(`Updated ChallengeSubmission status to ${status}`);
+        }
+
         // If approved, update progress and award badge
         if (status === 'approved') {
             challenge.currentProgress += participant.contribution;
 
-            // Award "Tree Master" badge
-            const treeMasterBadge = await Badge.findOne({ name: 'Tree Master' });
+            // Award points to user
+            const user = await User.findById(participant.user);
+            if (user) {
+                user.points = (user.points || 0) + (challenge.points || 50);
+                user.questsCompleted = (user.questsCompleted || 0) + 1;
+                await user.save();
+                console.log(`Awarded ${challenge.points || 50} points and updated quest count to user ${user.username}`);
+            }
+
+            // Award challenge completion badge
+            let badgeToAward = null;
             
-            if (treeMasterBadge) {
+            // Check if this is a tree planting challenge
+            if (challenge.title.toLowerCase().includes('tree') || challenge.title.toLowerCase().includes('plant')) {
+                badgeToAward = await Badge.findOne({ name: 'Tree Master' });
+                console.log('Looking for Tree Master badge for tree planting challenge');
+            } else {
+                // Default challenge completion badge
+                badgeToAward = await Badge.findOne({ name: 'Community Champion' });
+                console.log('Looking for Community Champion badge for general challenge');
+            }
+            
+            console.log('Badge to award:', badgeToAward);
+            
+            if (badgeToAward) {
                 const existingUserBadge = await UserBadge.findOne({
                     user_id: participant.user,
-                    badge_id: treeMasterBadge._id
+                    badge_id: badgeToAward._id
                 });
+
+                console.log('Existing user badge check:', existingUserBadge);
 
                 if (!existingUserBadge) {
                     const userBadge = new UserBadge({
                         user_id: participant.user,
-                        badge_id: treeMasterBadge._id
+                        badge_id: badgeToAward._id
                     });
                     await userBadge.save();
-                    console.log(`Tree Master badge awarded to user`);
+                    console.log(`${badgeToAward.name} badge awarded to user ${participant.user}`);
+                } else {
+                    console.log(`User already has ${badgeToAward.name} badge`);
+                }
+            }
+            
+            // Check for Challenge Hero badge (5 completed challenges)
+            const completedChallenges = await ChallengeSubmission.countDocuments({
+                user_id: participant.user,
+                status: 'approved'
+            });
+            
+            if (completedChallenges >= 5) {
+                const challengeHeroBadge = await Badge.findOne({ name: 'Challenge Hero' });
+                if (challengeHeroBadge) {
+                    const existingHeroBadge = await UserBadge.findOne({
+                        user_id: participant.user,
+                        badge_id: challengeHeroBadge._id
+                    });
+                    
+                    if (!existingHeroBadge) {
+                        const heroBadge = new UserBadge({
+                            user_id: participant.user,
+                            badge_id: challengeHeroBadge._id
+                        });
+                        await heroBadge.save();
+                        console.log(`Challenge Hero badge awarded to user`);
+                    }
                 }
             }
         }
@@ -326,6 +366,127 @@ router.put('/:id', [auth, roleCheck('admin')], async (req, res) => {
     } catch (err) {
         console.error('Error updating challenge:', err.message);
         res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+// @route   GET /api/challenges/:id/submissions/check
+// @desc    Check if user has already submitted to this challenge
+// @access  Private
+router.get('/:id/submissions/check', auth, async (req, res) => {
+    try {
+        console.log(`Checking submission for challenge ${req.params.id} by user ${req.user.id}`);
+        const existingSubmission = await ChallengeSubmission.findOne({
+            challenge_id: req.params.id,
+            user_id: req.user.id
+        });
+
+        console.log('Found submission:', existingSubmission);
+        res.json(existingSubmission);
+    } catch (err) {
+        console.error('Error checking submission:', err.message);
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+// @route   POST /api/challenges
+// @desc    Create a new community challenge (Admin/Partner only)
+// @access  Private
+router.post('/', [auth, roleCheck('admin', 'partner'), upload.fields([{ name: 'badge', maxCount: 1 }, { name: 'image', maxCount: 1 }]), handleUploadError], async (req, res) => {
+    try {
+        console.log('Creating challenge with data:', req.body);
+        console.log('Files received:', req.files);
+        
+        const { title, content, target, points, duration, location } = req.body;
+        
+        if (!title || !content || !target) {
+            console.log('Missing required fields:', { title: !!title, content: !!content, target: !!target });
+            return res.status(400).json({ msg: 'Title, content, and target are required' });
+        }
+
+        let badgeUrl = null;
+        let imageUrl = null;
+
+        // Handle badge upload
+        if (req.files && req.files.badge) {
+            try {
+                const badgeResult = await cloudinary.uploader.upload(req.files.badge[0].path, {
+                    folder: 'challenge-badges',
+                    resource_type: 'auto'
+                });
+                badgeUrl = badgeResult.secure_url;
+                console.log('Challenge badge uploaded to Cloudinary');
+            } catch (error) {
+                console.error('Cloudinary badge upload error:', error);
+                return res.status(500).json({ msg: 'Failed to upload badge' });
+            }
+        }
+
+        // Handle image upload (optional)
+        if (req.files && req.files.image) {
+            try {
+                const imageResult = await cloudinary.uploader.upload(req.files.image[0].path, {
+                    folder: 'challenges',
+                    resource_type: 'auto'
+                });
+                imageUrl = imageResult.secure_url;
+                console.log('Challenge image uploaded to Cloudinary');
+            } catch (error) {
+                console.error('Cloudinary image upload error:', error);
+                return res.status(500).json({ msg: 'Failed to upload image' });
+            }
+        }
+
+        const newChallenge = new Challenge({
+            title,
+            description: content,
+            target: parseInt(target),
+            currentProgress: 0,
+            points: parseInt(points) || 50,
+            duration: duration || '2-3 weeks',
+            location: location || 'HAU Campus',
+            badgeUrl,
+            imageUrl,
+            createdBy: req.user.id,
+            participants: [],
+            isActive: true
+        });
+
+        const challenge = await newChallenge.save();
+
+        // Clean up local files
+        try {
+            if (req.files && req.files.badge) {
+                fs.unlinkSync(req.files.badge[0].path);
+                console.log('Cleaned up badge file');
+            }
+            if (req.files && req.files.image) {
+                fs.unlinkSync(req.files.image[0].path);
+                console.log('Cleaned up image file');
+            }
+        } catch (cleanupError) {
+            console.error('Error cleaning up files:', cleanupError);
+            // Don't fail the request if cleanup fails
+        }
+
+        console.log(`New community challenge created: ${challenge.title}`);
+        res.json(challenge);
+    } catch (err) {
+        console.error('Error creating challenge:', err.message);
+        console.error('Full error:', err);
+        
+        // Clean up files if they exist and there was an error
+        try {
+            if (req.files && req.files.badge) {
+                fs.unlinkSync(req.files.badge[0].path);
+            }
+            if (req.files && req.files.image) {
+                fs.unlinkSync(req.files.image[0].path);
+            }
+        } catch (cleanupError) {
+            console.error('Error cleaning up files after error:', cleanupError);
+        }
+        
+        res.status(500).json({ msg: 'Server error', error: err.message });
     }
 });
 
@@ -466,26 +627,57 @@ router.put('/submissions/:id/review', [auth, roleCheck('admin')], async (req, re
 
         // If approved, award badge and update user points
         if (status === 'approved') {
+            const challenge = await Challenge.findById(submission.challenge_id);
             const user = await User.findById(submission.user_id);
-            if (user) {
-                user.eco_score += 50; // Award points for challenge completion
+            
+            if (user && challenge) {
+                // Award points to user (use challenge.points if available, otherwise 50)
+                user.points = (user.points || 0) + (challenge.points || 50);
+                user.questsCompleted = (user.questsCompleted || 0) + 1;
                 await user.save();
+                console.log(`Awarded ${challenge.points || 50} points and updated quest count to user ${user.username}`);
 
-                // Award "Tree Master" badge
-                const treeMasterBadge = await Badge.findOne({ name: 'Tree Master' });
-                if (treeMasterBadge) {
+                // Award appropriate badge based on challenge type
+                let badgeToAward = null;
+                
+                // Check if this is a tree planting challenge
+                if (challenge.title.toLowerCase().includes('tree') || challenge.title.toLowerCase().includes('plant')) {
+                    badgeToAward = await Badge.findOne({ name: 'Tree Master' });
+                    console.log('Looking for Tree Master badge for tree planting challenge');
+                } else {
+                    // Default challenge completion badge
+                    badgeToAward = await Badge.findOne({ name: 'Community Champion' });
+                    console.log('Looking for Community Champion badge for general challenge');
+                }
+                
+                console.log('Badge to award:', badgeToAward);
+                
+                if (badgeToAward) {
                     const existingUserBadge = await UserBadge.findOne({
                         user_id: submission.user_id,
-                        badge_id: treeMasterBadge._id
+                        badge_id: badgeToAward._id
                     });
+
+                    console.log('Existing user badge check:', existingUserBadge);
 
                     if (!existingUserBadge) {
                         const userBadge = new UserBadge({
                             user_id: submission.user_id,
-                            badge_id: treeMasterBadge._id
+                            badge_id: badgeToAward._id
                         });
                         await userBadge.save();
+                        console.log(`${badgeToAward.name} badge awarded to user ${submission.user_id}`);
+                    } else {
+                        console.log(`User already has ${badgeToAward.name} badge`);
                     }
+                }
+
+                // Update challenge progress
+                if (challenge) {
+                    challenge.currentProgress = (challenge.currentProgress || 0) + 1;
+                    challenge.current_progress = challenge.currentProgress; // Sync both fields
+                    await challenge.save();
+                    console.log(`Updated challenge progress to ${challenge.currentProgress}`);
                 }
             }
         }

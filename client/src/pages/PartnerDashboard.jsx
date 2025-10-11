@@ -507,9 +507,26 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
     const [formData, setFormData] = useState(challenge || {
         title: '',
         description: '',
-        target: 1000,
-        category: 'Environmental'
+        content: '',
+        target: 100,
+        points: 50,
+        duration: '2-3 weeks',
+        location: 'HAU Campus',
+        category: 'Environmental',
+        badge: null,
+        badgePreview: null
     });
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setFormData(prev => ({
+                ...prev,
+                badge: file,
+                badgePreview: URL.createObjectURL(file)
+            }));
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -540,11 +557,11 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-semibold mb-2">Description</label>
+                        <label className="block text-sm font-semibold mb-2">Challenge Description</label>
                         <textarea
                             required
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            value={formData.content}
+                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             rows="4"
                             placeholder="Describe the community challenge..."
@@ -553,30 +570,76 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-semibold mb-2">Target</label>
+                            <label className="block text-sm font-semibold mb-2">Target Goal</label>
                             <input
                                 type="number"
                                 required
                                 value={formData.target}
                                 onChange={(e) => setFormData({ ...formData, target: parseInt(e.target.value) })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                                placeholder="1000"
+                                placeholder="100"
+                                min="1"
                             />
                         </div>
-
                         <div>
-                            <label className="block text-sm font-semibold mb-2">Category</label>
-                            <select
-                                value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                            <label className="block text-sm font-semibold mb-2">Reward Points</label>
+                            <input
+                                type="number"
+                                required
+                                value={formData.points}
+                                onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                            >
-                                <option>Environmental</option>
-                                <option>Conservation</option>
-                                <option>Community</option>
-                                <option>Education</option>
-                            </select>
+                                placeholder="50"
+                                min="1"
+                            />
                         </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-semibold mb-2">Duration</label>
+                            <input
+                                type="text"
+                                required
+                                value={formData.duration}
+                                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="2-3 weeks"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold mb-2">Location</label>
+                            <input
+                                type="text"
+                                required
+                                value={formData.location}
+                                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                placeholder="HAU Campus"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Challenge Badge</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Upload a badge image for participants who complete this challenge</p>
+                        
+                        {formData.badgePreview && (
+                            <div className="mt-3">
+                                <p className="text-sm font-semibold mb-2">Badge Preview:</p>
+                                <img
+                                    src={formData.badgePreview}
+                                    alt="Badge preview"
+                                    className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex gap-3 pt-4">
@@ -1262,28 +1325,40 @@ const CommunityTab = ({ posts, setPosts }) => {
     const handleSaveChallenge = async (challengeData) => {
         try {
             const token = localStorage.getItem('token');
+            
+            // Use FormData to handle file uploads
+            const formData = new FormData();
+            formData.append('title', challengeData.title);
+            formData.append('content', challengeData.content);
+            formData.append('target', challengeData.target);
+            formData.append('points', challengeData.points);
+            formData.append('duration', challengeData.duration);
+            formData.append('location', challengeData.location);
+            
+            if (challengeData.badge) {
+                formData.append('badge', challengeData.badge);
+            }
+
             const response = await fetch('/api/challenges', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'x-auth-token': token
                 },
-                body: JSON.stringify({
-                    ...challengeData,
-                    isActive: true,
-                    current_progress: 0,
-                    participants: []
-                })
+                body: formData
             });
 
-            if (!response.ok) throw new Error('Failed to create challenge');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.msg || 'Failed to create challenge');
+            }
+            
             const newChallenge = await response.json();
             setChallenges([newChallenge, ...challenges]);
             alert('Community challenge created successfully!');
             setShowChallengeModal(false);
         } catch (error) {
             console.error('Error creating challenge:', error);
-            alert('Failed to create challenge. Please try again.');
+            alert(`Failed to create challenge: ${error.message}`);
         }
     };
 

@@ -14,7 +14,28 @@ const ChallengeSchema = new mongoose.Schema({
         required: true,
         default: 1000
     },
+    target: {
+        type: Number,
+        required: true,
+        default: 100
+    },
+    points: {
+        type: Number,
+        default: 50
+    },
+    duration: {
+        type: String,
+        default: '2-3 weeks'
+    },
+    location: {
+        type: String,
+        default: 'HAU Campus'
+    },
     currentProgress: {
+        type: Number,
+        default: 0
+    },
+    current_progress: {
         type: Number,
         default: 0
     },
@@ -55,6 +76,14 @@ const ChallengeSchema = new mongoose.Schema({
     badgeReward: {
         type: String,
         default: 'Tree Master'
+    },
+    badgeUrl: {
+        type: String,
+        default: ''
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     isActive: {
         type: Boolean,

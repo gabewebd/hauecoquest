@@ -52,6 +52,24 @@ const badges = [
             type: "challenge_joined",
             value: 1
         }
+    },
+    {
+        name: "Tree Master",
+        description: "Complete a community tree planting challenge",
+        image_url: "/images/badges/tree-master.png",
+        criteria: {
+            type: "challenge_completed",
+            value: 1
+        }
+    },
+    {
+        name: "Challenge Hero",
+        description: "Complete 5 community challenges",
+        image_url: "/images/badges/challenge-hero.png",
+        criteria: {
+            type: "challenges_completed",
+            value: 5
+        }
     }
 ];
 

@@ -286,7 +286,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
   };
 
   const currentAvatar = avatars.find((a) => a.name === (displayUser?.avatar_theme || selectedAvatar)) || avatars[0];
-  const level = Math.floor((displayUser?.points || 0) / 100) + 1;
+  const level = Math.floor((displayUser?.eco_score || displayUser?.points || 0) / 100) + 1;
 
   // Show loading if we don't have the display user data yet
   if (!displayUser && loading) {
@@ -380,7 +380,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
               {/* Stats */}
               <div className="flex gap-6 mt-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
-                  <Trophy className="w-4 h-4 text-yellow-500" /> {displayUser?.points || 0} points
+                  <Trophy className="w-4 h-4 text-yellow-500" /> {displayUser?.eco_score || displayUser?.points || 0} points
                 </div>
                 <div className="flex items-center gap-1">
                   <Award className="w-4 h-4 text-orange-500" /> {displayUser?.questsCompleted?.length || 0} quests completed

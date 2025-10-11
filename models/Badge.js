@@ -14,7 +14,9 @@ const BadgeSchema = new mongoose.Schema({
         'first_quest',
         'energy_conservation',
         'water_saved',
-        'challenge_joined'
+        'challenge_joined',
+        'challenge_completed',
+        'challenges_completed'
       ], 
       required: true 
     },

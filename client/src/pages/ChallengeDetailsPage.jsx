@@ -1,6 +1,6 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Upload, CheckCircle, Clock, MapPin, Users, Trophy, Camera, FileText } from 'lucide-react';
+import { ArrowLeft, Upload, CheckCircle, Clock, MapPin, Users, Trophy, Camera, FileText, X } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 
 const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
@@ -13,18 +13,42 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
     previewUrl: null
   });
   const [submitting, setSubmitting] = useState(false);
+  const [existingSubmission, setExistingSubmission] = useState(null);
+
+  // Debug existing submission state
+  useEffect(() => {
+    console.log('Existing submission state changed:', existingSubmission);
+  }, [existingSubmission]);
 
   useEffect(() => {
-    if (challengeId) {
+    if (challengeId && user) {
       fetchChallengeDetails();
     }
-  }, [challengeId]);
+  }, [challengeId, user]);
 
   const fetchChallengeDetails = async () => {
     try {
       const response = await fetch(`/api/challenges/${challengeId}`);
       const data = await response.json();
       setChallenge(data);
+      
+      // Check if user has already submitted to this challenge
+      if (user) {
+        const submissionResponse = await fetch(`/api/challenges/${challengeId}/submissions/check`, {
+          headers: {
+            'x-auth-token': localStorage.getItem('token')
+          }
+        });
+        if (submissionResponse.ok) {
+          const submissionData = await submissionResponse.json();
+          console.log('Existing submission found:', submissionData);
+          setExistingSubmission(submissionData);
+        } else {
+          console.log('No existing submission found');
+          setExistingSubmission(null);
+        }
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching challenge details:', error);
@@ -68,7 +92,14 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
 
       if (response.ok) {
         alert('Challenge submission successful! Your submission is under review.');
-        onPageChange('community');
+        // Refresh submission status instead of redirecting
+        await fetchChallengeDetails();
+        // Reset form
+        setSubmissionData({
+          reflection: '',
+          photo: null,
+          previewUrl: null
+        });
       } else {
         const errorData = await response.json();
         alert(errorData.msg || 'Failed to submit challenge');
@@ -144,7 +175,7 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
                     <div className="text-xs font-semibold text-gray-600">Duration</div>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-purple-600 mb-1">{challenge.participants?.length || 0}</div>
+                    <div className="text-2xl font-bold text-purple-600 mb-1">{challenge.approvedParticipants || 0}</div>
                     <div className="text-xs font-semibold text-gray-600">Participants</div>
                   </div>
                   <div className="bg-yellow-50 p-4 rounded-lg text-center">
@@ -175,7 +206,7 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
                 <span className="font-bold text-green-800 text-lg">Current Status: In Progress</span>
               </div>
               <p className="text-green-700">
-                {challenge.participants?.length || 0} eco-warriors are actively participating in this challenge!
+                {challenge.approvedParticipants || 0} eco-warriors are actively participating in this challenge!
               </p>
             </div>
           </div>
@@ -236,8 +267,42 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
             </div>
           </div>
 
+          {/* Existing Submission Status */}
+          {user && user.role === 'user' && existingSubmission && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Your Submission Status</h2>
+              {existingSubmission.status === 'pending' && (
+                <div className="bg-yellow-50 border-yellow-200 text-yellow-800 p-4 rounded-lg border">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-5 h-5" />
+                    <span className="font-semibold">Submission Under Review</span>
+                  </div>
+                  <p className="text-sm">Your challenge submission is currently being reviewed by our team. You cannot submit again until it's approved or rejected.</p>
+                </div>
+              )}
+              {existingSubmission.status === 'approved' && (
+                <div className="bg-green-50 border-green-200 text-green-800 p-4 rounded-lg border">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="w-5 h-5" />
+                    <span className="font-semibold">Submission Approved!</span>
+                  </div>
+                  <p className="text-sm">Congratulations! Your challenge submission has been approved and you've earned your badge!</p>
+                </div>
+              )}
+              {existingSubmission.status === 'rejected' && (
+                <div className="bg-red-50 border-red-200 text-red-800 p-4 rounded-lg border">
+                  <div className="flex items-center gap-2 mb-2">
+                    <X className="w-5 h-5" />
+                    <span className="font-semibold">Submission Rejected</span>
+                  </div>
+                  <p className="text-sm">Your submission was rejected. You can submit again with improved documentation.</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Submission Form */}
-          {user && user.role === 'user' && (
+          {user && user.role === 'user' && !existingSubmission && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Submit Your Challenge</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -301,13 +366,18 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={submitting || !submissionData.reflection || !submissionData.photo}
+                disabled={submitting || !submissionData.reflection || !submissionData.photo || (existingSubmission && existingSubmission.status === 'pending')}
                 className="w-full bg-green-500 text-white font-bold py-4 px-6 rounded-lg hover:bg-green-600 transition disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {submitting ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     Submitting...
+                  </>
+                ) : (existingSubmission && existingSubmission.status === 'pending') ? (
+                  <>
+                    <Clock className="w-5 h-5" />
+                    Submission Under Review
                   </>
                 ) : (
                   <>

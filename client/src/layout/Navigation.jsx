@@ -464,6 +464,140 @@ export function Navigation({ currentPage, onPageChange }) {
                   </button>
                 );
               })}
+              
+              {/* Mobile Notifications Button */}
+              {user && (
+                <div className="border-t border-gray-200 my-2"></div>
+              )}
+              {user && (
+                <div className="relative px-4 py-2">
+                  <button
+                    onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}
+                    className="flex items-center gap-3 w-full px-3 py-3 rounded-lg font-bold text-sm text-gray-700 hover:bg-gray-100 transition-all"
+                  >
+                    <Bell className="w-5 h-5" />
+                    <span>Notifications</span>
+                    {unreadNotifications > 0 && (
+                      <span className="ml-auto bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                        {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                      </span>
+                    )}
+                  </button>
+                  
+                  {/* Mobile Notification Dropdown */}
+                  {notificationDropdownOpen && (
+                    <div className="mt-2 ml-8 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
+                      <div className="p-3 border-b border-gray-200">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-bold text-gray-900 text-sm">Notifications</h3>
+                          <div className="flex gap-2">
+                            {unreadNotifications > 0 && (
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await notificationAPI.markAllAsRead();
+                                    fetchUnreadNotifications();
+                                  } catch (error) {
+                                    console.error('Error marking all as read:', error);
+                                  }
+                                }}
+                                className="text-xs text-green-600 hover:text-green-700 font-semibold"
+                              >
+                                Mark all as read
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="max-h-48 overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <div className="p-4 text-center text-gray-500">
+                            <Bell className="w-6 h-6 mx-auto mb-2 text-gray-300" />
+                            <p className="text-sm">No notifications yet</p>
+                          </div>
+                        ) : (
+                          notifications.map((notification) => (
+                            <div
+                              key={notification._id}
+                              className={`p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
+                                !notification.is_read ? 'bg-blue-50' : ''
+                              }`}
+                              onClick={async () => {
+                                // Mark as read
+                                if (!notification.is_read) {
+                                  try {
+                                    await notificationAPI.markAsRead(notification._id);
+                                    fetchUnreadNotifications();
+                                  } catch (error) {
+                                    console.error('Error marking as read:', error);
+                                  }
+                                }
+                                
+                                // Navigate based on notification type
+                                if (notification.type === 'post_liked' || notification.type === 'post_commented') {
+                                  onPageChange('community');
+                                  setNotificationDropdownOpen(false);
+                                  setMobileMenuOpen(false);
+                                } else if (notification.type === 'submission_approved' || notification.type === 'submission_rejected') {
+                                  onPageChange('quests');
+                                  setNotificationDropdownOpen(false);
+                                  setMobileMenuOpen(false);
+                                } else if (notification.type === 'role_approved') {
+                                  onPageChange('profile');
+                                  setNotificationDropdownOpen(false);
+                                  setMobileMenuOpen(false);
+                                }
+                              }}
+                            >
+                              <div className="flex items-start gap-2">
+                                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${!notification.is_read ? 'bg-blue-500' : 'bg-transparent'}`}></div>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-semibold text-sm text-gray-900 truncate">{notification.title}</h4>
+                                  <p className="text-xs text-gray-600 mt-1 line-clamp-2">{notification.message}</p>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    {new Date(notification.created_at).toLocaleString()}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                      
+                      {notifications.length > 0 && (
+                        <div className="p-3 border-t border-gray-200 text-center">
+                          <button
+                            onClick={() => {
+                              setNotificationDropdownOpen(false);
+                              setMobileMenuOpen(false);
+                              // Navigate to dashboard notifications tab
+                              if (user.role === 'admin') {
+                                onPageChange('admin-dashboard');
+                              } else if (user.role === 'partner') {
+                                onPageChange('partner-dashboard');
+                              } else {
+                                onPageChange('dashboard');
+                              }
+                              // Trigger notifications tab after navigation
+                              setTimeout(() => {
+                                const notificationsTab = document.querySelector('[data-tab="notifications"]');
+                                if (notificationsTab) {
+                                  notificationsTab.click();
+                                }
+                              }, 100);
+                            }}
+                            className="text-sm text-green-600 hover:text-green-700 font-semibold"
+                          >
+                            View all notifications
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              
               {user ? (
                 <>
                   <div className="border-t border-gray-200 my-2"></div>
