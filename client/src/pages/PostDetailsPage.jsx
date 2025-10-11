@@ -1,7 +1,31 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Heart, MessageCircle, Share2, User, Calendar, Tag, Eye } from 'lucide-react';
+import { ArrowLeft, Heart, MessageCircle, Share2, User, Calendar, Tag, Eye, X } from 'lucide-react';
 import { useUser } from '../context/UserContext';
+
+// Image Modal Component
+const ImageModal = ({ imageUrl, onClose }) => {
+  if (!imageUrl) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="relative max-w-4xl max-h-full">
+        <button
+          onClick={onClose}
+          className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+        >
+          <X className="w-8 h-8" />
+        </button>
+        <img
+          src={imageUrl}
+          alt="Full size"
+          className="max-w-full max-h-full object-contain rounded-lg"
+          onClick={(e) => e.stopPropagation()}
+        />
+      </div>
+    </div>
+  );
+};
 
 const PostDetailsPage = ({ onPageChange, postId }) => {
   const { user } = useUser();
@@ -11,6 +35,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
   const [submittingComment, setSubmittingComment] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
+  const [showImageModal, setShowImageModal] = useState(false);
 
   useEffect(() => {
     if (postId) {
@@ -184,7 +209,8 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
               <img
                 src={`${post.image_url}`}
                 alt="Post content"
-                className="rounded-lg w-full max-h-96 object-cover"
+                className="rounded-lg w-full max-h-96 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => setShowImageModal(true)}
               />
             </div>
           )}
@@ -312,6 +338,11 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
           </div>
         </div>
       </div>
+
+      {/* Image Modal */}
+      {showImageModal && (
+        <ImageModal imageUrl={post.image_url} onClose={() => setShowImageModal(false)} />
+      )}
     </div>
   );
 };

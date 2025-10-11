@@ -164,30 +164,41 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
                 <label className="block text-sm font-semibold mb-2 text-gray-700">
                     Upload Photo/Video Proof (Geo-tagged evidence)
                 </label>
-                <div className="flex items-center space-x-2">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
                     <input
                         type="file"
-                        id="proof-file"
                         accept="image/*,video/*"
                         onChange={handleFileChange}
                         className="hidden"
+                        id="quest-photo-upload"
+                        required
                     />
-                    <label
-                        htmlFor="proof-file"
-                        className="flex-1 cursor-pointer bg-green-500 text-white py-3 px-4 rounded-xl font-semibold text-center hover:bg-green-600 transition-colors"
+                    <label 
+                        htmlFor="quest-photo-upload" 
+                        className="cursor-pointer block"
                     >
-                        <span className='flex items-center justify-center gap-2'>
-                            <Upload className="w-5 h-5" />
-                            {file ? file.name : 'Choose File'}
-                        </span>
+                        {file ? (
+                            <div className="space-y-4">
+                                <img 
+                                    src={URL.createObjectURL(file)} 
+                                    alt="Quest proof preview" 
+                                    className="max-h-48 mx-auto rounded-lg"
+                                />
+                                <p className="text-sm text-green-600">Click to change photo</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                <div className="w-16 h-16 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
+                                    <Camera className="w-8 h-8 text-gray-400" />
+                                </div>
+                                <div>
+                                    <p className="text-lg font-semibold text-gray-700">Choose File</p>
+                                    <p className="text-sm text-gray-500">Max 5MB. Must clearly show the completed action.</p>
+                                </div>
+                            </div>
+                        )}
                     </label>
-                    {file && (
-                        <button onClick={() => setFile(null)} type="button" className="p-2 text-red-500 hover:text-red-700">
-                            <XCircle className="w-6 h-6" />
-                        </button>
-                    )}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Max 5MB. Must clearly show the completed action.</p>
             </div>
 
             <button
@@ -266,20 +277,21 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
     const diffStyle = difficultyStyles[difficulty] || difficultyStyles.Medium;
 
     return (
-        <div className="font-sans bg-gray-50 text-gray-800 min-h-screen">
-            <main className="container mx-auto px-4 pt-24 pb-12">
-                <div className="max-w-4xl mx-auto">
-                    {/* Back Button */}
-                    <button
-                        onClick={onBack}
-                        className="flex items-center gap-2 text-green-600 font-semibold mb-6 hover:text-green-700 transition-colors"
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                        Back to All Quests
-                    </button>
+        <div className="font-sans bg-gray-50 text-gray-900 min-h-screen">
+            <main className="pt-20 pb-12">
+                <div className="container mx-auto px-6">
+                    <div className="max-w-4xl mx-auto">
+                        {/* Back Button */}
+                        <button
+                            onClick={onBack}
+                            className="flex items-center gap-2 text-green-600 font-semibold mb-8 hover:text-green-700 transition-colors"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                            Back to All Quests
+                        </button>
 
-                    {/* Quest Header and Stats */}
-                    <div className="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-gray-100 mb-8">
+                        {/* Quest Header and Stats */}
+                        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-4">
                                 <div className="p-4 rounded-xl bg-green-100">
@@ -298,8 +310,8 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
                             </button>
                         </div>
 
-                        <h1 className="text-4xl font-extrabold text-gray-800 mb-4">{title}</h1>
-                        <p className="text-gray-600 mb-6">{description}</p>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-3">{title}</h1>
+                            <p className="text-gray-600 mb-4 leading-relaxed">{description}</p>
 
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                             <StatItem
@@ -328,85 +340,85 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
                             />
                         </div>
 
-                        {/* Status Bar: Now shows In Progress automatically */}
-                        <div className={`p-3 rounded-xl text-sm font-semibold flex items-center justify-between ${statusStyle}`}>
-                            <span>Current Status:</span>
-                            <span className="flex items-center gap-1">
-                                {status === 'In Progress' ? <Sprout className="w-4 h-4" /> : <ClipboardList className="w-4 h-4" />}
-                                {status}
-                            </span>
-                        </div>
+                            {/* Status Bar: Now shows In Progress automatically */}
+                            <div className={`p-4 rounded-xl text-sm font-bold flex items-center justify-between ${statusStyle}`}>
+                                <span>Current Status:</span>
+                                <span className="flex items-center gap-2">
+                                    {status === 'In Progress' ? <Sprout className="w-4 h-4" /> : <ClipboardList className="w-4 h-4" />}
+                                    {status}
+                                </span>
+                            </div>
 
                         {/* ACCEPT QUEST BUTTON REMOVED AS REQUESTED */}
 
                     </div>
 
-                    {/* --- Single Column Content (Objectives, Requirements, Submission) --- */}
-                    <div className="space-y-8">
-                        {/* 1. Quest Objectives */}
-                        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
-                            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <ClipboardList className="w-5 h-5 text-primary-green" />
-                                Quest Objectives
-                            </h3>
-                            <ul className="space-y-3">
-                                {objectives.map((obj, index) => (
-                                    <li key={index} className="flex items-start gap-3 text-gray-700">
-                                        <CheckCircle className="w-5 h-5 mt-1 text-green-500 flex-shrink-0" />
-                                        <span>{obj}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                        {/* --- Single Column Content (Objectives, Requirements, Submission) --- */}
+                        <div className="space-y-8">
+                            {/* 1. Quest Objectives */}
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <ClipboardList className="w-5 h-5 text-green-600" />
+                                    Quest Objectives
+                                </h3>
+                                <ul className="space-y-3">
+                                    {objectives.map((obj, index) => (
+                                        <li key={index} className="flex items-start gap-3 text-gray-700">
+                                            <CheckCircle className="w-5 h-5 mt-1 text-green-500 flex-shrink-0" />
+                                            <span className="leading-relaxed">{obj}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
 
-                        {/* 2. Submission Requirements */}
-                        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100">
-                            <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                <Camera className="w-5 h-5 text-blue-500" />
-                                Submission Requirements
-                            </h3>
-                            <ul className="space-y-3">
-                                {submissionRequirements.map((req, index) => (
-                                    <li key={index} className="flex items-start gap-3 text-gray-700">
-                                        <AlertTriangle className="w-5 h-5 mt-1 text-red-500 flex-shrink-0" />
-                                        <span>{req}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                            {/* 2. Submission Requirements */}
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <Camera className="w-5 h-5 text-blue-600" />
+                                    Submission Requirements
+                                </h3>
+                                <ul className="space-y-3">
+                                    {submissionRequirements.map((req, index) => (
+                                        <li key={index} className="flex items-start gap-3 text-gray-700">
+                                            <AlertTriangle className="w-5 h-5 mt-1 text-red-500 flex-shrink-0" />
+                                            <span className="leading-relaxed">{req}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
 
-                        {/* 3. Quest Submission Form or View-Only Message */}
-                        <div className="bg-white p-6 rounded-xl shadow-xl border border-gray-100">
-                            {isViewOnly ? (
-                                <div className="bg-blue-50 border border-blue-200 p-6 rounded-xl text-center">
-                                    <Eye className="w-12 h-12 text-blue-600 mx-auto mb-3" />
-                                    <h4 className="text-xl font-bold text-blue-800 mb-2">View Only Mode</h4>
-                                    <p className="text-blue-700">
-                                        As {userRole === 'admin' ? 'an administrator' : 'a partner'}, you can view this quest but cannot participate.
-                                        Your role is to monitor progress and {userRole === 'admin' ? 'approve submissions' : 'create quests'}.
-                                    </p>
-                                    <div className="mt-4 grid grid-cols-2 gap-4">
-                                        <div className="bg-white p-3 rounded-lg">
-                                            <p className="text-2xl font-bold text-blue-600">{participants || 0}</p>
-                                            <p className="text-sm text-gray-600">Total Participants</p>
-                                        </div>
-                                        <div className="bg-white p-3 rounded-lg">
-                                            <p className="text-2xl font-bold text-green-600">{points}</p>
-                                            <p className="text-sm text-gray-600">Points Reward</p>
+                            {/* 3. Quest Submission Form or View-Only Message */}
+                            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                                {isViewOnly ? (
+                                    <div className="bg-blue-50 border-2 border-blue-200 p-8 rounded-2xl text-center">
+                                        <Eye className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+                                        <h4 className="text-2xl font-black text-blue-800 mb-3">View Only Mode</h4>
+                                        <p className="text-lg text-blue-700 mb-6">
+                                            As {userRole === 'admin' ? 'an administrator' : 'a partner'}, you can view this quest but cannot participate.
+                                            Your role is to monitor progress and {userRole === 'admin' ? 'approve submissions' : 'create quests'}.
+                                        </p>
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="bg-white p-6 rounded-xl shadow-sm">
+                                                <p className="text-3xl font-black text-blue-600 mb-2">{participants || 0}</p>
+                                                <p className="text-sm font-semibold text-gray-600">Total Participants</p>
+                                            </div>
+                                            <div className="bg-white p-6 rounded-xl shadow-sm">
+                                                <p className="text-3xl font-black text-green-600 mb-2">{points}</p>
+                                                <p className="text-sm font-semibold text-gray-600">Points Reward</p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ) : (
-                                <QuestSubmissionForm
-                                    questId={quest._id}
-                                    onSubmissionSuccess={onSubmissionSuccess}
-                                    existingSubmission={quest.existingSubmission}
-                                    questData={quest}
-                                />
-                            )}
+                                ) : (
+                                    <QuestSubmissionForm
+                                        questId={quest._id}
+                                        onSubmissionSuccess={onSubmissionSuccess}
+                                        existingSubmission={quest.existingSubmission}
+                                        questData={quest}
+                                    />
+                                )}
+                            </div>
                         </div>
                     </div>
-
                 </div>
             </main>
         </div>

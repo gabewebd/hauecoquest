@@ -1,6 +1,6 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
-import { Crown, Award, Shield, Sprout, Recycle, Zap, Users, Swords, Users2, Leaf, Rocket } from 'lucide-react';
+import { Crown, Award, Shield, Sprout, Recycle, Zap, Users, Swords, Users2, Leaf, Rocket, Search, Filter } from 'lucide-react';
 import { userAPI } from '../utils/api';
 import { useUser } from '../context/UserContext';
 import FacebookIcon from '../img/Facebook.png';
@@ -23,11 +23,26 @@ const TopChampionCard = ({ user, rank, onPageChange }) => {
     <div className={`relative ${style.bg} p-6 rounded-2xl border-2 ${style.border} text-center flex flex-col items-center`}>
       {style.crown && <Crown className="absolute -top-4 text-yellow-500 w-8 h-8" />}
       <div className="relative mb-3">
-        {/* FIXED: Replaced to-primary-green with to-green-500 */}
-        <div className={`w-20 h-20 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center text-white text-3xl font-bold`}>
-          {user.avatarInitial}
+        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg">
+          {user.avatarImage ? (
+            <img 
+              src={user.avatarImage} 
+              alt={user.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <div className={`w-full h-full bg-gradient-to-br from-green-400 to-green-500 flex items-center justify-center text-white text-3xl font-bold`} style={{display: user.avatarImage ? 'none' : 'flex'}}>
+            {user.avatarInitial}
+          </div>
         </div>
         <div className="absolute -bottom-1 -right-1 bg-white text-sm font-bold w-8 h-8 rounded-full border-2 flex items-center justify-center border-yellow-300">{user.level}</div>
+      </div>
+      <div className="absolute -top-2 -left-2 bg-white text-lg font-black w-10 h-10 rounded-full border-2 flex items-center justify-center border-gray-300 text-gray-700">
+        #{rank}
       </div>
       <button
         onClick={() => onPageChange('profile', { userId: user.id })}
@@ -52,7 +67,22 @@ const LeaderboardRow = ({ user, rank, onPageChange }) => {
       <div className="w-8 text-center font-bold text-gray-500 text-lg">#{rank}</div>
       <div className="flex items-center gap-3 flex-1 ml-4">
         <div className="relative">
-          <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center font-bold text-lg text-gray-600">{user.avatarInitial}</div>
+          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200">
+            {user.avatarImage ? (
+              <img 
+                src={user.avatarImage} 
+                alt={user.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'flex';
+                }}
+              />
+            ) : null}
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center font-bold text-lg text-gray-600" style={{display: user.avatarImage ? 'none' : 'flex'}}>
+              {user.avatarInitial}
+            </div>
+          </div>
           <div className="absolute -bottom-0 -right-0 bg-white text-xs font-bold w-5 h-5 rounded-full border flex items-center justify-center">{user.level}</div>
         </div>
         <div>
@@ -77,31 +107,58 @@ const LeaderboardRow = ({ user, rank, onPageChange }) => {
 };
 
 // Helper component for department leaderboard rows
-const DepartmentRow = ({ department, rank, onPageChange }) => (
-  <div className="flex items-center bg-white p-4 rounded-xl mb-3 hover:bg-green-50/50 transition-colors border-2 border-gray-100">
-    <div className="w-12 text-center font-bold text-gray-500 text-2xl">#{rank}</div>
-    <div className="flex items-center gap-4 flex-1 ml-4">
-      <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
-        {department.department}
+const DepartmentRow = ({ department, rank, onPageChange, onDepartmentSelect }) => {
+  const getDepartmentLogo = (dept) => {
+    const logoMap = {
+      'SOC': '/assets/departments/hau_soc_logo_revised4.png',
+      'SAS': '/assets/departments/hau_sas_logo.png',
+      'SEA': '/assets/departments/hau_sea_logo.png',
+      'SBA': '/assets/departments/hau_sba_logo.png',
+      'SED': '/assets/departments/hau_sed_logo.png',
+      'CCJEF': '/assets/departments/hau_ccjef_logo.png',
+      'SHTM': '/assets/departments/hau_SHTM_logo.png',
+      'SNAMS': '/assets/departments/hau_snams_logo.png'
+    };
+    return logoMap[dept] || '/assets/departments/hau_soc_logo_revised4.png';
+  };
+
+  return (
+    <div className="flex items-center bg-gradient-to-r from-white to-green-50 p-6 rounded-2xl mb-4 hover:from-green-50 hover:to-green-100 transition-all duration-300 border-2 border-green-100 hover:border-green-200 shadow-md hover:shadow-lg">
+      <div className="w-16 text-center font-black text-gray-700 text-3xl bg-white rounded-full w-12 h-12 flex items-center justify-center border-2 border-gray-200">
+        #{rank}
       </div>
-      <div>
-        <h3 className="font-bold text-xl text-gray-800">{department.department}</h3>
-        <p className="text-sm text-gray-500">{department.userCount} students</p>
-        <div className="flex gap-2 mt-1">
-          {department.topUsers.map((user, index) => (
-            <span key={index} className="text-xs bg-gray-100 px-2 py-1 rounded-full">
-              {user.username} ({user.points}pts)
-            </span>
-          ))}
+      <div className="flex items-center gap-6 flex-1 ml-6">
+        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg flex items-center justify-center bg-white">
+          <img 
+            src={getDepartmentLogo(department.department)} 
+            alt={`${department.department} logo`}
+            className="w-16 h-16 object-contain"
+          />
+        </div>
+        <div className="flex-1">
+          <button
+            onClick={() => onDepartmentSelect(department.department)}
+            className="font-black text-2xl text-gray-800 hover:text-green-600 hover:underline cursor-pointer transition-colors block mb-2"
+          >
+            {department.department}
+          </button>
+          <p className="text-lg text-gray-600 font-semibold mb-3">{department.userCount} students</p>
+          <div className="flex flex-wrap gap-2">
+            {department.topUsers.map((user, index) => (
+              <span key={index} className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">
+                {user.username} ({user.points}pts)
+              </span>
+            ))}
+          </div>
         </div>
       </div>
+      <div className="text-right">
+        <div className="text-3xl font-black text-green-600">{department.totalPoints.toLocaleString()}</div>
+        <div className="text-lg text-gray-600 font-semibold">Total Points</div>
+      </div>
     </div>
-    <div className="text-right">
-      <div className="text-2xl font-bold text-green-600">{department.totalPoints.toLocaleString()}</div>
-      <div className="text-sm text-gray-500">Total Points</div>
-    </div>
-  </div>
-);
+  );
+};
 
 const LeaderboardPage = ({ onPageChange }) => {
   const { user } = useUser();
@@ -110,12 +167,28 @@ const LeaderboardPage = ({ onPageChange }) => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalQuests: 0,
     totalPoints: 0
   });
   const [displayCount, setDisplayCount] = useState(10);
+
+  // Helper function to get avatar image
+  const getAvatarImage = (avatarTheme) => {
+    const avatarMap = {
+      'Leaf': '/assets/avatars-headers/leaf-avatar.png',
+      'Sun': '/assets/avatars-headers/sun-avatar.png',
+      'Tree': '/assets/avatars-headers/tree-avatar.png',
+      'Water': '/assets/avatars-headers/water-avatar.png',
+      'Girl Avatar 1': '/assets/avatars-headers/leaf-avatar.png', // Legacy support
+      'Girl Avatar 2': '/assets/avatars-headers/sun-avatar.png', // Legacy support
+      'Boy Avatar 1': '/assets/avatars-headers/tree-avatar.png', // Legacy support
+      'Boy Avatar 2': '/assets/avatars-headers/water-avatar.png', // Legacy support
+    };
+    return avatarMap[avatarTheme] || '/assets/avatars-headers/leaf-avatar.png';
+  };
 
   const departmentOptions = [
     { value: 'all', label: 'All Departments' },
@@ -134,6 +207,15 @@ const LeaderboardPage = ({ onPageChange }) => {
     fetchLeaderboard();
     setDisplayCount(10); // Reset display count when department changes
   }, [selectedDepartment]);
+
+  // Handle department navigation from URL params or props
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const deptParam = urlParams.get('department');
+    if (deptParam && deptParam !== selectedDepartment) {
+      setSelectedDepartment(deptParam);
+    }
+  }, []);
 
   const fetchLeaderboard = async () => {
     try {
@@ -168,6 +250,7 @@ const LeaderboardPage = ({ onPageChange }) => {
           points: user.eco_score || user.points || 0,
           level: Math.floor((user.eco_score || user.points || 0) / 100) + 1,
           avatarInitial: getInitials(user.username),
+          avatarImage: getAvatarImage(user.avatar_theme),
           questsCompleted: user.questsCompleted
         }));
 
@@ -190,6 +273,9 @@ const LeaderboardPage = ({ onPageChange }) => {
       setLoading(false);
     } catch (error) {
       console.error('Error fetching leaderboard:', error);
+      setUsers([]);
+      setDepartments([]);
+      setStats({});
       setLoading(false);
     }
   };
@@ -219,8 +305,51 @@ const LeaderboardPage = ({ onPageChange }) => {
   // Filter to include ONLY 'user' role (excludes 'admin' and 'partner')
   const filteredUsers = users.filter(user => user.role === 'user');
 
-  // Sort the filtered users by points (descending)
+  // Sort users by points first (descending) to establish rankings
   const sortedUsers = [...filteredUsers].sort((a, b) => b.points - a.points);
+
+  // Add original rank to each user
+  const usersWithRank = sortedUsers.map((user, index) => ({
+    ...user,
+    originalRank: index + 1
+  }));
+
+  // Filter users by search term while preserving original rankings
+  const searchFilteredUsers = usersWithRank.filter(user => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    const userName = (user.name || user.username || '').toLowerCase();
+    const userTitle = (user.title || '').toLowerCase();
+    const userDepartment = (user.department || '').toLowerCase();
+    const userEmail = (user.email || '').toLowerCase();
+    
+    return userName.includes(searchLower) ||
+           userTitle.includes(searchLower) ||
+           userDepartment.includes(searchLower) ||
+           userEmail.includes(searchLower);
+  });
+
+  // Filter departments by search term when "all" is selected
+  const searchFilteredDepartments = departments.filter(dept => {
+    const deptName = dept.department.toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
+    
+    // Map department codes to full names for better search
+    const deptFullNames = {
+      'soc': 'school of computing',
+      'sas': 'school of arts and sciences',
+      'sea': 'school of engineering and architecture',
+      'sba': 'school of business and accountancy',
+      'sed': 'school of education',
+      'ccjef': 'college of criminal justice education and forensics',
+      'shtm': 'school of hospitality and tourism management',
+      'snams': 'school of nursing and allied medical sciences'
+    };
+    
+    return deptName.includes(searchLower) || 
+           (deptFullNames[deptName] && deptFullNames[deptName].includes(searchLower));
+  });
 
   const handleShowMore = () => {
     setDisplayCount(prev => prev + 10);
@@ -237,71 +366,103 @@ const LeaderboardPage = ({ onPageChange }) => {
     );
   }
 
-  const topThree = sortedUsers.slice(0, 3);
-  const remainingUsers = sortedUsers.slice(3, displayCount);
+  const topThree = searchFilteredUsers.slice(0, 3);
+  const remainingUsers = searchFilteredUsers.slice(3, displayCount);
 
   return (
-    <div className="font-sans bg-app-bg text-gray-800">
-      <main className="pt-24 pb-12">
-        {/* Header */}
-        <section className="container mx-auto px-4 mb-12">
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              {/* FIXED: Replaced text-dark-green with text-green-900 */}
-              <h2 className="text-4xl font-extrabold text-green-900 mb-2">Hall of Fame</h2>
-              <p className="text-gray-600 max-w-lg">Celebrate our environmental champions and see how you rank among the eco-heroes making a real difference in the world!</p>
-              <div className="flex items-center gap-4 mt-6">
-                {/* FIXED: Replaced bg-primary-green with bg-green-500 */}
-                <button
-                  onClick={() => {
-                    const leaderboardSection = document.querySelector('#leaderboard-section');
-                    if (leaderboardSection) {
-                      leaderboardSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
-                  className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
-                >
-                  View Rankings
-                </button>
-                <button
-                  onClick={() => {
-                    if (user) {
-                      if (user.role === 'admin') {
-                        onPageChange('admin-dashboard');
-                      } else if (user.role === 'partner') {
-                        onPageChange('partner-dashboard');
-                      } else {
-                        onPageChange('dashboard');
-                      }
-                    } else {
-                      onPageChange('login');
-                    }
-                  }}
-                  className="font-bold text-gray-700 py-3 px-6 hover:text-green-600 transition"
-                >
-                  My Progress
-                </button>
+    <div className="font-sans bg-gray-50 text-gray-900">
+      <main className="pt-20 pb-12">
+        {/* Page Header - Compact */}
+        <section className="bg-white border-b border-gray-200 shadow-sm">
+          <div className="container mx-auto px-6 py-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-3 rounded-xl shadow-lg">
+                  <Crown className="w-7 h-7 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-black text-gray-900 mb-1">Hall of Fame</h1>
+                  <p className="text-gray-600 text-sm">Celebrate our environmental champions and see how you rank among the eco-heroes</p>
+                </div>
               </div>
-            </div>
-            <div className="bg-green-50 p-6 rounded-2xl text-center">
-              <p>Leaderboard Illustration Placeholder</p>
             </div>
           </div>
         </section>
 
-        {/* Department Filter */}
-        <section className="container mx-auto px-4 mb-8">
-          <div className="bg-white p-6 rounded-2xl shadow-lg border">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-              <div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Filter by Department</h3>
-                <p className="text-gray-600">View rankings for specific departments or see all participants</p>
+        {/* Stats Bar */}
+        <section className="bg-white border-b border-gray-200">
+          <div className="container mx-auto px-6 py-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-gray-900">{stats.totalUsers}</p>
+                  <p className="text-xs text-gray-500 font-semibold">
+                    {selectedDepartment === 'all' ? 'Total Students' : 'Department Students'}
+                  </p>
+                </div>
               </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <Swords className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-gray-900">{stats.totalQuests}</p>
+                  <p className="text-xs text-gray-500 font-semibold">
+                    {selectedDepartment === 'all' ? 'All Quests' : 'Quests Completed'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Users2 className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-gray-900">{selectedDepartment === 'all' ? departments.length : stats.totalUsers}</p>
+                  <p className="text-xs text-gray-500 font-semibold">
+                    {selectedDepartment === 'all' ? 'Departments' : 'Active Students'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Leaf className="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-gray-900">{stats.totalPoints}</p>
+                  <p className="text-xs text-gray-500 font-semibold">
+                    {selectedDepartment === 'all' ? 'Combined Points' : 'Department Points'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Filters Bar - Sticky */}
+        <section className="bg-white border-b border-gray-200 shadow-sm sticky top-16 z-40">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Search */}
+              <div className="relative flex-1">
+                <input 
+                  type="text" 
+                  placeholder={selectedDepartment === 'all' ? "Search departments..." : "Search users..."} 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-gray-50 text-gray-900 placeholder-gray-400 border-2 border-gray-200 rounded-lg px-4 py-2.5 pl-10 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" 
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              </div>
+
+              {/* Department Filter */}
               <div className="w-full md:w-80">
                 <select
                   value={selectedDepartment}
                   onChange={(e) => setSelectedDepartment(e.target.value)}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent font-medium"
+                  className="w-full bg-gray-50 text-gray-900 border-2 border-gray-200 rounded-lg px-4 py-2.5 font-semibold focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
                   {departmentOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -314,108 +475,100 @@ const LeaderboardPage = ({ onPageChange }) => {
           </div>
         </section>
 
-        {/* Stats Bar */}
-        <section className="container mx-auto px-4 mb-12 grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="bg-white p-4 rounded-2xl shadow-md border text-center">
-            <Users className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-            <p className="text-2xl font-bold">{stats.totalUsers}</p>
-            <p className="text-sm text-gray-500">
-              {selectedDepartment === 'all' ? 'Total Students' : 'Department Students'}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-2xl shadow-md border text-center">
-            <Swords className="w-8 h-8 text-yellow-500 mx-auto mb-2" />
-            <p className="text-2xl font-bold">{stats.totalQuests}</p>
-            <p className="text-sm text-gray-500">
-              {selectedDepartment === 'all' ? 'All Quests' : 'Quests Completed'}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-2xl shadow-md border text-center">
-            <Users2 className="w-8 h-8 text-purple-500 mx-auto mb-2" />
-            <p className="text-2xl font-bold">{selectedDepartment === 'all' ? departments.length : stats.totalUsers}</p>
-            <p className="text-sm text-gray-500">
-              {selectedDepartment === 'all' ? 'Departments' : 'Active Students'}
-            </p>
-          </div>
-          <div className="bg-white p-4 rounded-2xl shadow-md border text-center">
-            <Leaf className="w-8 h-8 text-green-500 mx-auto mb-2" />
-            <p className="text-2xl font-bold">{stats.totalPoints}</p>
-            <p className="text-sm text-gray-500">
-              {selectedDepartment === 'all' ? 'Combined Points' : 'Department Points'}
-            </p>
-          </div>
-        </section>
-
         {/* Leaderboard Section */}
-        <section id="leaderboard-section" className="container mx-auto px-4">
-
-          {/* Top Champions */}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold">
-              🏆 {selectedDepartment === 'all' ? 'Department Rankings' : 'Top Environmental Champions'} 🏆
-            </h2>
-            {selectedDepartment !== 'all' && (
-              <p className="text-lg text-gray-600 mt-2">
-                {departmentOptions.find(d => d.value === selectedDepartment)?.label}
-              </p>
-            )}
-            {departmentData && (
-              <div className="mt-4 p-4 bg-green-50 rounded-xl border-2 border-green-200">
-                <p className="text-lg font-bold text-green-800">
-                  Department Total: {departmentData.totalPoints.toLocaleString()} points
-                </p>
-                <p className="text-sm text-green-600">
-                  {departmentData.totalUsers} students contributing
-                </p>
-              </div>
-            )}
-          </div>
+        <section id="leaderboard-section" className="container mx-auto px-6 py-8">
 
           {selectedDepartment === 'all' ? (
             // Department leaderboard
-            <div className="bg-white p-6 rounded-2xl shadow-xl border">
-              <h3 className="text-2xl font-bold mb-6">Department Rankings</h3>
-              {departments.map((department, index) => (
-                <DepartmentRow
-                  key={department.department}
-                  department={department}
-                  rank={department.rank}
-                  onPageChange={onPageChange}
-                />
-              ))}
+            <div className="space-y-6">
+              <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Department Rankings</h2>
+                  <p className="text-gray-600">Click on any department to view their top environmental champions</p>
+                </div>
+                {searchFilteredDepartments.length > 0 ? (
+                  <div className="space-y-4">
+                    {searchFilteredDepartments.map((department, index) => (
+                      <DepartmentRow
+                        key={department.department}
+                        department={department}
+                        rank={department.rank}
+                        onPageChange={onPageChange}
+                        onDepartmentSelect={setSelectedDepartment}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Sprout className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-bold text-gray-600 mb-2">No Departments Found</h3>
+                    <p className="text-gray-500">No departments match your search criteria.</p>
+                  </div>
+                )}
+              </div>
             </div>
           ) : (
             // Individual department leaderboard (now only showing regular users in that department)
-            sortedUsers.length > 0 ? (
+            searchFilteredUsers.length > 0 ? (
               <>
+                {/* Department Header */}
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold text-gray-900">Top Environmental Champions</h2>
+                  <p className="text-lg text-gray-600 mt-2">
+                    {departmentOptions.find(d => d.value === selectedDepartment)?.label}
+                  </p>
+                  {departmentData && (
+                    <div className="mt-4 p-4 bg-green-50 rounded-xl border-2 border-green-200">
+                      <p className="text-lg font-bold text-green-800">
+                        Department Total: {departmentData.totalPoints.toLocaleString()} points
+                      </p>
+                      <p className="text-sm text-green-600">
+                        {departmentData.totalUsers} students contributing
+                      </p>
+                    </div>
+                  )}
+                </div>
+
                 {/* Show top 3 champions if we have 3 or more users */}
-                {sortedUsers.length >= 3 && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                    <TopChampionCard user={sortedUsers[1]} rank={2} onPageChange={onPageChange} />
-                    <TopChampionCard user={sortedUsers[0]} rank={1} onPageChange={onPageChange} />
-                    <TopChampionCard user={sortedUsers[2]} rank={3} onPageChange={onPageChange} />
+                {searchFilteredUsers.length >= 3 && (
+                  <div className="mb-12">
+                    <h3 className="text-2xl font-bold text-center mb-8 text-gray-900">Top Champions</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                      {/* 2nd Place */}
+                      <div className="order-2 md:order-1">
+                        <TopChampionCard key={searchFilteredUsers[1].id} user={searchFilteredUsers[1]} rank={searchFilteredUsers[1].originalRank} onPageChange={onPageChange} />
+                      </div>
+                      {/* 1st Place - Center and elevated */}
+                      <div className="order-1 md:order-2 transform md:scale-110 md:-mt-4">
+                        <TopChampionCard key={searchFilteredUsers[0].id} user={searchFilteredUsers[0]} rank={searchFilteredUsers[0].originalRank} onPageChange={onPageChange} />
+                      </div>
+                      {/* 3rd Place */}
+                      <div className="order-3 md:order-3">
+                        <TopChampionCard key={searchFilteredUsers[2].id} user={searchFilteredUsers[2]} rank={searchFilteredUsers[2].originalRank} onPageChange={onPageChange} />
+                      </div>
+                    </div>
                   </div>
                 )}
 
                 {/* Show all users in a simple list format */}
-                <div className="bg-white p-6 rounded-2xl shadow-xl border">
-                  <h3 className="text-2xl font-bold mb-4">
-                    {sortedUsers.length >= 3 ? 'Complete User Rankings' : 'User Rankings'}
+                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+                  <h3 className="text-2xl font-bold mb-4 text-gray-900">
+                    {searchFilteredUsers.length >= 3 ? 'Complete User Rankings' : 'User Rankings'}
                   </h3>
-                  {sortedUsers.length >= 3 ? (
+                  {searchFilteredUsers.length >= 3 ? (
                     // If we have 3+ users, show remaining users (4th place and below)
                     remainingUsers.map((user, index) => (
-                      <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={index + 4} onPageChange={onPageChange} />
+                      <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={user.originalRank} onPageChange={onPageChange} />
                     ))
                   ) : (
-                    // If we have fewer than 3 users, show all users starting from rank 1
-                    sortedUsers.map((user, index) => (
-                      <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={index + 1} onPageChange={onPageChange} />
+                    // If we have fewer than 3 users, show all users with their original ranks
+                    searchFilteredUsers.map((user, index) => (
+                      <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={user.originalRank} onPageChange={onPageChange} />
                     ))
                   )}
 
                   {/* Show More Button */}
-                  {sortedUsers.length >= 3 && displayCount < sortedUsers.length && (
+                  {searchFilteredUsers.length >= 3 && displayCount < searchFilteredUsers.length && (
                     <div className="text-center mt-6">
                       <button
                         onClick={handleShowMore}
@@ -428,7 +581,7 @@ const LeaderboardPage = ({ onPageChange }) => {
                 </div>
               </>
             ) : (
-              <div className="bg-white p-12 rounded-2xl shadow-xl border text-center">
+              <div className="bg-white p-12 rounded-2xl shadow-lg border border-gray-200 text-center">
                 <Sprout className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-gray-600 mb-2">No Users Found</h3>
                 <p className="text-gray-500">There are no users registered in this department yet.</p>
@@ -438,21 +591,22 @@ const LeaderboardPage = ({ onPageChange }) => {
         </section>
 
         {/* CTA */}
-        <section className="container mx-auto px-4 mt-24">
-          <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 text-center flex flex-col items-center">
-            {/* FIXED: Replaced text-primary-green with text-green-500 */}
-            <Rocket className="w-12 h-12 text-green-500 mb-4" />
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Climb the Eco-Hero Rankings!</h2>
-            <p className="text-gray-600 max-w-lg mx-auto mb-6">Complete quests, attend events, and make environmental impact to earn points and climb the leaderboard. Every action counts towards a sustainable future!</p>
-            <div className="flex gap-4">
-              {/* --- CHANGE: Made this button functional --- */}
-              <button
-                onClick={() => onPageChange('quests')}
-                className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
-              >
-                Start New Quest
-              </button>
-            </div>
+        <section className="py-32 px-6 bg-gray-100 text-center">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-5xl md:text-6xl font-black mb-8 leading-tight text-gray-900">
+              Climb the Eco-Hero Rankings!
+            </h2>
+            <p className="text-xl text-gray-600 mb-10">
+              Complete quests, attend events, and make environmental impact to earn points and climb the leaderboard. Every action counts towards a sustainable future!
+            </p>
+            
+            <button 
+              onClick={() => onPageChange('quests')}
+              className="bg-green-600 hover:bg-green-700 text-white font-black px-12 py-5 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all inline-flex items-center gap-3 text-lg"
+            >
+              <Rocket className="w-6 h-6" />
+              Start New Quest
+            </button>
           </div>
         </section>
       </main>

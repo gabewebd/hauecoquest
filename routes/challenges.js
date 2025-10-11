@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Challenge = require('../models/Challenge');
+const ChallengeSubmission = require('../models/ChallengeSubmission');
 const User = require('../models/User');
 const UserBadge = require('../models/UserBadge');
 const Badge = require('../models/Badge');
@@ -9,9 +10,10 @@ const roleCheck = require('../middleware/roleCheck');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 
-// Create client/img/challenges directory if it doesn't exist
-const uploadDir = 'client/img/challenges';
+// Create uploads directory if it doesn't exist
+const uploadDir = 'uploads';
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -165,7 +167,7 @@ router.post('/:id/join', [auth, upload.single('photo'), handleUploadError], asyn
         challenge.participants.push({
             user: req.user.id,
             contribution: contributionAmount,
-            photo_url: `/img/challenges/${req.file.filename}`,
+            photo_url: `/uploads/${req.file.filename}`,
             status: 'pending'
         });
 
@@ -347,31 +349,153 @@ router.post('/submit', [auth, upload.single('photo'), handleUploadError], async 
             return res.status(404).json({ msg: 'Challenge not found' });
         }
 
-        // Check if user already participated
-        const alreadyParticipated = challenge.participants.some(
-            p => p.user.toString() === req.user.id
-        );
+        // Check if user already submitted to this challenge
+        const existingSubmission = await ChallengeSubmission.findOne({
+            challenge_id: challengeId,
+            user_id: req.user.id
+        });
 
-        if (alreadyParticipated) {
+        if (existingSubmission) {
             return res.status(400).json({ msg: 'You have already submitted to this challenge' });
         }
 
-        // Add user to participants
-        challenge.participants.push({
-            user: req.user.id,
-            contribution: 1,
-            photo_url: `/img/challenges/${req.file.filename}`,
+        // Upload to Cloudinary
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: 'challenge-submissions',
+            resource_type: 'auto'
+        });
+
+        // Create challenge submission
+        const submission = new ChallengeSubmission({
+            challenge_id: challengeId,
+            user_id: req.user.id,
+            reflection_text: reflection,
+            photo_url: result.secure_url,
             status: 'pending'
         });
 
-        await challenge.save();
+        await submission.save();
+
+        // Clean up local file
+        fs.unlinkSync(req.file.path);
 
         res.json({ 
             msg: 'Challenge submission sent for approval!', 
-            challenge 
+            submission 
         });
     } catch (err) {
         console.error('Error submitting challenge:', err.message);
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+// @route   GET /api/challenges/submissions/all
+// @desc    Get all challenge submissions (Admin only)
+// @access  Private
+router.get('/submissions/all', [auth, roleCheck('admin')], async (req, res) => {
+    try {
+        const submissions = await ChallengeSubmission.find()
+            .populate('user_id', 'username email avatar_theme role')
+            .populate('challenge_id', 'title points')
+            .sort({ submitted_at: -1 });
+        
+        res.json(submissions);
+    } catch (err) {
+        console.error('Error fetching challenge submissions:', err.message);
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+// @route   GET /api/challenges/submissions/user/:userId
+// @desc    Get challenge submissions for a specific user
+// @access  Private
+router.get('/submissions/user/:userId', auth, async (req, res) => {
+    try {
+        const submissions = await ChallengeSubmission.find({ user_id: req.params.userId })
+            .populate('challenge_id', 'title points category')
+            .sort({ submitted_at: -1 });
+        
+        res.json(submissions);
+    } catch (err) {
+        console.error('Error fetching user challenge submissions:', err.message);
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+// @route   GET /api/challenges/:id/submissions
+// @desc    Get all submissions for a challenge (Admin only)
+// @access  Private
+router.get('/:id/submissions', [auth, roleCheck('admin')], async (req, res) => {
+    try {
+        const submissions = await ChallengeSubmission.find({ challenge_id: req.params.id })
+            .populate('user_id', 'username email avatar_theme')
+            .sort({ submitted_at: -1 });
+        
+        res.json(submissions);
+    } catch (err) {
+        console.error('Error fetching challenge submissions:', err.message);
+        res.status(500).json({ msg: 'Server error' });
+    }
+});
+
+// @route   PUT /api/challenges/submissions/:id/review
+// @desc    Approve or reject a challenge submission (Admin only)
+// @access  Private
+router.put('/submissions/:id/review', [auth, roleCheck('admin')], async (req, res) => {
+    try {
+        const { status, rejection_reason } = req.body;
+        
+        if (!['approved', 'rejected'].includes(status)) {
+            return res.status(400).json({ msg: 'Invalid status' });
+        }
+
+        const submission = await ChallengeSubmission.findById(req.params.id);
+        if (!submission) {
+            return res.status(404).json({ msg: 'Submission not found' });
+        }
+
+        submission.status = status;
+        submission.reviewed_by = req.user.id;
+        submission.reviewed_at = new Date();
+        
+        if (status === 'rejected' && rejection_reason) {
+            submission.rejection_reason = rejection_reason;
+        }
+
+        await submission.save();
+
+        // If approved, award badge and update user points
+        if (status === 'approved') {
+            const user = await User.findById(submission.user_id);
+            if (user) {
+                user.eco_score += 50; // Award points for challenge completion
+                await user.save();
+
+                // Award "Tree Master" badge
+                const treeMasterBadge = await Badge.findOne({ name: 'Tree Master' });
+                if (treeMasterBadge) {
+                    const existingUserBadge = await UserBadge.findOne({
+                        user_id: submission.user_id,
+                        badge_id: treeMasterBadge._id
+                    });
+
+                    if (!existingUserBadge) {
+                        const userBadge = new UserBadge({
+                            user_id: submission.user_id,
+                            badge_id: treeMasterBadge._id
+                        });
+                        await userBadge.save();
+                    }
+                }
+            }
+        }
+
+        res.json({ 
+            msg: `Submission ${status}`, 
+            submission 
+        });
+    } catch (err) {
+        console.error('Error reviewing submission:', err.message);
         res.status(500).json({ msg: 'Server error' });
     }
 });

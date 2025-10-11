@@ -26,20 +26,31 @@ export default function HomePage({ onPageChange }) {
       const questsData = await questAPI.getAllQuests();
       console.log('Quests data:', questsData);
       
-      // Fetch leaderboard data
-      const leaderboardData = await userAPI.getLeaderboard();
+      // Fetch leaderboard data for all departments
+      const leaderboardData = await userAPI.getLeaderboard('all');
       console.log('Leaderboard data:', leaderboardData);
       
-      // Calculate total points from all users
-      const totalPoints = leaderboardData.reduce((sum, user) => {
-        return sum + (user.eco_score || user.points || 0);
-      }, 0);
+      // Handle department leaderboard structure
+      let totalUsers = 0;
+      let totalPoints = 0;
+      
+      if (leaderboardData && leaderboardData.leaderboard) {
+        // Department leaderboard structure
+        totalUsers = leaderboardData.leaderboard.reduce((sum, dept) => sum + (dept.userCount || 0), 0);
+        totalPoints = leaderboardData.leaderboard.reduce((sum, dept) => sum + (dept.totalPoints || 0), 0);
+      } else if (Array.isArray(leaderboardData)) {
+        // Individual user leaderboard structure
+        totalUsers = leaderboardData.length;
+        totalPoints = leaderboardData.reduce((sum, user) => {
+          return sum + (user.eco_score || user.points || 0);
+        }, 0);
+      }
       
       // Update stats with actual data
       setStats({
         totalQuests: questsData ? questsData.length : 0,
-        totalUsers: leaderboardData ? leaderboardData.length : 0,
-        totalPoints: totalPoints || 0
+        totalUsers: totalUsers,
+        totalPoints: totalPoints
       });
 
 
@@ -252,118 +263,6 @@ export default function HomePage({ onPageChange }) {
         </div>
       </section>
 
-      {challenge && (
-        <section className="py-24 px-6 bg-gray-50">
-          <div className="max-w-6xl mx-auto">
-            <div className="bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 rounded-3xl p-12 md:p-16 shadow-2xl relative overflow-hidden">
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-              </div>
-
-              <div className="relative z-10">
-                <div className="text-center mb-12">
-                  <div className="w-24 h-24 bg-white rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg">
-                    <div className="text-center">
-                      <span className="text-2xl font-black text-green-600">IMG</span>
-                    </div>
-                  </div>
-                  <h2 className="text-4xl md:text-5xl font-black mb-4 text-white">
-                    {challenge.title}
-                  </h2>
-                  <p className="text-lg md:text-xl max-w-3xl mx-auto text-white">
-                    {challenge.description}
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-3xl p-8 md:p-10 shadow-xl mb-8">
-                  <div className="mb-8">
-                    <div className="flex justify-between text-sm font-bold mb-3 text-gray-700">
-                      <span>Progress</span>
-                      <span className="text-green-600">{challenge.currentProgress} / {challenge.goal} Trees</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden">
-                      <div 
-                        className="bg-gradient-to-r from-green-500 to-emerald-600 h-6 rounded-full transition-all duration-500 flex items-center justify-end pr-3"
-                        style={{ width: `${Math.min((challenge.currentProgress / challenge.goal) * 100, 100)}%` }}
-                      >
-                        <span className="text-white text-xs font-black">
-                          {Math.round((challenge.currentProgress / challenge.goal) * 100)}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="text-center p-6 bg-green-50 rounded-2xl">
-                      <div className="text-4xl md:text-5xl font-black text-green-600 mb-2">
-                        {challenge.participants?.length || 0}
-                      </div>
-                      <div className="text-sm font-semibold text-gray-700">Eco-Warriors Joined</div>
-                    </div>
-                    <div className="text-center p-6 bg-emerald-50 rounded-2xl">
-                      <div className="text-4xl md:text-5xl font-black text-emerald-600 mb-2">
-                        {challenge.goal - challenge.currentProgress}
-                      </div>
-                      <div className="text-sm font-semibold text-gray-700">Trees Remaining</div>
-                    </div>
-                    <div className="text-center p-6 bg-amber-50 rounded-2xl">
-                      <div className="w-16 h-16 bg-amber-100 rounded-2xl mx-auto mb-2 flex items-center justify-center">
-                        <Trophy className="w-8 h-8 text-amber-600" />
-                      </div>
-                      <div className="text-sm font-semibold text-gray-700">Exclusive Badge</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  {user ? (
-                    user.role === 'user' ? (
-                      <>
-                        <button 
-                          onClick={() => onPageChange('community')}
-                          className="bg-white text-green-600 font-black px-10 py-5 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all flex items-center justify-center gap-2"
-                        >
-                          <Rocket className="w-5 h-5" />
-                          Join Challenge Now
-                        </button>
-                        <button 
-                          onClick={() => onPageChange('community')}
-                          className="text-white font-black px-10 py-5 rounded-full hover:bg-white hover:bg-opacity-10 transition-all border-2 border-white border-opacity-50"
-                        >
-                          View Details
-                        </button>
-                      </>
-                    ) : (
-                      <button 
-                        onClick={() => onPageChange('community')}
-                        className="bg-white text-green-600 font-black px-10 py-5 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
-                      >
-                        View Progress
-                      </button>
-                    )
-                  ) : (
-                    <>
-                      <button 
-                        onClick={() => onPageChange('signup')}
-                        className="bg-white text-green-600 font-black px-10 py-5 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all"
-                      >
-                        Sign Up to Join
-                      </button>
-                      <button 
-                        onClick={() => onPageChange('login')}
-                        className="text-white font-black px-10 py-5 rounded-full hover:bg-white hover:text-green-600 hover:bg-opacity-100 transition-all border-2 border-white border-opacity-50"
-                      >
-                        Login
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       <section className="py-32 px-6 bg-gray-100 text-center">
         <div className="max-w-4xl mx-auto">

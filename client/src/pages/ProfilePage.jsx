@@ -26,13 +26,14 @@ const ProfilePage = ({ onPageChange, userId }) => {
   const [userCreatedQuests, setUserCreatedQuests] = useState([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editTab, setEditTab] = useState("avatar");
-  const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar_theme || "Girl Avatar 1");
-  const [headerTheme, setHeaderTheme] = useState(user?.header_theme || "orange");
+  const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar_theme || "Leaf");
+  const [headerTheme, setHeaderTheme] = useState(user?.header_theme || "leaf");
   const [editedUsername, setEditedUsername] = useState(user?.username || "");
   
   // Data states
   const [userActivity, setUserActivity] = useState([]);
   const [userQuests, setUserQuests] = useState([]);
+  const [userChallengeSubmissions, setUserChallengeSubmissions] = useState([]);
   const [userAchievements, setUserAchievements] = useState([]);
   const [userPhotos, setUserPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -46,8 +47,8 @@ const ProfilePage = ({ onPageChange, userId }) => {
   // Update local state when user context changes
   useEffect(() => {
     if (user) {
-      setSelectedAvatar(user.avatar_theme || "Girl Avatar 1");
-      setHeaderTheme(user.header_theme || "orange");
+      setSelectedAvatar(user.avatar_theme || "Leaf");
+      setHeaderTheme(user.header_theme || "leaf");
       setEditedUsername(user.username || "");
     }
   }, [user]);
@@ -132,7 +133,20 @@ const ProfilePage = ({ onPageChange, userId }) => {
       const photosRes = await fetch(`/api/users/${profileUserId}/photos`);
       if (photosRes.ok) {
         const photosData = await photosRes.json();
-        setUserPhotos(photosData);
+        console.log('Fetched profile user photos:', photosData);
+        setUserPhotos(photosData || []);
+      } else {
+        console.error('Failed to fetch photos:', photosRes.status, photosRes.statusText);
+        setUserPhotos([]);
+      }
+
+      // Fetch profile user's challenge submissions
+      if (displayUser?.role === 'user') {
+        const challengeSubmissionsRes = await fetch(`/api/challenges/submissions/user/${profileUserId}`);
+        if (challengeSubmissionsRes.ok) {
+          const challengeSubmissionsData = await challengeSubmissionsRes.json();
+          setUserChallengeSubmissions(challengeSubmissionsData || []);
+        }
       }
 
     } catch (error) {
@@ -178,11 +192,17 @@ const ProfilePage = ({ onPageChange, userId }) => {
             setUserAchievements(badgesData);
 
             // Fetch user's photo history
-            const photosRes = await fetch('/api/users/photos', {
+            const photosRes = await fetch(`/api/users/${user._id}/photos`, {
                 headers: { 'x-auth-token': token }
             });
-            const photosData = await photosRes.json();
-            setUserPhotos(photosData);
+            if (photosRes.ok) {
+                const photosData = await photosRes.json();
+                console.log('Fetched user photos:', photosData);
+                setUserPhotos(photosData || []);
+            } else {
+                console.error('Failed to fetch user photos:', photosRes.status, photosRes.statusText);
+                setUserPhotos([]);
+            }
 
         } catch (error) {
             console.error('Error fetching user data:', error);
@@ -212,16 +232,24 @@ const ProfilePage = ({ onPageChange, userId }) => {
 
   // Avatars with lucide-react icons and colors
   const avatars = [
-    { name: "Girl Avatar 1", gender: "Female", color: "text-pink-500", bg: "bg-pink-100" },
-    { name: "Girl Avatar 2", gender: "Female", color: "text-pink-400", bg: "bg-pink-50" },
-    { name: "Boy Avatar 1", gender: "Male", color: "text-blue-500", bg: "bg-blue-100" },
-    { name: "Boy Avatar 2", gender: "Male", color: "text-blue-400", bg: "bg-blue-50" },
+    { name: "Leaf", gender: "Nature", color: "text-green-500", bg: "bg-green-100", image: "/assets/avatars-headers/leaf-avatar.png" },
+    { name: "Sun", gender: "Energy", color: "text-yellow-500", bg: "bg-yellow-100", image: "/assets/avatars-headers/sun-avatar.png" },
+    { name: "Tree", gender: "Growth", color: "text-green-600", bg: "bg-green-50", image: "/assets/avatars-headers/tree-avatar.png" },
+    { name: "Water", gender: "Life", color: "text-blue-500", bg: "bg-blue-100", image: "/assets/avatars-headers/water-avatar.png" },
   ];
 
   const headerThemes = {
-    orange: "from-orange-400 to-pink-500",
-    green: "from-green-400 to-emerald-600",
-    blue: "from-blue-400 to-indigo-500",
+    leaf: "from-orange-400 to-pink-500",
+    sun: "from-green-400 to-emerald-600",
+    tree: "from-blue-400 to-indigo-500",
+    water: "from-cyan-400 to-blue-500",
+  };
+
+  const headerImages = {
+    leaf: "/assets/avatars-headers/leaf-header.png",
+    sun: "/assets/avatars-headers/sun-header.png",
+    tree: "/assets/avatars-headers/tree-header.png",
+    water: "/assets/avatars-headers/water-header.png",
   };
 
   const handleSaveChanges = async () => {
@@ -239,8 +267,8 @@ const ProfilePage = ({ onPageChange, userId }) => {
   };
 
   const handleCancelEdit = () => {
-    setSelectedAvatar(user?.avatar_theme || "Girl Avatar 1");
-    setHeaderTheme(user?.header_theme || "orange");
+    setSelectedAvatar(user?.avatar_theme || "Leaf");
+    setHeaderTheme(user?.header_theme || "leaf");
     setEditedUsername(user?.username || "");
     setIsEditOpen(false);
   };
@@ -257,7 +285,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
     }
   };
 
-  const currentAvatar = avatars.find((a) => a.name === (displayUser?.avatar_theme || selectedAvatar));
+  const currentAvatar = avatars.find((a) => a.name === (displayUser?.avatar_theme || selectedAvatar)) || avatars[0];
   const level = Math.floor((displayUser?.points || 0) / 100) + 1;
 
   // Show loading if we don't have the display user data yet
@@ -292,14 +320,37 @@ const ProfilePage = ({ onPageChange, userId }) => {
   return (
     <div className="pt-20 flex flex-col min-h-screen">
       {/* Banner */}
-      <div className={`h-48 bg-gradient-to-r ${headerThemes[displayUser?.header_theme || headerTheme]} relative`}>
+      <div className="relative flex justify-center">
+        <div 
+          className="bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(${headerImages[displayUser?.header_theme || headerTheme] || headerImages.orange})`,
+            height: '400px',
+            width: '1200px', // Fixed width to match header image aspect ratio
+            maxWidth: '100%' // Ensure it doesn't exceed screen width
+          }}
+        >
+        </div>
         {/* Profile Card */}
         <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-20 w-full max-w-4xl px-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 flex items-center relative">
             {/* Avatar */}
             <div className="relative">
-              <div className={`w-24 h-24 rounded-full ${currentAvatar?.bg} overflow-hidden flex justify-center items-center`}>
-                <UserCircle className={`w-20 h-20 ${currentAvatar?.color}`} />
+              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                {currentAvatar?.image ? (
+                  <img 
+                    src={currentAvatar.image} 
+                    alt={currentAvatar.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className={`w-full h-full ${currentAvatar?.bg} flex justify-center items-center`} style={{display: currentAvatar?.image ? 'none' : 'flex'}}>
+                  <UserCircle className={`w-20 h-20 ${currentAvatar?.color}`} />
+                </div>
               </div>
               <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                 {level}
@@ -342,8 +393,8 @@ const ProfilePage = ({ onPageChange, userId }) => {
               <div className="flex gap-2 absolute top-4 right-4">
                 <button
                   onClick={() => { 
-                    setSelectedAvatar(displayUser?.avatar_theme || "Girl Avatar 1");
-                    setHeaderTheme(displayUser?.header_theme || "orange");
+                    setSelectedAvatar(displayUser?.avatar_theme || "Leaf");
+                    setHeaderTheme(displayUser?.header_theme || "leaf");
                     setEditedUsername(displayUser?.username || "");
                     setEditTab("profile"); 
                     setIsEditOpen(true); 
@@ -360,35 +411,37 @@ const ProfilePage = ({ onPageChange, userId }) => {
 
       {/* Tabs Section */}
       <div className="mt-28 max-w-4xl mx-auto px-4 flex-grow">
-        <div className="flex justify-center gap-8 border-b pb-2">
-          {displayUser?.role === 'user' ? 
-            ["Activity", "Quests", "Photo History", "Achievements"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 ${
-                  activeTab === tab
-                    ? "border-b-2 border-green-500 text-green-600 font-semibold"
-                    : "text-gray-600 hover:text-gray-800"
-                }`}
-              >
-                {tab}
-              </button>
-            )) :
-            ["Activity", "Created Quests", "Photo History", "Achievements"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 ${
-                  activeTab === tab
-                    ? "border-b-2 border-green-500 text-green-600 font-semibold"
-                    : "text-gray-600 hover:text-gray-800"
-                }`}
-              >
-                {tab}
-              </button>
-            ))
-          }
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-6">
+          <div className="flex justify-center gap-3">
+            {displayUser?.role === 'user' ? 
+              ["Activity", "Quests", "Photo History", "Achievements"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all duration-200 text-sm ${
+                    activeTab === tab
+                      ? "bg-green-500 text-white shadow-md"
+                      : "bg-white text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  {tab}
+                </button>
+              )) :
+              ["Activity", "Created Quests", "Photo History", "Achievements"].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all duration-200 text-sm ${
+                    activeTab === tab
+                      ? "bg-green-500 text-white shadow-md"
+                      : "bg-white text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))
+            }
+          </div>
         </div>
 
         {/* Content */}
@@ -400,14 +453,17 @@ const ProfilePage = ({ onPageChange, userId }) => {
           ) : (
             <>
               {activeTab === "Activity" && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {userActivity.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                      <p>No activity yet</p>
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+                      <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                        📝
+                      </div>
+                      <p className="text-gray-500">No activity yet. Start posting to build your activity feed!</p>
                     </div>
                   ) : (
                     userActivity.map((post, index) => (
-                      <div key={index} className="bg-white p-6 rounded-xl shadow-md border">
+                      <div key={index} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                         <h3 className="font-bold text-lg mb-2">{post.title}</h3>
                         <p className="text-gray-600 mb-3">{post.content}</p>
                         <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -422,41 +478,48 @@ const ProfilePage = ({ onPageChange, userId }) => {
               )}
 
               {activeTab === "Quests" && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {userQuests.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                      <p>No quest submissions yet</p>
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+                      <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                        🎯
+                      </div>
+                      <p className="text-gray-500">No quest submissions yet. Start completing quests to build your quest history!</p>
                     </div>
                   ) : (
-                    userQuests.map((quest, index) => (
-                      <div key={index} className="bg-white p-6 rounded-xl shadow-md border">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-bold text-lg">{quest.quest_id?.title || 'Quest Submission'}</h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            quest.status === 'approved' ? 'bg-green-100 text-green-700' :
-                            quest.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-red-100 text-red-700'
-                          }`}>
-                            {quest.status}
-                          </span>
-                        </div>
-                        <p className="text-gray-600 mb-3">{quest.quest_id?.description || quest.reflection_text || 'Quest description'}</p>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="grid grid-cols-1 gap-4">
+                      {userQuests.map((quest, index) => (
+                        <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-bold text-lg text-gray-900 truncate">{quest.quest_id?.title || 'Quest Submission'}</h3>
+                              <p className="text-gray-600 text-sm mt-1 line-clamp-2">{quest.quest_id?.description || quest.reflection_text || 'Quest description'}</p>
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-3 flex-shrink-0 ${
+                              quest.status === 'approved' ? 'bg-green-100 text-green-700' :
+                              quest.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {quest.status}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-3">
                             <span>Submitted: {new Date(quest.submitted_at).toLocaleDateString()}</span>
                             <span>{quest.quest_id?.points || 0} points</span>
                             <span>Category: {quest.quest_id?.category || 'General'}</span>
                             <span>Difficulty: {quest.quest_id?.difficulty || 'Medium'}</span>
                           </div>
-                          <button 
-                            onClick={() => onPageChange('quest-details', quest.quest_id?._id)}
-                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition text-sm font-semibold"
-                          >
-                            View Details
-                          </button>
+                          <div className="flex justify-end">
+                            <button 
+                              onClick={() => onPageChange('quest-details', quest.quest_id?._id)}
+                              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition text-sm font-semibold"
+                            >
+                              View Details
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      ))}
+                    </div>
                   )}
                 </div>
               )}
@@ -500,22 +563,23 @@ const ProfilePage = ({ onPageChange, userId }) => {
               )}
 
               {activeTab === "Photo History" && (
-                <div className="space-y-4">
-                  {userPhotos.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
+                <div className="space-y-6">
+                  {userPhotos.length === 0 && userChallengeSubmissions.length === 0 ? (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
                       <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                         📷
                       </div>
-                      <p>No photos uploaded yet. Complete quests to build your photo history!</p>
+                      <p className="text-gray-500">No photos uploaded yet. Complete quests and challenges to build your photo history!</p>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {/* Quest Submissions */}
                       {userPhotos.map((photo, index) => (
-                        <div key={index} className="bg-white rounded-xl shadow-md border overflow-hidden">
+                        <div key={`quest-${index}`} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                           <div className="aspect-square bg-gray-100 flex items-center justify-center">
-                            {photo.photo_url ? (
+                            {photo.photo_url || photo.image_url ? (
                               <img 
-                                src={`http://localhost:5000/${photo.photo_url.replace(/\\/g, '/')}`}
+                                src={photo.photo_url || photo.image_url}
                                 alt={`Quest: ${photo.quest_title}`}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
@@ -529,7 +593,10 @@ const ProfilePage = ({ onPageChange, userId }) => {
                             </div>
                           </div>
                           <div className="p-4">
-                            <h3 className="font-bold text-sm mb-1">{photo.quest_title}</h3>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-bold text-sm">{photo.quest_title}</h3>
+                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Quest</span>
+                            </div>
                             <p className="text-xs text-gray-500 mb-2">{photo.quest_category}</p>
                             <div className="flex items-center justify-between">
                               <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -546,22 +613,63 @@ const ProfilePage = ({ onPageChange, userId }) => {
                           </div>
                         </div>
                       ))}
+                      
+                      {/* Challenge Submissions */}
+                      {userChallengeSubmissions.map((submission, index) => (
+                        <div key={`challenge-${index}`} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                          <div className="aspect-square bg-gray-100 flex items-center justify-center">
+                            {submission.photo_url ? (
+                              <img 
+                                src={submission.photo_url}
+                                alt={`Challenge: ${submission.challenge_id?.title}`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            <div className="w-full h-full flex items-center justify-center text-gray-400" style={{display: 'none'}}>
+                              📷 Photo not available
+                            </div>
+                          </div>
+                          <div className="p-4">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="font-bold text-sm">{submission.challenge_id?.title}</h3>
+                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">Challenge</span>
+                            </div>
+                            <p className="text-xs text-gray-500 mb-2">{submission.challenge_id?.category || 'Community Challenge'}</p>
+                            <div className="flex items-center justify-between">
+                              <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                submission.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-red-100 text-red-700'
+                              }`}>
+                                {submission.status}
+                              </span>
+                              <span className="text-xs text-gray-400">
+                                {new Date(submission.submitted_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
               )}
 
               {activeTab === "Achievements" && (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {userAchievements.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
                       <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <p>No achievements yet. Complete quests to earn badges!</p>
+                      <p className="text-gray-500">No achievements yet. Complete quests to earn badges!</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {userAchievements.map((userBadge, index) => (
-                        <div key={index} className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-xl shadow-md border border-yellow-200 text-center">
+                        <div key={index} className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-xl shadow-sm border border-yellow-200 text-center">
                           <div className="text-4xl mb-3">{userBadge.badge_id?.image_url || '🏆'}</div>
                           <h3 className="font-bold text-lg mb-2 text-yellow-800">{userBadge.badge_id?.name || 'Achievement'}</h3>
                           <p className="text-yellow-600 text-sm mb-2">{userBadge.badge_id?.description || 'Great job!'}</p>
@@ -582,39 +690,41 @@ const ProfilePage = ({ onPageChange, userId }) => {
       {/* Edit Modal */}
       {isEditOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-          <div className="bg-white rounded-2xl p-8 w-full max-w-2xl relative shadow-lg">
+          <div className="bg-white rounded-xl p-8 w-full max-w-2xl relative shadow-lg border border-gray-200">
             {/* Header Tabs */}
-            <div className="flex mb-6 border-b">
-              <button
-                onClick={() => setEditTab("profile")}
-                className={`flex-1 py-2 ${
-                  editTab === "profile"
-                    ? "border-b-2 border-green-500 font-semibold"
-                    : "text-gray-500"
-                }`}
-              >
-                Edit Profile
-              </button>
-              <button
-                onClick={() => setEditTab("avatar")}
-                className={`flex-1 py-2 ${
-                  editTab === "avatar"
-                    ? "border-b-2 border-green-500 font-semibold"
-                    : "text-gray-500"
-                }`}
-              >
-                Choose Avatar
-              </button>
-              <button
-                onClick={() => setEditTab("header")}
-                className={`flex-1 py-2 ${
-                  editTab === "header"
-                    ? "border-b-2 border-green-500 font-semibold"
-                    : "text-gray-500"
-                }`}
-              >
-                Header Theme
-              </button>
+            <div className="bg-gray-50 rounded-xl p-3 mb-6">
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setEditTab("profile")}
+                  className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all duration-200 text-sm ${
+                    editTab === "profile"
+                      ? "bg-green-500 text-white shadow-md"
+                      : "bg-white text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  Edit Profile
+                </button>
+                <button
+                  onClick={() => setEditTab("avatar")}
+                  className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all duration-200 text-sm ${
+                    editTab === "avatar"
+                      ? "bg-green-500 text-white shadow-md"
+                      : "bg-white text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  Choose Avatar
+                </button>
+                <button
+                  onClick={() => setEditTab("header")}
+                  className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all duration-200 text-sm ${
+                    editTab === "header"
+                      ? "bg-green-500 text-white shadow-md"
+                      : "bg-white text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  Header Theme
+                </button>
+              </div>
             </div>
 
             {/* Profile Tab */}
@@ -647,8 +757,21 @@ const ProfilePage = ({ onPageChange, userId }) => {
                         : "hover:bg-gray-50 border-gray-200"
                     }`}
                   >
-                    <div className={`flex justify-center ${avatar.bg} rounded-full w-20 h-20 mx-auto items-center`}>
-                      <UserCircle className={`w-16 h-16 ${avatar.color}`} />
+                    <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-gray-200">
+                      {avatar.image ? (
+                        <img 
+                          src={avatar.image} 
+                          alt={avatar.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div className={`w-full h-full ${avatar.bg} flex justify-center items-center`} style={{display: avatar.image ? 'none' : 'flex'}}>
+                        <UserCircle className={`w-16 h-16 ${avatar.color}`} />
+                      </div>
                     </div>
                     <h3 className="mt-2 font-medium">{avatar.name}</h3>
                     <p className="text-xs text-gray-500">
@@ -661,22 +784,34 @@ const ProfilePage = ({ onPageChange, userId }) => {
 
             {/* Header Theme Tab */}
             {editTab === "header" && (
-              <div className="grid grid-cols-3 gap-6">
-                {Object.keys(headerThemes).map((theme) => (
+              <div className="grid grid-cols-2 gap-6">
+                {Object.keys(headerImages).map((theme) => (
                   <div
                     key={theme}
                     onClick={() => setHeaderTheme(theme)}
-                    className={`h-20 rounded-xl cursor-pointer border-4 transition ${
+                    className={`h-40 rounded-xl cursor-pointer border-4 transition overflow-hidden relative ${
                       headerTheme === theme
                         ? "border-green-500"
                         : "border-gray-200"
-                    } bg-gradient-to-r ${headerThemes[theme]} flex items-center justify-center`}
+                    }`}
                   >
-                    {headerTheme === theme && (
-                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                        <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                      </div>
-                    )}
+                    <div 
+                      className="w-full h-full bg-cover bg-center bg-no-repeat"
+                      style={{
+                        backgroundImage: `url(${headerImages[theme]})`
+                      }}
+                    >
+                      {headerTheme === theme && (
+                        <div className="w-full h-full bg-black bg-opacity-20 flex items-center justify-center">
+                          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                      {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -686,13 +821,13 @@ const ProfilePage = ({ onPageChange, userId }) => {
             <div className="flex justify-between mt-6">
               <button
                 onClick={handleCancelEdit}
-                className="px-6 py-2 rounded-lg border text-gray-600 hover:bg-gray-100"
+                className="px-6 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveChanges}
-                className="px-6 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600"
+                className="px-6 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition"
               >
                 Done
               </button>

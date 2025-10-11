@@ -220,10 +220,12 @@ router.get('/:userId/photos', async (req, res) => {
 
     const photos = submissions.map(submission => ({
       id: submission._id,
-      image_url: submission.photo_url,
-      quest_title: submission.quest_id.title,
-      quest_category: submission.quest_id.category,
-      submitted_at: submission.submitted_at
+      photo_url: submission.photo_url,
+      image_url: submission.photo_url, // Keep both for compatibility
+      quest_title: submission.quest_id?.title || 'Unknown Quest',
+      quest_category: submission.quest_id?.category || 'General',
+      submitted_at: submission.submitted_at,
+      status: submission.status
     }));
 
     res.json(photos);
@@ -250,6 +252,7 @@ router.get('/photos', auth, async (req, res) => {
     const photos = submissions.map(submission => ({
       id: submission._id,
       photo_url: submission.photo_url,
+      image_url: submission.photo_url, // Keep both for compatibility
       quest_title: submission.quest_id?.title || 'Unknown Quest',
       quest_category: submission.quest_id?.category || 'General',
       submitted_at: submission.submitted_at,

@@ -19,6 +19,13 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ success: false, error: "Sorry, a user with this email already exists." });
     }
 
+    // Random avatar and header assignment
+    const avatars = ['Leaf', 'Sun', 'Tree', 'Water'];
+    const headers = ['leaf', 'sun', 'tree', 'water'];
+    
+    const randomAvatar = avatars[Math.floor(Math.random() * avatars.length)];
+    const randomHeader = headers[Math.floor(Math.random() * headers.length)];
+
     // Create a new user - everyone starts as 'user' role
     user = new User({
       username,
@@ -31,8 +38,8 @@ router.post('/signup', async (req, res) => {
       points: 0,
       profile_picture_url: '',
       hau_affiliation: '',
-      avatar_theme: 'Girl Avatar 1',
-      header_theme: 'orange',
+      avatar_theme: randomAvatar,
+      header_theme: randomHeader,
       is_approved: true, // All users are approved by default
       is_original_admin: false,
       questsCompleted: [],

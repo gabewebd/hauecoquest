@@ -7,11 +7,36 @@ import TiktokIcon from '../img/Tiktok.png';
 import { postAPI, questAPI, userAPI } from '../utils/api';
 import { useUser } from '../context/UserContext';
 
+// Image Modal Component
+const ImageModal = ({ imageUrl, onClose }) => {
+  if (!imageUrl) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="relative max-w-4xl max-h-full">
+        <button
+          onClick={onClose}
+          className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+        >
+          <X className="w-8 h-8" />
+        </button>
+        <img
+          src={imageUrl}
+          alt="Full size"
+          className="max-w-full max-h-full object-contain rounded-lg"
+          onClick={(e) => e.stopPropagation()}
+        />
+      </div>
+    </div>
+  );
+};
+
 // --- FIX START: PostCard no longer manages its own like/comment count ---
-const PostCard = ({ avatar, name, title, time, text, quest, image, likes, comments, onLike, onComment, postId, user, onPageChange, isPinned, onPin }) => {
+const PostCard = ({ avatar, name, title, time, text, quest, image, likes, comments, onLike, onComment, postId, user, onPageChange, isPinned, onPin, author }) => {
   // Local state is only for UI interactions that don't affect sorting, like the comment input box.
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [commentText, setCommentText] = useState('');
+  const [showImageModal, setShowImageModal] = useState(false);
 
   // Check if current user has liked this post based on the likes array
   const isLiked = user && likes && likes.includes(user._id); 
@@ -67,7 +92,7 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
           <div>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => onPageChange('profile', postId)}
+                onClick={() => onPageChange('profile', { userId: author?._id || author })}
                 className="font-bold text-gray-900 hover:text-green-600 transition-colors"
               >
                 {name}
@@ -107,7 +132,12 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
 
       {image && (
         <div className="rounded-xl overflow-hidden border border-gray-200 mb-4">
-          <img src={image} alt="Post content" className="w-full object-cover max-h-96" />
+          <img 
+            src={image} 
+            alt="Post content" 
+            className="w-full object-cover max-h-96 cursor-pointer hover:opacity-90 transition-opacity" 
+            onClick={() => setShowImageModal(true)}
+          />
         </div>
       )}
 
@@ -168,6 +198,11 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
             </button>
           </div>
         </div>
+      )}
+
+      {/* Image Modal */}
+      {showImageModal && (
+        <ImageModal imageUrl={image} onClose={() => setShowImageModal(false)} />
       )}
     </div>
   );
@@ -368,6 +403,21 @@ const CommunityPage = ({ onPageChange }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreatePostModal, setShowCreatePostModal] = useState(false);
 
+  // Helper function to get avatar image
+  const getAvatarImage = (avatarTheme) => {
+    const avatarMap = {
+      'Leaf': '/assets/avatars-headers/leaf-avatar.png',
+      'Sun': '/assets/avatars-headers/sun-avatar.png',
+      'Tree': '/assets/avatars-headers/tree-avatar.png',
+      'Water': '/assets/avatars-headers/water-avatar.png',
+      'Girl Avatar 1': '/assets/avatars-headers/leaf-avatar.png', // Legacy support
+      'Girl Avatar 2': '/assets/avatars-headers/sun-avatar.png', // Legacy support
+      'Boy Avatar 1': '/assets/avatars-headers/tree-avatar.png', // Legacy support
+      'Boy Avatar 2': '/assets/avatars-headers/water-avatar.png', // Legacy support
+    };
+    return avatarMap[avatarTheme] || '/assets/avatars-headers/leaf-avatar.png';
+  };
+
   useEffect(() => {
     fetchCommunityData();
   }, []);
@@ -491,7 +541,7 @@ const CommunityPage = ({ onPageChange }) => {
 
         return {
           id: post._id || index,
-          avatar: `https://i.pravatar.cc/150?u=${author?.username || 'user'}`,
+          avatar: getAvatarImage(author?.avatar_theme),
           name: author?.username || 'Anonymous',
           title: getRoleTitle(author?.role, author?.questsCompleted || 0),
           time: timeAgo,
@@ -502,7 +552,8 @@ const CommunityPage = ({ onPageChange }) => {
           comments: post.comments?.length || 0,
           shares: 0,
           created_at: post.created_at,
-          isPinned: post.isPinned || false
+          isPinned: post.isPinned || false,
+          author: author // Include author data for profile navigation
         };
       });
 
@@ -750,50 +801,75 @@ const CommunityPage = ({ onPageChange }) => {
 
                 {/* Quick Info Card */}
                 {!user && (
-                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-6 border-2 border-green-200">
-                    <h4 className="font-black text-gray-900 mb-2">Join Our Community</h4>
-                    <p className="text-sm text-gray-600 mb-4">
-                      Connect with eco-heroes and start making an impact today.
-                    </p>
-                    <button
-                      onClick={() => onPageChange('signup')}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2.5 rounded-lg transition-all"
-                    >
-                      Sign Up Now
-                    </button>
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200 shadow-lg">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <Users2 className="w-8 h-8 text-blue-600" />
+                      </div>
+                      <h4 className="font-black text-gray-900 mb-2">Join Our Community</h4>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Connect with eco-heroes and start making an impact today.
+                      </p>
+                      <button
+                        onClick={() => onPageChange('signup')}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-lg transition-all shadow-md hover:shadow-lg"
+                      >
+                        Sign Up Now
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Right Content - Posts Feed (2 columns) */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 relative">
               {/* Filters - Made Sticky with proper z-index and backdrop */}
               <div className="sticky top-20 z-40 bg-white/95 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200 p-4 mb-6">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                  <div className="flex gap-2">
-                    {['Recent Activity', 'Most Popular'].map((filter) => (
-                      <button
-                        key={filter}
-                        onClick={() => handleFilterChange(filter)}
-                        className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeFilter === filter
-                            ? 'bg-green-600 text-white shadow-md'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                          }`}
-                      >
-                        {filter}
-                      </button>
-                    ))}
+                  <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                    
+                    {/* Filter Buttons */}
+                    <div className="flex gap-2">
+                      {['Recent Activity', 'Most Popular'].map((filter) => (
+                        <button
+                          key={filter}
+                          onClick={() => handleFilterChange(filter)}
+                          className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${activeFilter === filter
+                              ? 'bg-green-600 text-white shadow-md'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                        >
+                          {filter}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="relative w-full md:w-64">
-                    <input
-                      type="text"
-                      placeholder="Search posts..."
-                      value={searchTerm}
-                      onChange={handleSearchChange}
-                      className="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  
+                  {/* Search Bar and Create Post Button */}
+                  <div className="flex items-center gap-3">
+                    {/* Create Post Button - Desktop only */}
+                    {user && (
+                      <button
+                        onClick={() => setShowCreatePostModal(true)}
+                        className="hidden md:flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Create Post
+                      </button>
+                    )}
+                    
+                    {/* Search Bar */}
+                    <div className="relative w-full md:w-64">
+                      <input
+                        type="text"
+                        placeholder="Search posts..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        className="w-full pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -987,17 +1063,17 @@ const CommunityPage = ({ onPageChange }) => {
         </div>
       )}
 
-      {/* Sticky Create Post Button - Fixed to bottom center */}
+      {/* Sticky Create Post Button - Mobile only */}
       {user ? (
         <button
           onClick={() => setShowCreatePostModal(true)}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-full shadow-2xl hover:bg-green-700 transition-all hover:scale-105 flex items-center gap-2 font-bold"
+          className="md:hidden fixed bottom-6 right-6 z-40 bg-green-600 text-white px-6 py-3 rounded-full shadow-2xl hover:bg-green-700 transition-all hover:scale-105 flex items-center gap-2 font-bold"
         >
           <Plus className="w-5 h-5" />
           <span>Create Post</span>
         </button>
       ) : (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-600 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 font-bold">
+        <div className="md:hidden fixed bottom-6 right-6 z-40 bg-gray-600 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 font-bold">
           <span>Please log in to create posts</span>
         </div>
       )}

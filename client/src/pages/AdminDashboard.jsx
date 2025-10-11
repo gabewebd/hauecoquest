@@ -1,7 +1,7 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import { Users, BookOpen, BarChart, Shield, CheckCircle, XCircle, Edit, Trash2, Plus, Search, Filter, Calendar, MapPin, Award, X, Save, Clock, Eye, FileCheck, Heart, MessageCircle, FileText, TrendingUp, TrendingDown, Activity, Zap } from 'lucide-react';
+import { Users, BookOpen, BarChart, Shield, CheckCircle, XCircle, Edit, Trash2, Plus, Search, Filter, Calendar, MapPin, Award, X, Save, Clock, Eye, FileCheck, Heart, MessageCircle, FileText, TrendingUp, TrendingDown, Activity, Zap, Target } from 'lucide-react';
 
 // --- HELPER COMPONENTS ---
 
@@ -361,7 +361,7 @@ const OverviewTab = ({ stats, setActiveTab }) => (
                 ]} 
                 title="Weekly Platform Activity" 
                 categories={['This Week', 'Last Week']}
-                colors={['#3B82F6', '#10B981']}
+                colors={['#10B981', '#3B82F6']}
             />
             <DonutChart 
                 data={[
@@ -404,12 +404,6 @@ const OverviewTab = ({ stats, setActiveTab }) => (
                         title="View Analytics"
                         subtitle="System performance metrics"
                         onClick={() => setActiveTab('analytics')}
-                    />
-                    <QuickAction
-                        icon={<Calendar className="w-6 h-6 text-orange-500" />}
-                        title="Create Daily Quest"
-                        subtitle="Set today's featured quest"
-                        onClick={() => setActiveTab('daily')}
                     />
                 </div>
             </div>
@@ -666,51 +660,54 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
 
             {/* User Management Table */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                    <div>
-                        <h3 className="text-xl font-bold">User Management</h3>
-                        <p className="text-sm text-gray-500">Manage all user accounts and roles</p>
+                <div className="mb-6">
+                    <h3 className="text-xl font-bold">User Management</h3>
+                    <p className="text-sm text-gray-500">Manage all user accounts and roles</p>
+                </div>
+
+                {/* Search and Filters */}
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                    {/* Search Bar - Left */}
+                    <div className="relative w-full md:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search users..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                        />
                     </div>
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search users..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
-                            />
-                        </div>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setFilterRole('all')}
-                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'all'
-                                        ? 'bg-gray-500 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
-                            >
-                                All Roles
-                            </button>
-                            <button
-                                onClick={() => setFilterRole('student')}
-                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'student'
-                                        ? 'bg-blue-500 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
-                            >
-                                Students
-                            </button>
-                            <button
-                                onClick={() => setFilterRole('partner')}
-                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'partner'
-                                        ? 'bg-purple-500 text-white'
-                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    }`}
-                            >
-                                Partners
-                            </button>
-                        </div>
+                    
+                    {/* Filters - Right */}
+                    <div className="flex gap-2 flex-wrap">
+                        <button
+                            onClick={() => setFilterRole('all')}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'all'
+                                    ? 'bg-gray-500 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                        >
+                            All Roles
+                        </button>
+                        <button
+                            onClick={() => setFilterRole('student')}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'student'
+                                    ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                        >
+                            Students
+                        </button>
+                        <button
+                            onClick={() => setFilterRole('partner')}
+                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'partner'
+                                    ? 'bg-purple-500 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                        >
+                            Partners
+                        </button>
                     </div>
                 </div>
 
@@ -1027,6 +1024,10 @@ const QuestModal = ({ quest, onClose, onSave }) => {
 const QuestsTab = ({ quests, setQuests }) => {
     const [showModal, setShowModal] = useState(false);
     const [editingQuest, setEditingQuest] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [creatorFilter, setCreatorFilter] = useState('all');
 
     const handleSaveQuest = async (questData) => {
         try {
@@ -1121,6 +1122,23 @@ const QuestsTab = ({ quests, setQuests }) => {
         }
     };
 
+    // Filter quests based on search and filters
+    const filteredQuests = quests.filter(quest => {
+        const matchesSearch = quest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             quest.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = categoryFilter === 'all' || quest.category === categoryFilter;
+        const matchesStatus = statusFilter === 'all' || 
+                             (statusFilter === 'active' && quest.isActive) ||
+                             (statusFilter === 'inactive' && !quest.isActive);
+        const matchesCreator = creatorFilter === 'all' || 
+                              (creatorFilter === 'admin' && quest.createdBy === 'admin') ||
+                              (creatorFilter === 'partner' && quest.createdBy === 'partner');
+        return matchesSearch && matchesCategory && matchesStatus && matchesCreator;
+    });
+
+    // Get unique categories for filter
+    const categories = [...new Set(quests.map(q => q.category))];
+
     return (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
@@ -1138,8 +1156,66 @@ const QuestsTab = ({ quests, setQuests }) => {
                     </button>
                 </div>
 
+                {/* Search and Filters */}
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                    {/* Search Bar - Left */}
+                    <div className="relative w-full md:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search quests..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                        />
+                    </div>
+                    
+                    {/* Filters - Right */}
+                    <div className="flex gap-2 flex-wrap">
+                        {/* Category Filter */}
+                        <select
+                            value={categoryFilter}
+                            onChange={(e) => setCategoryFilter(e.target.value)}
+                            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                        >
+                            <option value="all">All Categories</option>
+                            {categories.map(category => (
+                                <option key={category} value={category}>{category}</option>
+                            ))}
+                        </select>
+                        
+                        {/* Status Filter */}
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                        >
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                        
+                        {/* Creator Filter */}
+                        <select
+                            value={creatorFilter}
+                            onChange={(e) => setCreatorFilter(e.target.value)}
+                            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                        >
+                            <option value="all">All Creators</option>
+                            <option value="admin">Admin Created</option>
+                            <option value="partner">Partner Created</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div className="space-y-4">
-                    {quests.map(quest => (
+                    {filteredQuests.length === 0 ? (
+                        <div className="text-center py-8 bg-gray-50 rounded-lg">
+                            <BookOpen className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                            <p className="text-gray-500 text-sm">No quests found</p>
+                        </div>
+                    ) : (
+                        filteredQuests.map(quest => (
                         <div key={quest._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex-1">
@@ -1198,7 +1274,8 @@ const QuestsTab = ({ quests, setQuests }) => {
                                 </span>
                             </div>
                         </div>
-                    ))}
+                        ))
+                    )}
                 </div>
             </div>
 
@@ -1384,35 +1461,16 @@ const AnalyticsTab = ({ stats, users, quests }) => {
 const CommunityTab = ({ posts, setPosts }) => {
     const [showModal, setShowModal] = useState(false);
     const [showChallengeModal, setShowChallengeModal] = useState(false);
-    const [editingPost, setEditingPost] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [postFilter, setPostFilter] = useState('all'); // all, admin, partner, user
+    const [challenges, setChallenges] = useState([]);
+    const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'posts', 'challenges'
+    const [loading, setLoading] = useState(true);
 
     const handleSavePost = async (postData) => {
         try {
             const token = localStorage.getItem('token');
 
-            if (editingPost) {
-                const payload = {
-                    title: postData.title,
-                    content: postData.content,
-                    category: postData.category,
-                    tags: postData.tags.split(',').map(t => t.trim()).filter(t => t)
-                };
-
-                const response = await fetch(`/api/posts/${editingPost._id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-auth-token': token
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) throw new Error('Failed to update post');
-                const updatedPost = await response.json();
-                setPosts(posts.map(p => p._id === editingPost._id ? updatedPost : p));
-            } else {
                 const formData = new FormData();
                 formData.append('title', postData.title);
                 formData.append('content', postData.content);
@@ -1437,10 +1495,8 @@ const CommunityTab = ({ posts, setPosts }) => {
                 }
                 const newPost = await response.json();
                 setPosts([newPost, ...posts]);
-            }
 
             setShowModal(false);
-            setEditingPost(null);
         } catch (error) {
             console.error('Error saving post:', error);
             alert(`Failed to save post: ${error.message}`);
@@ -1465,6 +1521,8 @@ const CommunityTab = ({ posts, setPosts }) => {
             });
 
             if (!response.ok) throw new Error('Failed to create challenge');
+            const newChallenge = await response.json();
+            setChallenges([newChallenge, ...challenges]);
             alert('Community challenge created successfully!');
             setShowChallengeModal(false);
         } catch (error) {
@@ -1472,6 +1530,26 @@ const CommunityTab = ({ posts, setPosts }) => {
             alert('Failed to create challenge. Please try again.');
         }
     };
+
+    const fetchChallenges = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('/api/challenges', {
+                headers: { 'x-auth-token': token }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setChallenges(data);
+            }
+        } catch (error) {
+            console.error('Error fetching challenges:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchChallenges();
+        setLoading(false);
+    }, []);
 
     const handleDeletePost = async (postId) => {
         const reason = prompt('Please provide a reason for deleting this post:');
@@ -1505,6 +1583,10 @@ const CommunityTab = ({ posts, setPosts }) => {
             (postFilter === 'user' && p.author?.role === 'user');
         return matchesSearch && matchesFilter;
     });
+
+    const filteredChallenges = challenges.filter(c =>
+        c.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     // Separate posts by author role for admin controls
     const adminPosts = posts.filter(p => p.author?.role === 'admin');
@@ -1577,140 +1659,209 @@ const CommunityTab = ({ posts, setPosts }) => {
                     </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-4 mb-6">
-                    <div className="relative flex-1">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                    {/* Search Bar - Left */}
+                    <div className="relative w-full md:w-64">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search posts..."
+                            placeholder="Search content..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
                         />
                     </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => setPostFilter('all')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${postFilter === 'all'
-                                    ? 'bg-gray-500 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
+                    
+                    {/* Filters - Right */}
+                    <div className="flex gap-3 flex-wrap">
+                        {/* Content Type Filter */}
+                        <select
+                            value={activeFilter}
+                            onChange={(e) => setActiveFilter(e.target.value)}
+                            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
                         >
-                            All Posts
-                        </button>
-                        <button
-                            onClick={() => setPostFilter('admin')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${postFilter === 'admin'
-                                    ? 'bg-red-500 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                        >
-                            Admin Posts
-                        </button>
-                        <button
-                            onClick={() => setPostFilter('partner')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${postFilter === 'partner'
-                                    ? 'bg-blue-500 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                        >
-                            Partner Posts
-                        </button>
-                        <button
-                            onClick={() => setPostFilter('user')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${postFilter === 'user'
-                                    ? 'bg-green-500 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                        >
-                            User Posts
-                        </button>
+                            <option value="all">All Content</option>
+                            <option value="posts">Posts Only</option>
+                            <option value="challenges">Challenges Only</option>
+                        </select>
+                        
+                        {/* Post Role Filters */}
+                        {(activeFilter === 'all' || activeFilter === 'posts') && (
+                            <select
+                                value={postFilter}
+                                onChange={(e) => setPostFilter(e.target.value)}
+                                className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                            >
+                                <option value="all">All Posts</option>
+                                <option value="admin">Admin Posts</option>
+                                <option value="partner">Partner Posts</option>
+                                <option value="user">User Posts</option>
+                            </select>
+                        )}
                     </div>
                 </div>
 
                 <div className="space-y-4">
-                    {filteredPosts.length === 0 ? (
+                    {/* Posts Section */}
+                    {(activeFilter === 'all' || activeFilter === 'posts') && (
+                        <div>
+                            <h4 className="text-lg font-semibold mb-3 text-gray-800">Posts</h4>
+                            {filteredPosts.length === 0 ? (
+                                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                                    <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                    <p className="text-gray-500 text-sm">No posts found</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {filteredPosts.map(post => (
+                                        <div key={post._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                        <h4 className="text-lg font-bold">{post.title}</h4>
+                                                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                                                            {post.category}
+                                                        </span>
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                            post.author?.role === 'admin' ? 'bg-red-100 text-red-700' :
+                                                            post.author?.role === 'partner' ? 'bg-blue-100 text-blue-700' :
+                                                            'bg-green-100 text-green-700'
+                                                        }`}>
+                                                            {post.author?.role || 'user'}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.content}</p>
+                                                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                                        <span className="flex items-center gap-1">
+                                                            <Calendar className="w-4 h-4" />
+                                                            {new Date(post.created_at).toLocaleDateString()}
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Eye className="w-4 h-4" />
+                                                            {post.views} views
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Heart className="w-4 h-4" />
+                                                            {post.likes?.length || 0} likes
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <MessageCircle className="w-4 h-4" />
+                                                            {post.comments?.length || 0} comments
+                                                        </span>
+                                                    </div>
+                                                    {post.tags && post.tags.length > 0 && (
+                                                        <div className="flex gap-2 mt-2 flex-wrap">
+                                                            {post.tags.map((tag, idx) => (
+                                                                <span key={idx} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                                                    #{tag}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => handleDeletePost(post._id)}
+                                                        className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
+                                                    >
+                                                        <Trash2 className="w-5 h-5 text-red-600" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Challenges Section */}
+                    {(activeFilter === 'all' || activeFilter === 'challenges') && (
+                        <div>
+                            <h4 className="text-lg font-semibold mb-3 text-gray-800">Community Challenges</h4>
+                            {filteredChallenges.length === 0 ? (
+                                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                                    <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                    <p className="text-gray-500 text-sm">No challenges found</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {filteredChallenges.map(challenge => (
+                                        <div key={challenge._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                        <h4 className="text-lg font-bold">{challenge.title}</h4>
+                                                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                                                            Challenge
+                                                        </span>
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                            challenge.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                                                        }`}>
+                                                            {challenge.isActive ? 'Active' : 'Inactive'}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{challenge.description}</p>
+                                                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                                        <span className="flex items-center gap-1">
+                                                            <Calendar className="w-4 h-4" />
+                                                            {new Date(challenge.created_at).toLocaleDateString()}
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Users className="w-4 h-4" />
+                                                            {challenge.participants?.length || 0} participants
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Target className="w-4 h-4" />
+                                                            {challenge.current_progress || 0} / {challenge.target} progress
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            // Edit challenge functionality
+                                                            alert('Edit challenge functionality coming soon!');
+                                                        }}
+                                                        className="p-2 hover:bg-blue-50 rounded-lg transition border border-blue-200"
+                                                    >
+                                                        <Edit className="w-5 h-5 text-blue-600" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            if (confirm('Are you sure you want to delete this challenge?')) {
+                                                                // Delete challenge functionality
+                                                                alert('Delete challenge functionality coming soon!');
+                                                            }
+                                                        }}
+                                                        className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
+                                                    >
+                                                        <Trash2 className="w-5 h-5 text-red-600" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* No content message */}
+                    {activeFilter === 'all' && filteredPosts.length === 0 && filteredChallenges.length === 0 && (
                         <div className="text-center py-12">
                             <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                            <p className="text-gray-500">No posts found. Create your first post!</p>
+                            <p className="text-gray-500">No content found. Create your first post or challenge!</p>
                         </div>
-                    ) : (
-                        filteredPosts.map(post => (
-                            <div key={post._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                            <h4 className="text-lg font-bold">{post.title}</h4>
-                                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                                                {post.category}
-                                            </span>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                post.author?.role === 'admin' ? 'bg-red-100 text-red-700' :
-                                                post.author?.role === 'partner' ? 'bg-blue-100 text-blue-700' :
-                                                'bg-green-100 text-green-700'
-                                            }`}>
-                                                {post.author?.role || 'user'}
-                                            </span>
-                                        </div>
-                                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.content}</p>
-                                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                                            <span className="flex items-center gap-1">
-                                                <Calendar className="w-4 h-4" />
-                                                {new Date(post.created_at).toLocaleDateString()}
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <Eye className="w-4 h-4" />
-                                                {post.views} views
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <Heart className="w-4 h-4" />
-                                                {post.likes?.length || 0} likes
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <MessageCircle className="w-4 h-4" />
-                                                {post.comments?.length || 0} comments
-                                            </span>
-                                        </div>
-                                        {post.tags && post.tags.length > 0 && (
-                                            <div className="flex gap-2 mt-2 flex-wrap">
-                                                {post.tags.map((tag, idx) => (
-                                                    <span key={idx} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                                                        #{tag}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => {
-                                                setEditingPost({ ...post, tags: post.tags?.join(', ') || '' });
-                                                setShowModal(true);
-                                            }}
-                                            className="p-2 hover:bg-blue-50 rounded-lg transition border border-blue-200"
-                                        >
-                                            <Edit className="w-5 h-5 text-blue-600" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeletePost(post._id)}
-                                            className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
-                                        >
-                                            <Trash2 className="w-5 h-5 text-red-600" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
                     )}
                 </div>
             </div>
 
             {showModal && (
                 <PostModal
-                    post={editingPost}
+                    post={null}
                     onClose={() => {
                         setShowModal(false);
-                        setEditingPost(null);
                     }}
                     onSave={handleSavePost}
                 />
@@ -1789,7 +1940,7 @@ const NotificationsTab = () => {
 
     return (
         <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-lg border">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <div className="flex justify-between items-center mb-6">
                     <h3 className="text-xl font-bold">Notifications</h3>
                     <button
@@ -1816,7 +1967,7 @@ const NotificationsTab = () => {
                         {notifications.map(notification => (
                             <div
                                 key={notification._id}
-                                className={`p-4 rounded-lg border transition ${notification.is_read ? 'bg-gray-50' : 'bg-white shadow-sm'
+                                className={`p-4 rounded-lg border border-gray-200 transition ${notification.is_read ? 'bg-gray-50' : 'bg-white shadow-sm'
                                     }`}
                             >
                                 <div className="flex items-start justify-between">
@@ -1853,294 +2004,16 @@ const NotificationsTab = () => {
     );
 };
 
-// --- DAILY MANAGEMENT TAB ---
-const DailyTab = () => {
-    const [dailyQuest, setDailyQuest] = useState(null);
-    const [dailyChallenge, setDailyChallenge] = useState(null);
-    const [showQuestModal, setShowQuestModal] = useState(false);
-    const [showChallengeModal, setShowChallengeModal] = useState(false);
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchDailyContent();
-    }, []);
-
-    const fetchDailyContent = async () => {
-        try {
-            const token = localStorage.getItem('token');
-
-            // Fetch today's quest
-            const questRes = await fetch('/api/daily/quest');
-            const questData = await questRes.json();
-            setDailyQuest(questData.quest);
-
-            // Fetch today's challenge
-            const challengeRes = await fetch('/api/daily/challenge');
-            const challengeData = await challengeRes.json();
-            setDailyChallenge(challengeData.challenge);
-
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching daily content:', error);
-            setLoading(false);
-        }
-    };
-
-    const handleCreateDailyQuest = async (questData) => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('/api/daily/quest', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': token
-                },
-                body: JSON.stringify(questData)
-            });
-
-            if (response.ok) {
-                const newQuest = await response.json();
-                setDailyQuest(newQuest);
-                setShowQuestModal(false);
-                alert('Daily quest created successfully!');
-            } else {
-                const error = await response.json();
-                alert(error.msg || 'Failed to create daily quest');
-            }
-        } catch (error) {
-            console.error('Error creating daily quest:', error);
-            alert('Network error. Please try again.');
-        }
-    };
-
-    const handleCreateDailyChallenge = async (challengeData) => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch('/api/daily/challenge', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': token
-                },
-                body: JSON.stringify(challengeData)
-            });
-
-            if (response.ok) {
-                const newChallenge = await response.json();
-                setDailyChallenge(newChallenge);
-                setShowChallengeModal(false);
-                alert('Daily challenge created successfully!');
-            } else {
-                const error = await response.json();
-                alert(error.msg || 'Failed to create daily challenge');
-            }
-        } catch (error) {
-            console.error('Error creating daily challenge:', error);
-            alert('Network error. Please try again.');
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center py-12">
-                <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="space-y-8">
-            {/* Today's Quest Section */}
-            <div className="bg-white p-6 rounded-xl shadow-md border">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-bold">Today's Quest</h3>
-                    {!dailyQuest && (
-                        <button
-                            onClick={() => setShowQuestModal(true)}
-                            className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Create Daily Quest
-                        </button>
-                    )}
-                </div>
-
-                {dailyQuest ? (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <h4 className="font-bold text-green-800 mb-2">{dailyQuest.title}</h4>
-                        <p className="text-green-700 text-sm mb-2">{dailyQuest.description}</p>
-                        <div className="flex items-center gap-4 text-xs text-green-600">
-                            <span>Category: {dailyQuest.category}</span>
-                            <span>Points: {dailyQuest.points}</span>
-                            <span>Difficulty: {dailyQuest.difficulty}</span>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="text-center py-8 text-gray-500">
-                        <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                        <p>No daily quest created for today</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Today's Community Challenge Section */}
-            <div className="bg-white p-6 rounded-xl shadow-md border">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-xl font-bold">Today's Community Challenge</h3>
-                    {!dailyChallenge && (
-                        <button
-                            onClick={() => setShowChallengeModal(true)}
-                            className="flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Create Daily Challenge
-                        </button>
-                    )}
-                </div>
-
-                {dailyChallenge ? (
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                        <h4 className="font-bold text-purple-800 mb-2">{dailyChallenge.title}</h4>
-                        <p className="text-purple-700 text-sm">{dailyChallenge.content}</p>
-                    </div>
-                ) : (
-                    <div className="text-center py-8 text-gray-500">
-                        <Users className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                        <p>No community challenge created for today</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Daily Quest Modal */}
-            {showQuestModal && (
-                <DailyQuestModal
-                    onClose={() => setShowQuestModal(false)}
-                    onSave={handleCreateDailyQuest}
-                />
-            )}
-
-            {/* Daily Challenge Modal */}
-            {showChallengeModal && (
-                <DailyChallengeModal
-                    onClose={() => setShowChallengeModal(false)}
-                    onSave={handleCreateDailyChallenge}
-                />
-            )}
-        </div>
-    );
-};
-
-// --- DAILY QUEST MODAL ---
-const DailyQuestModal = ({ onClose, onSave }) => {
-    const [formData, setFormData] = useState({
-        title: '',
-        description: '',
-        category: 'Gardening & Planting',
-        difficulty: 'Medium',
-        points: 100,
-        duration: '1 day',
-        location: 'HAU Campus',
-        objectives: '',
-        submissionRequirements: '',
-        maxParticipants: 100
-    });
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave(formData);
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">Create Today's Quest</h3>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
-
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <div>
-                        <label className="block text-sm font-semibold mb-2">Quest Title</label>
-                        <input
-                            type="text"
-                            required
-                            value={formData.title}
-                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                            placeholder="e.g., Today's Campus Clean-up Challenge"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold mb-2">Description</label>
-                        <textarea
-                            required
-                            value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                            rows="3"
-                            placeholder="Describe today's special quest..."
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-semibold mb-2">Category</label>
-                            <select
-                                value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                            >
-                                <option>Gardening & Planting</option>
-                                <option>Recycling & Waste</option>
-                                <option>Energy Conservation</option>
-                                <option>Water Conservation</option>
-                                <option>Education & Awareness</option>
-                                <option>Transportation</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold mb-2">Points Reward</label>
-                            <input
-                                type="number"
-                                required
-                                value={formData.points}
-                                onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex gap-3 pt-4">
-                        <button
-                            type="submit"
-                            className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold"
-                        >
-                            Create Daily Quest
-                        </button>
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-6 py-3 border rounded-lg hover:bg-gray-50 transition font-semibold"
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
 
 // --- SUBMISSIONS TAB ---
 const SubmissionsTab = ({ onApprove, onReject }) => {
     const [submissions, setSubmissions] = useState([]);
+    const [challengeSubmissions, setChallengeSubmissions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('pending');
     const [selectedSubmission, setSelectedSubmission] = useState(null);
+    const [activeTab, setActiveTab] = useState('quests'); // 'quests' or 'challenges'
 
     useEffect(() => {
         fetchSubmissions();
@@ -2149,14 +2022,27 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
     const fetchSubmissions = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('/api/quests/submissions/all', {
+            
+            // Fetch quest submissions
+            const questResponse = await fetch('/api/quests/submissions/all', {
                 headers: { 'x-auth-token': token }
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                setSubmissions(data);
+            if (questResponse.ok) {
+                const questData = await questResponse.json();
+                setSubmissions(questData);
             }
+
+            // Fetch challenge submissions
+            const challengeResponse = await fetch('/api/challenges/submissions/all', {
+                headers: { 'x-auth-token': token }
+            });
+
+            if (challengeResponse.ok) {
+                const challengeData = await challengeResponse.json();
+                setChallengeSubmissions(challengeData);
+            }
+
             setLoading(false);
         } catch (error) {
             console.error('Error fetching submissions:', error);
@@ -2164,12 +2050,16 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
         }
     };
 
-    const handleApprove = async (submissionId) => {
-        console.log('🚀 FRONTEND: handleApprove called with submissionId:', submissionId);
+    const handleApprove = async (submissionId, type = 'quest') => {
+        console.log('🚀 FRONTEND: handleApprove called with submissionId:', submissionId, 'type:', type);
         try {
             const token = localStorage.getItem('token');
-            console.log('🚀 FRONTEND: Making API call to approve submission:', submissionId);
-            const response = await fetch(`/api/quests/submissions/${submissionId}/review`, {
+            const endpoint = type === 'quest' 
+                ? `/api/quests/submissions/${submissionId}/review`
+                : `/api/challenges/submissions/${submissionId}/review`;
+            
+            console.log('🚀 FRONTEND: Making API call to approve submission:', submissionId, 'endpoint:', endpoint);
+            const response = await fetch(endpoint, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2193,13 +2083,17 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
         }
     };
 
-    const handleReject = async (submissionId) => {
+    const handleReject = async (submissionId, type = 'quest') => {
         const reason = prompt('Please provide a reason for rejection:');
         if (!reason) return;
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`/api/quests/submissions/${submissionId}/review`, {
+            const endpoint = type === 'quest' 
+                ? `/api/quests/submissions/${submissionId}/review`
+                : `/api/challenges/submissions/${submissionId}/review`;
+            
+            const response = await fetch(endpoint, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2230,6 +2124,11 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
         return s.status === filter;
     });
 
+    const filteredChallengeSubmissions = challengeSubmissions.filter(s => {
+        if (filter === 'all') return true;
+        return s.status === filter;
+    });
+
     if (loading) {
         return (
             <div className="flex justify-center items-center py-12">
@@ -2249,7 +2148,9 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                         </div>
                         <div>
                             <h3 className="text-lg font-bold">Pending</h3>
-                            <p className="text-2xl font-bold text-yellow-600 group-hover:text-yellow-700 transition-colors">{submissions.filter(s => s.status === 'pending').length}</p>
+                            <p className="text-2xl font-bold text-yellow-600 group-hover:text-yellow-700 transition-colors">
+                                {submissions.filter(s => s.status === 'pending').length + challengeSubmissions.filter(s => s.status === 'pending').length}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -2260,7 +2161,9 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                         </div>
                         <div>
                             <h3 className="text-lg font-bold">Approved</h3>
-                            <p className="text-2xl font-bold text-green-600 group-hover:text-green-700 transition-colors">{submissions.filter(s => s.status === 'approved').length}</p>
+                            <p className="text-2xl font-bold text-green-600 group-hover:text-green-700 transition-colors">
+                                {submissions.filter(s => s.status === 'approved').length + challengeSubmissions.filter(s => s.status === 'approved').length}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -2271,7 +2174,9 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                         </div>
                         <div>
                             <h3 className="text-lg font-bold">Rejected</h3>
-                            <p className="text-2xl font-bold text-red-600 group-hover:text-red-700 transition-colors">{submissions.filter(s => s.status === 'rejected').length}</p>
+                            <p className="text-2xl font-bold text-red-600 group-hover:text-red-700 transition-colors">
+                                {submissions.filter(s => s.status === 'rejected').length + challengeSubmissions.filter(s => s.status === 'rejected').length}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -2282,7 +2187,9 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                         </div>
                         <div>
                             <h3 className="text-lg font-bold">Total</h3>
-                            <p className="text-2xl font-bold text-blue-600 group-hover:text-blue-700 transition-colors">{submissions.length}</p>
+                            <p className="text-2xl font-bold text-blue-600 group-hover:text-blue-700 transition-colors">
+                                {submissions.length + challengeSubmissions.length}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -2291,8 +2198,8 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                     <div>
-                        <h3 className="text-xl font-bold">Quest Submissions</h3>
-                        <p className="text-sm text-gray-500">Review and approve quest completions</p>
+                        <h3 className="text-xl font-bold">Submissions Review</h3>
+                        <p className="text-sm text-gray-500">Review and approve quest and challenge submissions</p>
                     </div>
                     <div className="flex gap-2">
                         <button
@@ -2334,89 +2241,199 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                     </div>
                 </div>
 
-                {filteredSubmissions.length === 0 ? (
-                    <div className="text-center py-12">
-                        <FileCheck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500">No {filter !== 'all' ? filter : ''} submissions found</p>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {filteredSubmissions.map(submission => (
-                            <div key={submission._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                            <h4 className="text-lg font-bold">{submission.quest_id?.title || 'Unknown Quest'}</h4>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                    submission.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                                        'bg-red-100 text-red-700'
-                                                }`}>
-                                                {submission.status.toUpperCase()}
-                                            </span>
+                {/* Submission Type Tabs */}
+                <div className="flex gap-2 mb-6">
+                    <button
+                        onClick={() => setActiveTab('quests')}
+                        className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'quests'
+                                ? 'bg-green-500 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                    >
+                        Quest Submissions ({filteredSubmissions.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('challenges')}
+                        className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'challenges'
+                                ? 'bg-purple-500 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                    >
+                        Challenge Submissions ({filteredChallengeSubmissions.length})
+                    </button>
+                </div>
+
+                {/* Quest Submissions */}
+                {activeTab === 'quests' && (
+                    filteredSubmissions.length === 0 ? (
+                        <div className="text-center py-12">
+                            <FileCheck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                            <p className="text-gray-500">No {filter !== 'all' ? filter : ''} quest submissions found</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {filteredSubmissions.map(submission => (
+                                <div key={submission._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                <h4 className="text-lg font-bold">{submission.quest_id?.title || 'Unknown Quest'}</h4>
+                                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Quest</span>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                        submission.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                                            'bg-red-100 text-red-700'
+                                                    }`}>
+                                                    {submission.status.toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
+                                                <span className="flex items-center gap-1">
+                                                    <Users className="w-4 h-4" />
+                                                    {submission.user_id?.username || 'Unknown User'}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Award className="w-4 h-4" />
+                                                    {submission.quest_id?.points || 0} points
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Clock className="w-4 h-4" />
+                                                    {new Date(submission.submitted_at).toLocaleDateString()}
+                                                </span>
+                                                <span className="flex items-center gap-1 text-xs">
+                                                    <Shield className="w-4 h-4" />
+                                                    {submission.user_id?.role || 'user'}
+                                                </span>
+                                            </div>
+                                            {submission.reflection_text && (
+                                                <p className="text-sm text-gray-600 mt-2 italic">"{submission.reflection_text}"</p>
+                                            )}
+                                            {submission.status === 'rejected' && submission.rejection_reason && (
+                                                <p className="text-sm text-red-600 mt-2">
+                                                    <strong>Rejection Reason:</strong> {submission.rejection_reason}
+                                                </p>
+                                            )}
                                         </div>
-                                        <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
-                                            <span className="flex items-center gap-1">
-                                                <Users className="w-4 h-4" />
-                                                {submission.user_id?.username || 'Unknown User'}
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <Award className="w-4 h-4" />
-                                                {submission.quest_id?.points || 0} points
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <Clock className="w-4 h-4" />
-                                                {new Date(submission.submitted_at).toLocaleDateString()}
-                                            </span>
-                                            <span className="flex items-center gap-1 text-xs">
-                                                <Shield className="w-4 h-4" />
-                                                {submission.user_id?.role || 'user'}
-                                            </span>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setSelectedSubmission({...submission, type: 'quest'})}
+                                                className="p-2 hover:bg-blue-50 hover:shadow-md rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-400 transform hover:scale-105"
+                                                title="View Details"
+                                            >
+                                                <Eye className="w-5 h-5 text-blue-600 hover:text-blue-700" />
+                                            </button>
+                                            {submission.status === 'pending' && (
+                                                <>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            console.log('🚀 BUTTON CLICKED: Approve button clicked for submission:', submission._id);
+                                                            console.log('🚀 BUTTON CLICKED: Submission status:', submission.status);
+                                                            console.log('🚀 BUTTON CLICKED: Event:', e);
+                                                            handleApprove(submission._id, 'quest');
+                                                        }}
+                                                        className="p-2 hover:bg-green-50 hover:shadow-md rounded-lg transition-all duration-200 border border-green-200 hover:border-green-400 transform hover:scale-105"
+                                                        title="Approve"
+                                                    >
+                                                        <CheckCircle className="w-5 h-5 text-green-600 hover:text-green-700" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleReject(submission._id, 'quest')}
+                                                        className="p-2 hover:bg-red-50 hover:shadow-md rounded-lg transition-all duration-200 border border-red-200 hover:border-red-400 transform hover:scale-105"
+                                                        title="Reject"
+                                                    >
+                                                        <XCircle className="w-5 h-5 text-red-600 hover:text-red-700" />
+                                                    </button>
+                                                </>
+                                            )}
                                         </div>
-                                        {submission.reflection_text && (
-                                            <p className="text-sm text-gray-600 mt-2 italic">"{submission.reflection_text}"</p>
-                                        )}
-                                        {submission.status === 'rejected' && submission.rejection_reason && (
-                                            <p className="text-sm text-red-600 mt-2">
-                                                <strong>Rejection Reason:</strong> {submission.rejection_reason}
-                                            </p>
-                                        )}
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => setSelectedSubmission(submission)}
-                                            className="p-2 hover:bg-blue-50 hover:shadow-md rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-400 transform hover:scale-105"
-                                            title="View Details"
-                                        >
-                                            <Eye className="w-5 h-5 text-blue-600 hover:text-blue-700" />
-                                        </button>
-                                        {submission.status === 'pending' && (
-                                            <>
-                                                <button
-                                                    onClick={(e) => {
-                                                        console.log('🚀 BUTTON CLICKED: Approve button clicked for submission:', submission._id);
-                                                        console.log('🚀 BUTTON CLICKED: Submission status:', submission.status);
-                                                        console.log('🚀 BUTTON CLICKED: Event:', e);
-                                                        handleApprove(submission._id);
-                                                    }}
-                                                    className="p-2 hover:bg-green-50 hover:shadow-md rounded-lg transition-all duration-200 border border-green-200 hover:border-green-400 transform hover:scale-105"
-                                                    title="Approve"
-                                                >
-                                                    <CheckCircle className="w-5 h-5 text-green-600 hover:text-green-700" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleReject(submission._id)}
-                                                    className="p-2 hover:bg-red-50 hover:shadow-md rounded-lg transition-all duration-200 border border-red-200 hover:border-red-400 transform hover:scale-105"
-                                                    title="Reject"
-                                                >
-                                                    <XCircle className="w-5 h-5 text-red-600 hover:text-red-700" />
-                                                </button>
-                                            </>
-                                        )}
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )
+                )}
+
+                {/* Challenge Submissions */}
+                {activeTab === 'challenges' && (
+                    filteredChallengeSubmissions.length === 0 ? (
+                        <div className="text-center py-12">
+                            <Target className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                            <p className="text-gray-500">No {filter !== 'all' ? filter : ''} challenge submissions found</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {filteredChallengeSubmissions.map(submission => (
+                                <div key={submission._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                <h4 className="text-lg font-bold">{submission.challenge_id?.title || 'Unknown Challenge'}</h4>
+                                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">Challenge</span>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                        submission.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                                            'bg-red-100 text-red-700'
+                                                    }`}>
+                                                    {submission.status.toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
+                                                <span className="flex items-center gap-1">
+                                                    <Users className="w-4 h-4" />
+                                                    {submission.user_id?.username || 'Unknown User'}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Award className="w-4 h-4" />
+                                                    {submission.challenge_id?.points || 0} points
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Clock className="w-4 h-4" />
+                                                    {new Date(submission.submitted_at).toLocaleDateString()}
+                                                </span>
+                                                <span className="flex items-center gap-1 text-xs">
+                                                    <Shield className="w-4 h-4" />
+                                                    {submission.user_id?.role || 'user'}
+                                                </span>
+                                            </div>
+                                            {submission.reflection_text && (
+                                                <p className="text-sm text-gray-600 mt-2 italic">"{submission.reflection_text}"</p>
+                                            )}
+                                            {submission.status === 'rejected' && submission.rejection_reason && (
+                                                <p className="text-sm text-red-600 mt-2">
+                                                    <strong>Rejection Reason:</strong> {submission.rejection_reason}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setSelectedSubmission({...submission, type: 'challenge'})}
+                                                className="p-2 hover:bg-blue-50 hover:shadow-md rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-400 transform hover:scale-105"
+                                                title="View Details"
+                                            >
+                                                <Eye className="w-5 h-5 text-blue-600 hover:text-blue-700" />
+                                            </button>
+                                            {submission.status === 'pending' && (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleApprove(submission._id, 'challenge')}
+                                                        className="p-2 hover:bg-green-50 hover:shadow-md rounded-lg transition-all duration-200 border border-green-200 hover:border-green-400 transform hover:scale-105"
+                                                        title="Approve"
+                                                    >
+                                                        <CheckCircle className="w-5 h-5 text-green-600 hover:text-green-700" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleReject(submission._id, 'challenge')}
+                                                        className="p-2 hover:bg-red-50 hover:shadow-md rounded-lg transition-all duration-200 border border-red-200 hover:border-red-400 transform hover:scale-105"
+                                                        title="Reject"
+                                                    >
+                                                        <XCircle className="w-5 h-5 text-red-600 hover:text-red-700" />
+                                                    </button>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )
                 )}
             </div>
 
@@ -2433,8 +2450,21 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
 
                         <div className="p-6 space-y-4">
                             <div>
-                                <h4 className="font-semibold text-gray-700 mb-1">Quest</h4>
-                                <p className="text-lg">{selectedSubmission.quest_id?.title}</p>
+                                <h4 className="font-semibold text-gray-700 mb-1">
+                                    {selectedSubmission.type === 'quest' ? 'Quest' : 'Challenge'}
+                                </h4>
+                                <p className="text-lg">
+                                    {selectedSubmission.type === 'quest' 
+                                        ? selectedSubmission.quest_id?.title 
+                                        : selectedSubmission.challenge_id?.title}
+                                </p>
+                                <span className={`px-2 py-1 rounded-full text-xs font-semibold mt-2 inline-block ${
+                                    selectedSubmission.type === 'quest' 
+                                        ? 'bg-green-100 text-green-700' 
+                                        : 'bg-purple-100 text-purple-700'
+                                }`}>
+                                    {selectedSubmission.type === 'quest' ? 'Quest' : 'Challenge'}
+                                </span>
                             </div>
                             <div>
                                 <h4 className="font-semibold text-gray-700 mb-1">Submitted By</h4>
@@ -2449,12 +2479,22 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                                 <h4 className="font-semibold text-gray-700 mb-1">Proof Photo</h4>
                                 {selectedSubmission.photo_url ? (
                                     <img
-                                        src={`http://localhost:5000/${selectedSubmission.photo_url}`}
-                                        alt="Quest proof"
+                                        src={selectedSubmission.photo_url}
+                                        alt={`${selectedSubmission.type} proof`}
                                         className="w-full max-h-96 object-contain border rounded-lg"
+                                        onError={(e) => {
+                                            console.error('Image failed to load:', selectedSubmission.photo_url);
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling.style.display = 'block';
+                                        }}
                                     />
                                 ) : (
                                     <p className="text-gray-500">No photo uploaded</p>
+                                )}
+                                {selectedSubmission.photo_url && (
+                                    <p className="text-gray-500 text-sm mt-2" style={{display: 'none'}}>
+                                        Failed to load image: {selectedSubmission.photo_url}
+                                    </p>
                                 )}
                             </div>
                             <div className="flex items-center gap-2">
@@ -2480,7 +2520,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                                             console.log('🚀 MODAL BUTTON CLICKED: Approve button clicked for submission:', selectedSubmission._id);
                                             console.log('🚀 MODAL BUTTON CLICKED: Submission status:', selectedSubmission.status);
                                             console.log('🚀 MODAL BUTTON CLICKED: Event:', e);
-                                            handleApprove(selectedSubmission._id);
+                                            handleApprove(selectedSubmission._id, selectedSubmission.type);
                                         }}
                                         className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2"
                                     >
@@ -2488,7 +2528,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                                         Approve Submission
                                     </button>
                                     <button
-                                        onClick={() => handleReject(selectedSubmission._id)}
+                                        onClick={() => handleReject(selectedSubmission._id, selectedSubmission.type)}
                                         className="flex-1 bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 transition font-semibold flex items-center justify-center gap-2"
                                     >
                                         <XCircle className="w-5 h-5" />
@@ -2522,7 +2562,7 @@ const PostModal = ({ post, onClose, onSave }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">{post ? 'Edit Post' : 'Create New Post'}</h3>
+                    <h3 className="text-2xl font-bold">Create New Post</h3>
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
                         <X className="w-5 h-5" />
                     </button>
@@ -2680,74 +2720,6 @@ const ChallengeModal = ({ onClose, onSave }) => {
     );
 };
 
-// --- DAILY CHALLENGE MODAL ---
-const DailyChallengeModal = ({ onClose, onSave }) => {
-    const [formData, setFormData] = useState({
-        title: '',
-        content: '',
-        tags: []
-    });
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave(formData);
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">Create Today's Community Challenge</h3>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
-                        <X className="w-5 h-5" />
-                    </button>
-                </div>
-
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                    <div>
-                        <label className="block text-sm font-semibold mb-2">Challenge Title</label>
-                        <input
-                            type="text"
-                            required
-                            value={formData.title}
-                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            placeholder="e.g., Share Your Green Tip of the Day"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-semibold mb-2">Challenge Description</label>
-                        <textarea
-                            required
-                            value={formData.content}
-                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            rows="4"
-                            placeholder="Describe today's community challenge..."
-                        />
-                    </div>
-
-                    <div className="flex gap-3 pt-4">
-                        <button
-                            type="submit"
-                            className="flex-1 bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition font-semibold"
-                        >
-                            Create Daily Challenge
-                        </button>
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="px-6 py-3 border rounded-lg hover:bg-gray-50 transition font-semibold"
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
 
 // --- MAIN ADMIN DASHBOARD ---
 const AdminDashboard = () => {
@@ -2951,7 +2923,6 @@ const AdminDashboard = () => {
                     <TabButton id="quests" label="Quests" icon={<BookOpen className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="community" label="Community" icon={<FileText className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="submissions" label="Submissions" icon={<FileCheck className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
-                    <TabButton id="daily" label="Daily" icon={<Calendar className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="notifications" label="Notifications" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="analytics" label="Analytics" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
@@ -2962,7 +2933,6 @@ const AdminDashboard = () => {
                 {activeTab === 'quests' && <QuestsTab quests={quests} setQuests={setQuests} />}
                 {activeTab === 'community' && <CommunityTab posts={posts} setPosts={setPosts} />}
                 {activeTab === 'submissions' && <SubmissionsTab />}
-                {activeTab === 'daily' && <DailyTab />}
                 {activeTab === 'notifications' && <NotificationsTab />}
                 {activeTab === 'analytics' && <AnalyticsTab stats={stats} users={users} quests={quests} />}
             </main>

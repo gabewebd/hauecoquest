@@ -903,6 +903,8 @@ const QuestsTab = ({ quests, setQuests }) => {
     const [showModal, setShowModal] = useState(false);
     const [editingQuest, setEditingQuest] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState('all');
 
     const handleSaveQuest = async (questData) => {
         try {
@@ -1005,9 +1007,18 @@ const QuestsTab = ({ quests, setQuests }) => {
         }
     };
 
-    const filteredQuests = quests.filter(q =>
-        q.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredQuests = quests.filter(q => {
+        const matchesSearch = q.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             q.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = categoryFilter === 'all' || q.category === categoryFilter;
+        const matchesStatus = statusFilter === 'all' || 
+                             (statusFilter === 'active' && q.isActive) ||
+                             (statusFilter === 'inactive' && !q.isActive);
+        return matchesSearch && matchesCategory && matchesStatus;
+    });
+
+    // Get unique categories for filter
+    const categories = [...new Set(quests.map(q => q.category))];
 
     return (
         <div className="space-y-6">
@@ -1029,8 +1040,10 @@ const QuestsTab = ({ quests, setQuests }) => {
                     </button>
                 </div>
 
-                <div className="mb-4">
-                    <div className="relative">
+                {/* Search and Filters */}
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                    {/* Search Bar - Left */}
+                    <div className="relative w-full md:w-64">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
@@ -1039,6 +1052,32 @@ const QuestsTab = ({ quests, setQuests }) => {
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
                         />
+                    </div>
+                    
+                    {/* Filters - Right */}
+                    <div className="flex gap-2 flex-wrap">
+                        {/* Category Filter */}
+                        <select
+                            value={categoryFilter}
+                            onChange={(e) => setCategoryFilter(e.target.value)}
+                            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                        >
+                            <option value="all">All Categories</option>
+                            {categories.map(category => (
+                                <option key={category} value={category}>{category}</option>
+                            ))}
+                        </select>
+                        
+                        {/* Status Filter */}
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                        >
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
                     </div>
                 </div>
 
@@ -1138,6 +1177,9 @@ const CommunityTab = ({ posts, setPosts }) => {
     const [showChallengeModal, setShowChallengeModal] = useState(false);
     const [editingPost, setEditingPost] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [challenges, setChallenges] = useState([]);
+    const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'posts', 'challenges'
+    const [loading, setLoading] = useState(true);
 
     const handleSavePost = async (postData) => {
         try {
@@ -1235,6 +1277,8 @@ const CommunityTab = ({ posts, setPosts }) => {
             });
 
             if (!response.ok) throw new Error('Failed to create challenge');
+            const newChallenge = await response.json();
+            setChallenges([newChallenge, ...challenges]);
             alert('Community challenge created successfully!');
             setShowChallengeModal(false);
         } catch (error) {
@@ -1243,8 +1287,32 @@ const CommunityTab = ({ posts, setPosts }) => {
         }
     };
 
+    const fetchChallenges = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('/api/challenges', {
+                headers: { 'x-auth-token': token }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setChallenges(data);
+            }
+        } catch (error) {
+            console.error('Error fetching challenges:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchChallenges();
+        setLoading(false);
+    }, []);
+
     const filteredPosts = posts.filter(p =>
         p.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const filteredChallenges = challenges.filter(c =>
+        c.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -1253,7 +1321,7 @@ const CommunityTab = ({ posts, setPosts }) => {
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                     <div>
                         <h3 className="text-xl font-bold">Community Content</h3>
-                        <p className="text-sm text-gray-500">Manage your blog posts and community updates</p>
+                        <p className="text-sm text-gray-500">Manage your blog posts and community challenges</p>
                     </div>
                     <div className="flex gap-2">
                         <button
@@ -1276,85 +1344,191 @@ const CommunityTab = ({ posts, setPosts }) => {
                     </div>
                 </div>
 
-                <div className="mb-4">
-                    <div className="relative">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                    {/* Search Bar - Left */}
+                    <div className="relative w-full md:w-64">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search posts..."
+                            placeholder="Search content..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
                         />
                     </div>
+                    
+                    {/* Filters - Right */}
+                    <div className="flex gap-2 flex-wrap">
+                        {['All', 'Posts', 'Challenges'].map((filter) => (
+                            <button
+                                key={filter}
+                                onClick={() => setActiveFilter(filter.toLowerCase())}
+                                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                                    activeFilter === filter.toLowerCase()
+                                        ? 'bg-green-600 text-white shadow-md'
+                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                }`}
+                            >
+                                {filter}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="space-y-4">
-                    {filteredPosts.length === 0 ? (
+                    {/* Posts Section */}
+                    {(activeFilter === 'all' || activeFilter === 'posts') && (
+                        <div>
+                            <h4 className="text-lg font-semibold mb-3 text-gray-800">Posts</h4>
+                            {filteredPosts.length === 0 ? (
+                                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                                    <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                    <p className="text-gray-500 text-sm">No posts found</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {filteredPosts.map(post => (
+                                        <div key={post._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                        <h4 className="text-lg font-bold">{post.title}</h4>
+                                                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                                                            {post.category}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.content}</p>
+                                                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                                        <span className="flex items-center gap-1">
+                                                            <Calendar className="w-4 h-4" />
+                                                            {new Date(post.created_at).toLocaleDateString()}
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Eye className="w-4 h-4" />
+                                                            {post.views} views
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Heart className="w-4 h-4" />
+                                                            {post.likes?.length || 0} likes
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <MessageCircle className="w-4 h-4" />
+                                                            {post.comments?.length || 0} comments
+                                                        </span>
+                                                    </div>
+                                                    {post.tags && post.tags.length > 0 && (
+                                                        <div className="flex gap-2 mt-2 flex-wrap">
+                                                            {post.tags.map((tag, idx) => (
+                                                                <span key={idx} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                                                                    #{tag}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingPost({ ...post, tags: post.tags?.join(', ') || '' });
+                                                            setShowModal(true);
+                                                        }}
+                                                        className="p-2 hover:bg-blue-50 rounded-lg transition"
+                                                    >
+                                                        <Edit className="w-5 h-5 text-blue-600" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeletePost(post._id)}
+                                                        className="p-2 hover:bg-red-50 rounded-lg transition"
+                                                    >
+                                                        <Trash2 className="w-5 h-5 text-red-600" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Challenges Section */}
+                    {(activeFilter === 'all' || activeFilter === 'challenges') && (
+                        <div>
+                            <h4 className="text-lg font-semibold mb-3 text-gray-800">Community Challenges</h4>
+                            {filteredChallenges.length === 0 ? (
+                                <div className="text-center py-8 bg-gray-50 rounded-lg">
+                                    <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                                    <p className="text-gray-500 text-sm">No challenges found</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {filteredChallenges.map(challenge => (
+                                        <div key={challenge._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
+                                            <div className="flex items-start justify-between gap-4">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                        <h4 className="text-lg font-bold">{challenge.title}</h4>
+                                                        <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                                                            Challenge
+                                                        </span>
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                                            challenge.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                                                        }`}>
+                                                            {challenge.isActive ? 'Active' : 'Inactive'}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{challenge.description}</p>
+                                                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+                                                        <span className="flex items-center gap-1">
+                                                            <Calendar className="w-4 h-4" />
+                                                            {new Date(challenge.created_at).toLocaleDateString()}
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Users className="w-4 h-4" />
+                                                            {challenge.participants?.length || 0} participants
+                                                        </span>
+                                                        <span className="flex items-center gap-1">
+                                                            <Target className="w-4 h-4" />
+                                                            {challenge.current_progress || 0} / {challenge.target} progress
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={() => {
+                                                            // Edit challenge functionality
+                                                            alert('Edit challenge functionality coming soon!');
+                                                        }}
+                                                        className="p-2 hover:bg-blue-50 rounded-lg transition"
+                                                    >
+                                                        <Edit className="w-5 h-5 text-blue-600" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            if (confirm('Are you sure you want to delete this challenge?')) {
+                                                                // Delete challenge functionality
+                                                                alert('Delete challenge functionality coming soon!');
+                                                            }
+                                                        }}
+                                                        className="p-2 hover:bg-red-50 rounded-lg transition"
+                                                    >
+                                                        <Trash2 className="w-5 h-5 text-red-600" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* No content message */}
+                    {activeFilter === 'all' && filteredPosts.length === 0 && filteredChallenges.length === 0 && (
                         <div className="text-center py-12">
                             <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                            <p className="text-gray-500">No posts found. Create your first post!</p>
+                            <p className="text-gray-500">No content found. Create your first post or challenge!</p>
                         </div>
-                    ) : (
-                        filteredPosts.map(post => (
-                            <div key={post._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                            <h4 className="text-lg font-bold">{post.title}</h4>
-                                            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                                                {post.category}
-                                            </span>
-                                        </div>
-                                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.content}</p>
-                                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                                            <span className="flex items-center gap-1">
-                                                <Calendar className="w-4 h-4" />
-                                                {new Date(post.created_at).toLocaleDateString()}
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <Eye className="w-4 h-4" />
-                                                {post.views} views
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <Heart className="w-4 h-4" />
-                                                {post.likes?.length || 0} likes
-                                            </span>
-                                            <span className="flex items-center gap-1">
-                                                <MessageCircle className="w-4 h-4" />
-                                                {post.comments?.length || 0} comments
-                                            </span>
-                                        </div>
-                                        {post.tags && post.tags.length > 0 && (
-                                            <div className="flex gap-2 mt-2 flex-wrap">
-                                                {post.tags.map((tag, idx) => (
-                                                    <span key={idx} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                                                        #{tag}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => {
-                                                setEditingPost({ ...post, tags: post.tags?.join(', ') || '' });
-                                                setShowModal(true);
-                                            }}
-                                            className="p-2 hover:bg-blue-50 rounded-lg transition"
-                                        >
-                                            <Edit className="w-5 h-5 text-blue-600" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeletePost(post._id)}
-                                            className="p-2 hover:bg-red-50 rounded-lg transition"
-                                        >
-                                            <Trash2 className="w-5 h-5 text-red-600" />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))
                     )}
                 </div>
             </div>

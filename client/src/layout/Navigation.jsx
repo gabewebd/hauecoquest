@@ -78,14 +78,29 @@ export function Navigation({ currentPage, onPageChange }) {
     { id: 'leaderboard', label: 'Leaderboard', icon: Crown },
   ];
 
+  // Helper function to get avatar image
+  const getAvatarImage = (avatarTheme) => {
+    const avatarMap = {
+      'Leaf': '/assets/avatars-headers/leaf-avatar.png',
+      'Sun': '/assets/avatars-headers/sun-avatar.png',
+      'Tree': '/assets/avatars-headers/tree-avatar.png',
+      'Water': '/assets/avatars-headers/water-avatar.png',
+      'Girl Avatar 1': '/assets/avatars-headers/leaf-avatar.png', // Legacy support
+      'Girl Avatar 2': '/assets/avatars-headers/sun-avatar.png', // Legacy support
+      'Boy Avatar 1': '/assets/avatars-headers/tree-avatar.png', // Legacy support
+      'Boy Avatar 2': '/assets/avatars-headers/water-avatar.png', // Legacy support
+    };
+    return avatarMap[avatarTheme] || '/assets/avatars-headers/leaf-avatar.png';
+  };
+
   const avatars = [
-    { name: "Girl Avatar 1", gender: "Female", color: "text-pink-500", bg: "bg-pink-100" },
-    { name: "Girl Avatar 2", gender: "Female", color: "text-pink-400", bg: "bg-pink-50" },
-    { name: "Boy Avatar 1", gender: "Male", color: "text-blue-500", bg: "bg-blue-100" },
-    { name: "Boy Avatar 2", gender: "Male", color: "text-blue-400", bg: "bg-blue-50" },
+    { name: "Leaf", gender: "Nature", color: "text-green-500", bg: "bg-green-100" },
+    { name: "Sun", gender: "Energy", color: "text-yellow-500", bg: "bg-yellow-100" },
+    { name: "Tree", gender: "Growth", color: "text-green-600", bg: "bg-green-50" },
+    { name: "Water", gender: "Life", color: "text-blue-500", bg: "bg-blue-100" },
   ];
-  const selectedAvatar = avatars.find((a) => a.name === (user?.avatar || "Girl Avatar 1"));
-  const defaultAvatarStyle = { bg: "bg-pink-100", color: "text-pink-500" };
+  const selectedAvatar = avatars.find((a) => a.name === (user?.avatar_theme || "Leaf"));
+  const defaultAvatarStyle = { bg: "bg-green-100", color: "text-green-500" };
   const currentAvatarStyle = selectedAvatar || defaultAvatarStyle;
 
   const getProfileDropdown = () => {
@@ -102,8 +117,21 @@ export function Navigation({ currentPage, onPageChange }) {
           className="flex items-center gap-3 bg-white hover:bg-gray-50 rounded-full px-3 py-2 transition-all shadow-md border border-gray-200"
         >
           <div className="relative">
-            <div className={`w-10 h-10 ${currentAvatarStyle.bg} rounded-full flex items-center justify-center`}>
-              <User className={`w-6 h-6 ${currentAvatarStyle.color}`} />
+            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200">
+              {getAvatarImage(user?.avatar_theme) ? (
+                <img 
+                  src={getAvatarImage(user?.avatar_theme)} 
+                  alt={user?.username || 'User'}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <div className={`w-full h-full ${currentAvatarStyle.bg} flex items-center justify-center`} style={{display: getAvatarImage(user?.avatar_theme) ? 'none' : 'flex'}}>
+                <User className={`w-6 h-6 ${currentAvatarStyle.color}`} />
+              </div>
             </div>
             <div className="absolute -top-1 -right-1 bg-amber-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full border-2 border-white shadow-sm">
               {level}
@@ -156,7 +184,16 @@ export function Navigation({ currentPage, onPageChange }) {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <button onClick={() => onPageChange('home')} className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+            <img
+              src="/assets/hau-eco-quest-logo.png"
+              alt="HAU Eco-Quest Logo"
+              className="w-10 h-10 rounded-xl"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center" style={{display: 'none'}}>
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-black text-gray-900">HAU Eco-Quest</span>
