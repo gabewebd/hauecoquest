@@ -9,7 +9,7 @@ HAU Eco-Quest is a gamified environmental platform that encourages students to p
 ## Team Members
 
 - **Aguiluz, Josh Andrei D.** - Project Manager, Full-Stack Developer
-- **Camus, Mark Dave** - Frontend Developer, Technical Writer  
+- **Camus, Mark Dave** - Full-Stack Developer, Technical Writer  
 - **Tienzo, Krisean** - Technical Writer
 - **Velasquez, Ainshley** - UI/UX Designer, Full-Stack Developer
 - **Yamaguchi, Mikaella** - Full-Stack Developer
