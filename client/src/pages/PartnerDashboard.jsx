@@ -1611,15 +1611,6 @@ const CommunityTab = ({ posts, setPosts }) => {
                                                 </div>
                                                 <div className="flex gap-2">
                                                     <button
-                                                        onClick={() => {
-                                                            setEditingPost({ ...post, tags: post.tags?.join(', ') || '' });
-                                                            setShowModal(true);
-                                                        }}
-                                                        className="p-2 hover:bg-blue-50 rounded-lg transition"
-                                                    >
-                                                        <Edit className="w-5 h-5 text-blue-600" />
-                                                    </button>
-                                                    <button
                                                         onClick={() => handleDeletePost(post._id)}
                                                         className="p-2 hover:bg-red-50 rounded-lg transition"
                                                     >

@@ -503,8 +503,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
               </div>
               <p className="text-gray-600">{displayUser?.department || displayUser?.hau_affiliation || "HAU Student"}</p>
               <p className="text-sm text-gray-500 mt-1">
-                Environmental science student passionate about making a
-                difference on campus.
+                Start making a difference on campus.
               </p>
 
               {/* Stats - Only show for user role */}
@@ -593,9 +592,9 @@ const ProfilePage = ({ onPageChange, userId }) => {
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
                       <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                         📝
-                      </div>
-                      <p className="text-gray-500">No activity yet. Start posting to build your activity feed!</p>
                     </div>
+                      <p className="text-gray-500">No activity yet. Start posting to build your activity feed!</p>
+                        </div>
                   ) : (
                     userActivity.map((post, index) => {
                       const PostCard = ({ post }) => {
@@ -614,26 +613,26 @@ const ProfilePage = ({ onPageChange, userId }) => {
                                 <div>
                                   <h4 className="font-semibold text-gray-900">{post.author?.username || 'Unknown User'}</h4>
                                   <p className="text-xs text-gray-500">{new Date(post.created_at).toLocaleDateString()}</p>
-                                </div>
+                    </div>
                                 <div>
                                   <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
                                     {post.category}
-                                  </span>
-                                </div>
-                              </div>
+                          </span>
+                        </div>
+                          </div>
                               
                               <h3 className="font-bold text-xl mb-3 text-gray-900">{post.title}</h3>
                               <p className="text-gray-700 mb-4 leading-relaxed whitespace-pre-wrap">{displayText}</p>
                               
                               {post.content.split(' ').length > WORD_LIMIT && (
-                                <button
+                          <button 
                                   onClick={() => setShowFullText(!showFullText)}
                                   className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                                >
+                          >
                                   {showFullText ? 'See less' : 'See more'}
-                                </button>
+                          </button>
                               )}
-                            </div>
+                        </div>
 
                             {/* Post Image */}
                             {post.image_url && (
@@ -646,8 +645,8 @@ const ProfilePage = ({ onPageChange, userId }) => {
                                     e.target.style.display = 'none';
                                   }}
                                 />
-                              </div>
-                            )}
+                </div>
+              )}
 
                             {/* Post Footer */}
                             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
@@ -656,7 +655,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
                                   <div className="flex items-center gap-1">
                                     <span className="text-red-500">❤️</span>
                                     <span>{post.likes?.length || 0} likes</span>
-                                  </div>
+                    </div>
                                   <div className="flex items-center gap-1">
                                     <span className="text-blue-500">💬</span>
                                     <span>{post.comments?.length || 0} comments</span>
@@ -667,16 +666,16 @@ const ProfilePage = ({ onPageChange, userId }) => {
                                     {post.tags.slice(0, 3).map((tag, tagIndex) => (
                                       <span key={tagIndex} className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
                                         #{tag}
-                                      </span>
+                          </span>
                                     ))}
                                     {post.tags.length > 3 && (
                                       <span className="text-xs text-gray-400">+{post.tags.length - 3} more</span>
                                     )}
-                                  </div>
+                        </div>
                                 )}
-                              </div>
-                            </div>
                           </div>
+                        </div>
+                      </div>
                         );
                       };
                       

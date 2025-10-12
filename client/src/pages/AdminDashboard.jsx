@@ -1846,15 +1846,6 @@ const CommunityTab = ({ posts, setPosts }) => {
                                                     )}
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    {/* Show edit button only for admin's own posts */}
-                                                    {post.author?.role === 'admin' && (
-                                                        <button
-                                                            onClick={() => handleEditPost(post)}
-                                                            className="p-2 hover:bg-green-50 rounded-lg transition border border-green-200"
-                                                        >
-                                                            <Edit className="w-5 h-5 text-green-600" />
-                                                        </button>
-                                                    )}
                                                     <button
                                                         onClick={() => handleDeletePost(post._id)}
                                                         className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
