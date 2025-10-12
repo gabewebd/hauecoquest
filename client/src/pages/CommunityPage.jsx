@@ -167,12 +167,6 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
             <MessageCircle className="w-4 h-4 md:w-5 md:h-5" />
             <span className="text-xs md:text-sm">{comments}</span>
           </button>
-          <button
-            onClick={handleShare}
-            className="flex items-center gap-1 md:gap-2 hover:text-green-500 transition-colors font-medium"
-          >
-            <Share2 className="w-4 h-4 md:w-5 md:h-5" />
-          </button>
         </div>
         <button
           onClick={() => onPageChange('post-details', postId)}

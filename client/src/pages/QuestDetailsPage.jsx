@@ -311,9 +311,6 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
                                     <span className="text-sm text-gray-500">{category}</span>
                                 </div>
                             </div>
-                            <button className="text-gray-400 hover:text-red-500 transition-colors">
-                                <Heart className="w-6 h-6" />
-                            </button>
                         </div>
 
                             <h1 className="text-3xl font-bold text-gray-900 mb-3">{title}</h1>

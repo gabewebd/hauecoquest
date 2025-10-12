@@ -268,13 +268,6 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
                 <MessageCircle className="w-6 h-6" />
                 <span className="font-semibold">{post.comments?.length || 0}</span>
               </div>
-              <button
-                onClick={handleShare}
-                className="flex items-center gap-2 text-gray-500 hover:text-green-500 transition"
-              >
-                <Share2 className="w-6 h-6" />
-                <span className="font-semibold">Share</span>
-              </button>
             </div>
           </div>
         </div>
