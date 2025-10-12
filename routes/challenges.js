@@ -360,14 +360,20 @@ router.get('/:id/participants', async (req, res) => {
 });
 
 // @route   PUT /api/challenges/:id
-// @desc    Update a challenge (Admin only)
+// @desc    Update a challenge (Admin/Partner only)
 // @access  Private
-router.put('/:id', [auth, roleCheck('admin'), upload.single('badge')], async (req, res) => {
+router.put('/:id', [auth, roleCheck('admin', 'partner'), upload.single('badge')], async (req, res) => {
     try {
         const challenge = await Challenge.findById(req.params.id);
         
         if (!challenge) {
             return res.status(404).json({ msg: 'Challenge not found' });
+        }
+
+        // Check if user is the creator or an admin
+        const user = await User.findById(req.user.id);
+        if (challenge.createdBy.toString() !== req.user.id && user.role !== 'admin') {
+            return res.status(401).json({ msg: 'Not authorized to update this challenge' });
         }
 
         const {

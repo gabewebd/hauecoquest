@@ -205,10 +205,10 @@ const ProfilePage = ({ onPageChange, userId }) => {
 
     try {
       // Fetch profile user's quest submissions (public data)
-      const questsRes = await fetch(`/api/quests/submissions/user/${profileUserId}`);
-      if (questsRes.ok) {
-        const questsData = await questsRes.json();
-        setUserQuests(questsData);
+        const questsRes = await fetch(`/api/quests/submissions/user/${profileUserId}`);
+        if (questsRes.ok) {
+          const questsData = await questsRes.json();
+          setUserQuests(questsData);
       } else {
         // For admin and partner, fetch quests they created
         const questsRes = await fetch('/api/quests');

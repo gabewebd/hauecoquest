@@ -510,32 +510,35 @@ const CommunityPage = ({ onPageChange, pageParams }) => {
         {/* Two Column Layout */}
         <section className="container mx-auto px-4 md:px-6 py-6 md:py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-            {/* Left Sidebar */}
-            <div className="lg:col-span-1"><div className="lg:sticky lg:top-24">
-              {/* Community Challenge Card */}
-              <div className={`bg-white rounded-xl md:rounded-2xl shadow-lg border-2 overflow-hidden mb-4 md:mb-6 transition-all duration-300 ${highlightChallenge && communityChallenge && communityChallenge.title === highlightChallenge ? 'border-green-400 shadow-xl ring-4 ring-green-100 animate-pulse' : 'border-gray-200'}`} data-challenge-title={communityChallenge?.title} data-section="challenges">
-                {communityChallenge ? (
-                  <>
-                    <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-4 md:p-6 relative overflow-hidden">
-                      <div className="absolute inset-0 opacity-10"><div className="absolute top-3 left-3 md:top-5 md:left-5 w-16 h-16 md:w-20 md:h-20 bg-white rounded-full"></div><div className="absolute bottom-3 right-3 md:bottom-5 md:right-5 w-20 h-20 md:w-24 md:h-24 bg-white rounded-full"></div></div>
-                      <div className="relative text-center text-white">
-                        <h3 className="text-lg md:text-xl font-black mb-2">{communityChallenge.title}</h3>
+            {/* Left Sidebar - Sticky Community Challenges */}
+            <div className="lg:col-span-1">
+              <div className="lg:sticky lg:top-24 lg:max-h-screen lg:overflow-y-auto">
+                {/* Community Challenge Card */}
+                <div className={`bg-white rounded-xl md:rounded-2xl shadow-lg border-2 overflow-hidden mb-4 md:mb-6 transition-all duration-300 ${highlightChallenge && communityChallenge && communityChallenge.title === highlightChallenge ? 'border-green-400 shadow-xl ring-4 ring-green-100 animate-pulse' : 'border-gray-200'}`} data-challenge-title={communityChallenge?.title} data-section="challenges">
+                  {communityChallenge ? (
+                    <>
+                      <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-4 md:p-6 relative overflow-hidden">
+                        <div className="absolute inset-0 opacity-10"><div className="absolute top-3 left-3 md:top-5 md:left-5 w-16 h-16 md:w-20 md:h-20 bg-white rounded-full"></div><div className="absolute bottom-3 right-3 md:bottom-5 md:right-5 w-20 h-20 md:w-24 md:h-24 bg-white rounded-full"></div></div>
+                        <div className="relative text-center text-white">
+                          <h3 className="text-lg md:text-xl font-black mb-2">{communityChallenge.title}</h3>
+                        </div>
                       </div>
-                    </div>
-                    <div className="p-4 md:p-6">
-                      <p className="text-gray-600 text-xs md:text-sm mb-4 md:mb-6 leading-relaxed">{communityChallenge.description}</p>
-                      <div className="mb-4 md:mb-6"><div className="flex justify-between text-xs font-bold mb-2 text-gray-700"><span>Progress</span><span className="text-green-600">{communityChallenge.current_progress || 0} / {communityChallenge.target}</span></div><div className="w-full bg-gray-200 rounded-full h-2 md:h-3 overflow-hidden"><div className="bg-gradient-to-r from-green-500 to-emerald-600 h-2 md:h-3 rounded-full transition-all duration-500" style={{ width: `${Math.min(((communityChallenge.current_progress || 0) / communityChallenge.target) * 100, 100)}%` }}></div></div></div>
-                      <div className="grid grid-cols-2 gap-2 md:gap-3 mb-4 md:mb-6"><div className="text-center p-2 md:p-3 bg-green-50 rounded-lg md:rounded-xl"><div className="text-lg md:text-xl font-black text-green-600 mb-1">{communityChallenge.participants?.length || 0}</div><div className="text-xs text-gray-600 font-semibold">Warriors</div></div><div className="text-center p-2 md:p-3 bg-blue-50 rounded-lg md:rounded-xl"><div className="text-lg md:text-xl font-black text-blue-600 mb-1">{communityChallenge.target - (communityChallenge.current_progress || 0)}</div><div className="text-xs text-gray-600 font-semibold">Remaining</div></div></div>
-                      {!user ? (<button onClick={() => onPageChange('signup')} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 md:py-3 rounded-lg md:rounded-xl shadow-md transition-all text-sm md:text-base">Join Challenge</button>) : user.role === 'user' ? (<button onClick={() => onPageChange('challenge-details', communityChallenge._id)} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 md:py-3 rounded-lg md:rounded-xl shadow-md transition-all text-sm md:text-base">View Challenge</button>) : (<button onClick={() => onPageChange('challenge-details', communityChallenge._id)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 md:py-3 rounded-lg md:rounded-xl shadow-md transition-all text-sm md:text-base">View Progress</button>)}
-                    </div>
-                  </>
-                ) : (<div className="p-8 text-center"><div className="w-16 h-16 bg-gray-100 rounded-xl mx-auto mb-4 flex items-center justify-center"><Trophy className="w-8 h-8 text-gray-300" /></div><h3 className="text-lg font-bold text-gray-600 mb-2">No Active Challenge</h3><p className="text-sm text-gray-500">Check back later for new challenges!</p></div>)}
+                      <div className="p-4 md:p-6">
+                        <p className="text-gray-600 text-xs md:text-sm mb-4 md:mb-6 leading-relaxed">{communityChallenge.description}</p>
+                        <div className="mb-4 md:mb-6"><div className="flex justify-between text-xs font-bold mb-2 text-gray-700"><span>Progress</span><span className="text-green-600">{communityChallenge.current_progress || 0} / {communityChallenge.target}</span></div><div className="w-full bg-gray-200 rounded-full h-2 md:h-3 overflow-hidden"><div className="bg-gradient-to-r from-green-500 to-emerald-600 h-2 md:h-3 rounded-full transition-all duration-500" style={{ width: `${Math.min(((communityChallenge.current_progress || 0) / communityChallenge.target) * 100, 100)}%` }}></div></div></div>
+                        <div className="grid grid-cols-2 gap-2 md:gap-3 mb-4 md:mb-6"><div className="text-center p-2 md:p-3 bg-green-50 rounded-lg md:rounded-xl"><div className="text-lg md:text-xl font-black text-green-600 mb-1">{communityChallenge.participants?.length || 0}</div><div className="text-xs text-gray-600 font-semibold">Warriors</div></div><div className="text-center p-2 md:p-3 bg-blue-50 rounded-lg md:rounded-xl"><div className="text-lg md:text-xl font-black text-blue-600 mb-1">{communityChallenge.target - (communityChallenge.current_progress || 0)}</div><div className="text-xs text-gray-600 font-semibold">Remaining</div></div></div>
+                        {!user ? (<button onClick={() => onPageChange('signup')} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 md:py-3 rounded-lg md:rounded-xl shadow-md transition-all text-sm md:text-base">Join Challenge</button>) : user.role === 'user' ? (<button onClick={() => onPageChange('challenge-details', communityChallenge._id)} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 md:py-3 rounded-lg md:rounded-xl shadow-md transition-all text-sm md:text-base">View Challenge</button>) : (<button onClick={() => onPageChange('challenge-details', communityChallenge._id)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 md:py-3 rounded-lg md:rounded-xl shadow-md transition-all text-sm md:text-base">View Progress</button>)}
+                      </div>
+                    </>
+                  ) : (<div className="p-8 text-center"><div className="w-16 h-16 bg-gray-100 rounded-xl mx-auto mb-4 flex items-center justify-center"><Trophy className="w-8 h-8 text-gray-300" /></div><h3 className="text-lg font-bold text-gray-600 mb-2">No Active Challenge</h3><p className="text-sm text-gray-500">Check back later for new challenges!</p></div>)}
+                </div>
+                {!user && (<div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200 shadow-lg"><div className="text-center"><div className="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center"><Users2 className="w-8 h-8 text-blue-600" /></div><h4 className="font-black text-gray-900 mb-2">Join Our Community</h4><p className="text-sm text-gray-600 mb-4">Connect with eco-heroes and start making an impact today.</p><button onClick={() => onPageChange('signup')} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-lg transition-all shadow-md hover:shadow-lg">Sign Up Now</button></div></div>)}
               </div>
-              {!user && (<div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 border-2 border-blue-200 shadow-lg"><div className="text-center"><div className="w-16 h-16 bg-blue-100 rounded-full mx-auto mb-4 flex items-center justify-center"><Users2 className="w-8 h-8 text-blue-600" /></div><h4 className="font-black text-gray-900 mb-2">Join Our Community</h4><p className="text-sm text-gray-600 mb-4">Connect with eco-heroes and start making an impact today.</p><button onClick={() => onPageChange('signup')} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-lg transition-all shadow-md hover:shadow-lg">Sign Up Now</button></div></div>)}
-            </div></div>
+            </div>
 
-            {/* Right Content - Posts Feed */}
+            {/* Right Content - Posts Feed with Sticky Search Bar */}
             <div className="lg:col-span-2 relative">
+              {/* Sticky Search Bar */}
               <div className="sticky top-16 md:top-20 z-40 bg-white/95 backdrop-blur-md rounded-xl md:rounded-2xl shadow-lg border border-gray-200 p-3 md:p-4 mb-4 md:mb-6">
                 <div className="flex flex-col gap-3 md:gap-4">
                   <div className="flex flex-col md:flex-row gap-3 md:gap-4">
@@ -544,7 +547,9 @@ const CommunityPage = ({ onPageChange, pageParams }) => {
                   </div>
                 </div>
               </div>
-              <div className="space-y-3 md:space-y-4">
+              
+              {/* Scrollable Posts Container */}
+              <div className="space-y-3 md:space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto">
                 {loading ? (<div className="flex justify-center items-center py-12 md:py-16"><div className="w-8 h-8 md:w-12 md:h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div></div>) : posts.length === 0 ? (<div className="bg-white p-8 md:p-16 rounded-xl md:rounded-2xl shadow-lg border border-gray-200 text-center"><FileText className="w-12 h-12 md:w-16 md:h-16 text-gray-300 mx-auto mb-4" /><h3 className="text-lg md:text-xl font-bold text-gray-600 mb-2">No Posts Found</h3><p className="text-sm md:text-base text-gray-500">{searchTerm ? 'Try adjusting your search' : 'Be the first to share your story!'}</p></div>) : (<div className="space-y-3 md:space-y-4">{posts.map((post, index) => (<PostCard key={index} {...post} onLike={handleLike} onComment={handleComment} onPin={handlePin} postId={post.id || index} user={user} onPageChange={onPageChange} isPinned={post.isPinned} />))}</div>)}
               </div>
             </div>
