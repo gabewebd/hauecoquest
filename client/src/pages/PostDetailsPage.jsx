@@ -159,17 +159,19 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
   }
 
   return (
-    <div className="font-sans bg-app-bg text-gray-800 min-h-screen">
-      <div className="container mx-auto px-4 py-8">
+    <div className="font-sans bg-gray-50 text-gray-800 min-h-screen">
+      <div className="container mx-auto px-4 pt-24 pb-8">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={() => onPageChange('community')}
-            className="flex items-center gap-2 bg-gray-100 hover:bg-green-100 text-gray-700 hover:text-green-700 px-4 py-2 rounded-lg transition-all duration-200 font-medium"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Community
-          </button>
+        <div className="sticky top-20 z-30 bg-gray-50 py-4 mb-8">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => onPageChange('community')}
+              className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-all duration-200 font-semibold shadow-md hover:shadow-lg"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Community
+            </button>
+          </div>
         </div>
 
         {/* Post Content */}
