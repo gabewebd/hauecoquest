@@ -1083,6 +1083,7 @@ const QuestsTab = ({ quests, setQuests }) => {
 
     const handleSaveQuest = async (questData) => {
         try {
+            console.log('Quest data being sent:', questData);
             const token = localStorage.getItem('token');
 
             if (editingQuest) {
@@ -1113,37 +1114,37 @@ const QuestsTab = ({ quests, setQuests }) => {
                 const updatedQuest = await response.json();
                 setQuests(quests.map(q => q._id === editingQuest._id ? updatedQuest : q));
             } else {
-                // For new quests, use FormData to handle file uploads
-                const formData = new FormData();
-                formData.append('title', questData.title);
-                formData.append('description', questData.description);
-                formData.append('category', questData.category);
-                formData.append('difficulty', questData.difficulty);
-                formData.append('points', questData.points);
-                formData.append('duration', questData.duration);
-                formData.append('location', questData.location);
-                formData.append('objectives', JSON.stringify(questData.objectives || []));
-                formData.append('submissionRequirements', JSON.stringify(questData.submissionRequirements || ['Photo proof required']));
-                formData.append('maxParticipants', questData.maxParticipants);
-
-                if (questData.image) {
-                    formData.append('image', questData.image);
-                }
+                // For new quests, use JSON (no image upload for now)
+                const payload = {
+                    title: questData.title,
+                    description: questData.description,
+                    category: questData.category,
+                    difficulty: questData.difficulty,
+                    points: questData.points,
+                    duration: questData.duration,
+                    location: questData.location,
+                    objectives: questData.objectives || [],
+                    submissionRequirements: questData.submissionRequirements || ['Photo proof required'],
+                    maxParticipants: questData.maxParticipants
+                };
 
                 const response = await fetch('/api/quests', {
                     method: 'POST',
                     headers: {
+                        'Content-Type': 'application/json',
                         'x-auth-token': token
                     },
-                    body: formData
+                    body: JSON.stringify(payload)
                 });
 
                 if (!response.ok) {
                     const errorData = await response.json();
+                    console.error('Server error response:', errorData);
                     throw new Error(errorData.msg || 'Failed to create quest');
                 }
                 const newQuest = await response.json();
                 setQuests([newQuest, ...quests]);
+                alert('Quest created successfully!');
             }
 
             setShowModal(false);

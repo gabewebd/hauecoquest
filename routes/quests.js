@@ -101,6 +101,10 @@ router.get('/:id', async (req, res) => {
 // @access  Private (Partner/Admin only)
 router.post('/', [auth, checkRole('partner', 'admin')], async (req, res) => {
   try {
+    console.log('Quest creation request received');
+    console.log('Request body:', req.body);
+    console.log('User:', req.user);
+    
     const {
       title,
       description,
@@ -119,6 +123,8 @@ router.post('/', [auth, checkRole('partner', 'admin')], async (req, res) => {
     const parsedObjectives = typeof objectives === 'string' ? JSON.parse(objectives) : objectives;
     const parsedSubmissionRequirements = typeof submissionRequirements === 'string' ? JSON.parse(submissionRequirements) : submissionRequirements;
 
+    console.log('Parsed objectives:', parsedObjectives);
+    console.log('Parsed submission requirements:', parsedSubmissionRequirements);
 
     const newQuest = new Quest({
       title,
@@ -136,7 +142,9 @@ router.post('/', [auth, checkRole('partner', 'admin')], async (req, res) => {
     });
 
 
+    console.log('Saving quest to database...');
     const quest = await newQuest.save();
+    console.log('Quest saved successfully:', quest._id);
     res.json(quest);
   } catch (err) {
     console.error(err.message);
