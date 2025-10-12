@@ -341,7 +341,7 @@ const AppContent = () => {
       case 'quests':
         return <QuestsPage onPageChange={handlePageChange} pageParams={pageParams} />;
       case 'community':
-        return <CommunityPage onPageChange={handlePageChange} />;
+        return <CommunityPage onPageChange={handlePageChange} pageParams={pageParams} />;
       case 'leaderboard':
         return <LeaderboardPage onPageChange={handlePageChange} />;
       case 'profile':

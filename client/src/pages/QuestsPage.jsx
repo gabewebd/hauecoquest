@@ -186,19 +186,40 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
     // Handle quest highlighting when pageParams change
     useEffect(() => {
         if (pageParams && pageParams.highlightQuest) {
+            console.log('Highlighting quest:', pageParams.highlightQuest);
             setHighlightQuest(pageParams.highlightQuest);
-            // Scroll to the quest after a short delay to ensure it's rendered
-            setTimeout(() => {
+            
+            // Multiple attempts to scroll to the quest with increasing delays
+            const scrollToQuest = (attempt = 1) => {
                 const questElement = document.querySelector(`[data-quest-title="${pageParams.highlightQuest}"]`);
+                console.log('Scroll attempt', attempt, 'Element found:', !!questElement);
+                
                 if (questElement) {
                     questElement.scrollIntoView({ 
                         behavior: 'smooth', 
                         block: 'center' 
                     });
+                    console.log('Successfully scrolled to quest');
+                } else if (attempt < 5) {
+                    // Retry after a longer delay if element not found
+                    setTimeout(() => scrollToQuest(attempt + 1), 1000 * attempt);
+                } else {
+                    console.warn('Could not find quest element after 5 attempts');
+                    // Fallback: scroll to quests section
+                    const questsSection = document.querySelector('[data-section="quests"]') || 
+                                        document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-4');
+                    if (questsSection) {
+                        questsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        console.log('Scrolled to quests section as fallback');
+                    }
                 }
-            }, 500);
+            };
+            
+            // Start scrolling attempts
+            setTimeout(() => scrollToQuest(), 300);
+            
             // Clear highlight after a delay
-            setTimeout(() => setHighlightQuest(null), 3000);
+            setTimeout(() => setHighlightQuest(null), 5000);
         }
     }, [pageParams]);
 
@@ -478,7 +499,7 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6" data-section="quests">
                 {filteredQuests.map((quest) => (
                   <QuestCard 
                     key={quest.id} 

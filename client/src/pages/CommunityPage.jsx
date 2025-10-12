@@ -406,7 +406,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, user }) => {
   );
 };
 
-const CommunityPage = ({ onPageChange }) => {
+const CommunityPage = ({ onPageChange, pageParams }) => {
   const { user } = useUser();
   const [posts, setPosts] = useState([]);
   const [allPosts, setAllPosts] = useState([]);
@@ -417,6 +417,7 @@ const CommunityPage = ({ onPageChange }) => {
     questsCompleted: 0,
     totalPoints: 0
   });
+  const [highlightChallenge, setHighlightChallenge] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('Recent Activity');
   const [searchTerm, setSearchTerm] = useState('');
@@ -440,6 +441,46 @@ const CommunityPage = ({ onPageChange }) => {
   useEffect(() => {
     fetchCommunityData();
   }, []);
+
+  // Handle challenge highlighting when pageParams change
+  useEffect(() => {
+    if (pageParams && pageParams.highlightChallenge) {
+      console.log('Highlighting challenge:', pageParams.highlightChallenge);
+      setHighlightChallenge(pageParams.highlightChallenge);
+      
+      // Multiple attempts to scroll to the challenge with increasing delays
+      const scrollToChallenge = (attempt = 1) => {
+        const challengeElement = document.querySelector(`[data-challenge-title="${pageParams.highlightChallenge}"]`);
+        console.log('Challenge scroll attempt', attempt, 'Element found:', !!challengeElement);
+        
+        if (challengeElement) {
+          challengeElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          console.log('Successfully scrolled to challenge');
+        } else if (attempt < 5) {
+          // Retry after a longer delay if element not found
+          setTimeout(() => scrollToChallenge(attempt + 1), 1000 * attempt);
+        } else {
+          console.warn('Could not find challenge element after 5 attempts');
+          // Fallback: scroll to challenge section
+          const challengeSection = document.querySelector('[data-section="challenges"]') || 
+                                  document.querySelector('.bg-gradient-to-br.from-green-400.to-emerald-500');
+          if (challengeSection) {
+            challengeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            console.log('Scrolled to challenge section as fallback');
+          }
+        }
+      };
+      
+      // Start scrolling attempts
+      setTimeout(() => scrollToChallenge(), 300);
+      
+      // Clear highlight after a delay
+      setTimeout(() => setHighlightChallenge(null), 5000);
+    }
+  }, [pageParams]);
 
   const handleLike = async (postId) => {
     try {
@@ -732,7 +773,15 @@ const CommunityPage = ({ onPageChange }) => {
             <div className="lg:col-span-1">
               <div className="lg:sticky lg:top-24">
                 {/* Community Challenge Card */}
-                <div className="bg-white rounded-xl md:rounded-2xl shadow-lg border border-gray-200 overflow-hidden mb-4 md:mb-6">
+                <div 
+                  className={`bg-white rounded-xl md:rounded-2xl shadow-lg border-2 overflow-hidden mb-4 md:mb-6 transition-all duration-300 ${
+                    highlightChallenge && communityChallenge && communityChallenge.title === highlightChallenge 
+                      ? 'border-green-400 shadow-xl ring-4 ring-green-100 animate-pulse' 
+                      : 'border-gray-200'
+                  }`}
+                  data-challenge-title={communityChallenge?.title}
+                  data-section="challenges"
+                >
                   {communityChallenge ? (
                     <>
                       {/* Challenge Header with Image Placeholder */}

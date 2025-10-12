@@ -793,7 +793,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
                               </span>
                             </div>
                             <button 
-                              onClick={() => onPageChange('challenge-details', submission.challenge_id?._id)}
+                              onClick={() => onPageChange('community', { highlightChallenge: submission.challenge_id?.title || 'Plant Trees Challenge' })}
                               className="w-full bg-purple-500 text-white px-3 py-2 rounded-lg hover:bg-purple-600 transition text-sm font-semibold"
                             >
                               View Details
