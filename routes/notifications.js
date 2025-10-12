@@ -7,6 +7,7 @@ const User = require('../models/User');
 // Helper function to create notifications
 const createNotification = async (userId, type, title, message, data = {}) => {
   try {
+    console.log(`Creating notification: type=${type}, userId=${userId}, title=${title}`);
     const notification = new Notification({
       user_id: userId,
       type,
@@ -14,10 +15,12 @@ const createNotification = async (userId, type, title, message, data = {}) => {
       message,
       data
     });
-    await notification.save();
-    return notification;
+    const savedNotification = await notification.save();
+    console.log(`Notification created successfully with ID: ${savedNotification._id}`);
+    return savedNotification;
   } catch (error) {
     console.error('Error creating notification:', error);
+    console.error('Notification data:', { userId, type, title, message, data });
     return null;
   }
 };
@@ -44,6 +47,33 @@ router.post('/test', auth, async (req, res) => {
   } catch (err) {
     console.error('Error creating test notification:', err.message);
     res.status(500).json({ msg: 'Server error' });
+  }
+});
+
+// @route   POST /api/notifications/test-challenge
+// @desc    Create a test challenge approval notification for debugging
+// @access  Private
+router.post('/test-challenge', auth, async (req, res) => {
+  try {
+    const testNotification = new Notification({
+      user_id: req.user.id,
+      type: 'challenge_approved',
+      title: 'Challenge Approved!',
+      message: 'Your challenge submission for "Plant Trees Challenge" has been approved! You earned 50 points and a badge.',
+      data: { 
+        challengeId: 'test-challenge-id',
+        challengeTitle: 'Plant Trees Challenge',
+        pointsEarned: 50,
+        submissionId: 'test-submission-id'
+      }
+    });
+    
+    await testNotification.save();
+    console.log('Test challenge notification created for user:', req.user.id);
+    res.json({ msg: 'Test challenge notification created', notification: testNotification });
+  } catch (err) {
+    console.error('Error creating test challenge notification:', err.message);
+    res.status(500).json({ msg: 'Server error', error: err.message });
   }
 });
 

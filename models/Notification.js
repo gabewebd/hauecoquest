@@ -22,6 +22,8 @@ const notificationSchema = new mongoose.Schema({
       'submission_rejected',
       'challenge_joined',
       'challenge_completed',
+      'challenge_approved',
+      'challenge_rejected',
       'post_liked',
       'post_commented',
       'role_approved'
