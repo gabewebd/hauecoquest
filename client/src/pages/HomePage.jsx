@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Rocket, ArrowRight, Target, Users, Trophy, BarChart, Zap } from "lucide-react";
+import { Rocket, ArrowRight, Target, Users, BarChart, Zap } from "lucide-react";
 import { questAPI, userAPI } from "../utils/api";
 import FacebookIcon from '../img/Facebook.png';
 import InstagramIcon from '../img/Instagram.png';
@@ -80,7 +80,6 @@ export default function HomePage({ onPageChange }) {
     }
   };
   
-
   return (
     <div className="font-sans bg-white text-gray-900 overflow-x-hidden">
       <section className="relative bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 text-white overflow-hidden">
@@ -137,18 +136,13 @@ export default function HomePage({ onPageChange }) {
             </div>
 
             <div className="relative z-10 hidden md:block">
-              <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-white border-opacity-20">
-                <div className="aspect-square bg-gradient-to-br from-green-200 to-emerald-300 rounded-2xl flex items-center justify-center">
-                  <div className="text-center text-green-700">
-                    <div className="w-32 h-32 bg-white bg-opacity-50 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                      <span className="text-4xl font-black">IMG</span>
-                    </div>
-                    <p className="font-bold text-xl">Hero Illustration</p>
-                    <p className="text-sm opacity-75">Students on eco-adventure</p>
-                  </div>
-                </div>
-              </div>
+              <img 
+                src="/assets/designs/eco-adventure.jpg" 
+                alt="Students collaborating on an eco-adventure"
+                className="rounded-3xl shadow-2xl w-full h-full object-cover"
+              />
             </div>
+
           </div>
         </div>
       </section>
@@ -184,16 +178,13 @@ export default function HomePage({ onPageChange }) {
       <section className="py-16 md:py-24 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
-            <div className="bg-green-100 rounded-2xl md:rounded-3xl aspect-video flex items-center justify-center overflow-hidden relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-200 to-emerald-300"></div>
-              <div className="relative text-center text-green-700 p-6 md:p-8">
-                <div className="w-16 h-16 md:w-24 md:h-24 bg-white bg-opacity-50 rounded-xl md:rounded-2xl mx-auto mb-3 md:mb-4 flex items-center justify-center">
-                  <span className="text-lg md:text-2xl font-black">IMG</span>
-                </div>
-                <p className="font-bold text-base md:text-lg">Quest Board Showcase</p>
-                <p className="text-xs md:text-sm opacity-75">Active missions interface</p>
-              </div>
-            </div>
+            
+            <img 
+              src="/assets/designs/quest.png" 
+              alt="HAU Eco-Quest board with active missions"
+              className="rounded-2xl md:rounded-3xl w-full h-full object-cover shadow-lg"
+            />
+            
             <div>
               <h2 className="text-3xl md:text-5xl font-black mb-4 md:mb-6 leading-tight text-gray-900">
                 Create eco-adventures with purpose
@@ -217,16 +208,14 @@ export default function HomePage({ onPageChange }) {
                 See your environmental footprint grow with every completed quest. Track points, badges, and achievements on your personalized dashboard. Compete on leaderboards and unlock exclusive rewards as you level up your eco-warrior status.
               </p>
             </div>
-            <div className="bg-emerald-100 rounded-2xl md:rounded-3xl aspect-video flex items-center justify-center overflow-hidden relative order-1 md:order-2">
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-200 to-teal-300"></div>
-              <div className="relative text-center text-emerald-700 p-6 md:p-8">
-                <div className="w-16 h-16 md:w-24 md:h-24 bg-white bg-opacity-50 rounded-xl md:rounded-2xl mx-auto mb-3 md:mb-4 flex items-center justify-center">
-                  <span className="text-lg md:text-2xl font-black">IMG</span>
-                </div>
-                <p className="font-bold text-base md:text-lg">Dashboard Interface</p>
-                <p className="text-xs md:text-sm opacity-75">Stats & progress tracking</p>
-              </div>
-            </div>
+            
+            {/* UPDATED Dashboard Interface Image */}
+            <img 
+              src="/assets/designs/progress.jpg" 
+              alt="Dashboard showing user progress and stats"
+              className="rounded-2xl md:rounded-3xl w-full h-full object-cover shadow-lg order-1 md:order-2"
+            />
+            
           </div>
         </div>
       </section>
@@ -234,16 +223,14 @@ export default function HomePage({ onPageChange }) {
       <section className="py-16 md:py-24 px-4 md:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
-            <div className="bg-teal-100 rounded-2xl md:rounded-3xl aspect-video flex items-center justify-center overflow-hidden relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-teal-200 to-green-300"></div>
-              <div className="relative text-center text-teal-700 p-6 md:p-8">
-                <div className="w-16 h-16 md:w-24 md:h-24 bg-white bg-opacity-50 rounded-xl md:rounded-2xl mx-auto mb-3 md:mb-4 flex items-center justify-center">
-                  <span className="text-lg md:text-2xl font-black">IMG</span>
-                </div>
-                <p className="font-bold text-base md:text-lg">Community Hub</p>
-                <p className="text-xs md:text-sm opacity-75">Students collaborating</p>
-              </div>
-            </div>
+            
+            {/* UPDATED Community Hub Image */}
+            <img 
+              src="/assets/designs/collaborating.jpg" 
+              alt="Students collaborating in the community hub"
+              className="rounded-2xl md:rounded-3xl w-full h-full object-cover shadow-lg"
+            />
+            
             <div>
               <h2 className="text-3xl md:text-5xl font-black mb-4 md:mb-6 leading-tight text-gray-900">
                 From few to a student guild
@@ -255,7 +242,6 @@ export default function HomePage({ onPageChange }) {
           </div>
         </div>
       </section>
-
 
       <section className="py-20 md:py-32 px-4 md:px-6 bg-gray-100 text-center">
         <div className="max-w-4xl mx-auto">
@@ -278,8 +264,8 @@ export default function HomePage({ onPageChange }) {
         </div>
       </section>
 
-        {/* Footer */}
-        <footer className="bg-green-700 text-white pt-12 md:pt-16 pb-6 md:pb-8 px-4 md:px-6">
+      {/* Footer */}
+      <footer className="bg-green-700 text-white pt-12 md:pt-16 pb-6 md:pb-8 px-4 md:px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 text-left">
           {/* Brand */}
           <div>

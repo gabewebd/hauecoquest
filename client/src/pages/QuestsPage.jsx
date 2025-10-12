@@ -155,18 +155,6 @@ const QuestCard = ({ icon, title, description, difficulty, points, duration, par
   );
 };
 
-const GuidelineCard = ({ icon, title, description, iconColor }) => (
-  <div className="text-center p-6 bg-white rounded-xl border border-gray-200 shadow-lg">
-    <div className={`mx-auto w-14 h-14 flex items-center justify-center rounded-xl mb-4`} style={{ backgroundColor: `${iconColor}20` }}>
-      <div style={{ color: iconColor }}>
-        {icon}
-      </div>
-    </div>
-    <h4 className="font-bold text-gray-900 mb-2 text-base">{title}</h4>
-    <p className="text-sm text-gray-600 leading-relaxed">{description}</p>
-  </div>
-);
-
 // --- MAIN PAGE COMPONENT ---
 const QuestsPage = ({ onPageChange, pageParams }) => {
     const { user } = useUser();
@@ -189,36 +177,18 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
             console.log('Highlighting quest:', pageParams.highlightQuest);
             setHighlightQuest(pageParams.highlightQuest);
             
-            // Multiple attempts to scroll to the quest with increasing delays
             const scrollToQuest = (attempt = 1) => {
                 const questElement = document.querySelector(`[data-quest-title="${pageParams.highlightQuest}"]`);
-                console.log('Scroll attempt', attempt, 'Element found:', !!questElement);
-                
                 if (questElement) {
-                    questElement.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'center' 
-                    });
-                    console.log('Successfully scrolled to quest');
+                    questElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else if (attempt < 5) {
-                    // Retry after a longer delay if element not found
                     setTimeout(() => scrollToQuest(attempt + 1), 1000 * attempt);
                 } else {
                     console.warn('Could not find quest element after 5 attempts');
-                    // Fallback: scroll to quests section
-                    const questsSection = document.querySelector('[data-section="quests"]') || 
-                                        document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3.xl\\:grid-cols-4');
-                    if (questsSection) {
-                        questsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        console.log('Scrolled to quests section as fallback');
-                    }
                 }
             };
             
-            // Start scrolling attempts
             setTimeout(() => scrollToQuest(), 300);
-            
-            // Clear highlight after a delay
             setTimeout(() => setHighlightQuest(null), 5000);
         }
     }, [pageParams]);
@@ -226,7 +196,6 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
     const fetchQuests = async () => {
         try {
             const questsData = await questAPI.getAllQuests();
-            
             let userSubmissions = [];
             if (user) {
                 try {
@@ -238,7 +207,6 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
             
             const transformedQuests = questsData.map(quest => {
                 const userSubmission = userSubmissions.find(sub => sub.quest_id?._id === quest._id);
-                
                 return {
                     ...quest,
                     id: quest._id,
@@ -321,39 +289,25 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
 
     const handleQuestSubmission = () => {
         fetchQuests();
-        console.log('Quest submitted successfully!');
     };
 
     const filteredQuests = quests.filter(quest => {
         const matchesSearch = quest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             quest.description.toLowerCase().includes(searchTerm.toLowerCase());
+                              quest.description.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = selectedCategory === 'All' || quest.category === selectedCategory;
         const matchesDifficulty = selectedDifficulty === 'All' || quest.difficulty === selectedDifficulty;
         return matchesSearch && matchesCategory && matchesDifficulty;
     }).sort((a, b) => {
-        // Priority order: Available quests first, then user's in-progress/completed, then full quests last
-        
-        // Check if quest is full
         const aIsFull = a.participants >= a.maxParticipants;
         const bIsFull = b.participants >= b.maxParticipants;
-        
-        // Check if user has submission for this quest
         const aHasSubmission = a.existingSubmission;
         const bHasSubmission = b.existingSubmission;
-        
-        // Priority 1: Available quests (not full, no user submission)
         if (!aIsFull && !aHasSubmission && (bIsFull || bHasSubmission)) return -1;
         if (!bIsFull && !bHasSubmission && (aIsFull || aHasSubmission)) return 1;
-        
-        // Priority 2: User's submissions (in progress or completed)
         if (aHasSubmission && !bHasSubmission) return -1;
         if (bHasSubmission && !aHasSubmission) return 1;
-        
-        // Priority 3: Full quests last
         if (aIsFull && !bIsFull) return 1;
         if (bIsFull && !aIsFull) return -1;
-        
-        // If same priority, sort by points (higher points first)
         return b.points - a.points;
     });
 
@@ -375,7 +329,7 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
   return (
     <div className="font-sans bg-gray-50 text-gray-900">
       <main className="pt-16 md:pt-20 pb-12">
-        {/* Page Header - Compact */}
+        {/* Page Header */}
         <section className="bg-white border-b border-gray-200 shadow-sm">
           <div className="container mx-auto px-4 md:px-6 py-6 md:py-8">
             <div className="flex items-center justify-between">
@@ -396,7 +350,6 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
         <section className="bg-white border-b border-gray-200 shadow-sm sticky top-16 z-40">
           <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
             <div className="flex flex-col md:flex-row gap-3 md:gap-4">
-              {/* Search */}
               <div className="relative flex-1">
                 <input 
                   type="text" 
@@ -407,19 +360,13 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
                 />
                 <Search className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
               </div>
-
-              {/* Category Filter */}
               <div className="flex gap-2 overflow-x-auto">
                 {['All', 'Gardening', 'Recycling', 'Energy', 'Water'].map((cat) => (
                   <button 
                     key={cat}
                     onClick={() => setSelectedCategory(cat === 'All' ? 'All' : cat === 'Gardening' ? 'Gardening & Planting' : cat === 'Recycling' ? 'Recycling & Waste' : cat === 'Energy' ? 'Energy Conservation' : 'Water Conservation')}
                     className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-bold whitespace-nowrap transition-all ${
-                      (selectedCategory === 'All' && cat === 'All') ||
-                      (selectedCategory === 'Gardening & Planting' && cat === 'Gardening') ||
-                      (selectedCategory === 'Recycling & Waste' && cat === 'Recycling') ||
-                      (selectedCategory === 'Energy Conservation' && cat === 'Energy') ||
-                      (selectedCategory === 'Water Conservation' && cat === 'Water')
+                      (selectedCategory === 'All' && cat === 'All') || (selectedCategory === 'Gardening & Planting' && cat === 'Gardening') || (selectedCategory === 'Recycling & Waste' && cat === 'Recycling') || (selectedCategory === 'Energy Conservation' && cat === 'Energy') || (selectedCategory === 'Water Conservation' && cat === 'Water')
                         ? 'bg-green-600 text-white shadow-lg' 
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
@@ -428,8 +375,6 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
                   </button>
                 ))}
               </div>
-
-              {/* Difficulty Dropdown */}
               <select 
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(e.target.value)}
@@ -448,23 +393,16 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
         {todayQuest && (
           <section className="container mx-auto px-6 py-6">
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 relative overflow-hidden border-2 border-blue-400 shadow-xl">
-              <div className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-black">
-                DAILY QUEST
-              </div>
+              <div className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-black">DAILY QUEST</div>
               <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="bg-white bg-opacity-20 backdrop-blur-sm p-3 rounded-xl">
-                    {todayQuest.icon}
-                  </div>
+                  <div className="bg-white bg-opacity-20 backdrop-blur-sm p-3 rounded-xl">{todayQuest.icon}</div>
                   <div>
                     <h3 className="text-xl font-bold text-white mb-1">{todayQuest.title}</h3>
                     <p className="text-blue-100 text-sm">{todayQuest.description?.substring(0, 120)}...</p>
                   </div>
                 </div>
-                <button 
-                  onClick={() => handleViewDetails(todayQuest)}
-                  className="bg-white text-blue-600 font-bold py-3 px-8 rounded-lg hover:bg-gray-100 transition-all shadow-lg whitespace-nowrap"
-                >
+                <button onClick={() => handleViewDetails(todayQuest)} className="bg-white text-blue-600 font-bold py-3 px-8 rounded-lg hover:bg-gray-100 transition-all shadow-lg whitespace-nowrap">
                   {user ? 'Accept Quest' : 'Login to Start'}
                 </button>
               </div>
@@ -474,42 +412,25 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
 
         {/* Available Quests Section */}
         <section className="container mx-auto px-4 md:px-6 py-6 md:py-8 relative">
-          {/* Discord-inspired decorative background */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             <div className="absolute top-20 right-10 w-64 h-64 bg-gradient-to-br from-green-200 to-emerald-200 rounded-full opacity-20 blur-3xl"></div>
             <div className="absolute bottom-20 left-20 w-96 h-96 bg-gradient-to-br from-blue-200 to-cyan-200 rounded-full opacity-20 blur-3xl"></div>
             <div className="absolute top-1/2 left-1/3 w-80 h-80 bg-gradient-to-br from-purple-200 to-indigo-200 rounded-full opacity-15 blur-3xl"></div>
           </div>
-          
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h2 className="text-xl md:text-2xl font-bold text-gray-900">Available Quests</h2>
               <span className="text-gray-600 text-xs md:text-sm font-semibold">{filteredQuests.length} quests available</span>
             </div>
-
-            {/* Quest Grid */}
             {filteredQuests.length === 0 ? (
               <div className="bg-white border-2 border-gray-200 p-8 md:p-16 rounded-lg md:rounded-xl text-center shadow-lg">
                 <BookOpen className="w-12 h-12 md:w-16 md:h-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg md:text-xl font-bold text-gray-600 mb-2">No Quests Found</h3>
-                <p className="text-gray-500 text-sm md:text-base">
-                  {searchTerm || selectedCategory !== 'All' 
-                    ? 'Try adjusting your filters' 
-                    : 'No quests available at the moment'}
-                </p>
+                <p className="text-gray-500 text-sm md:text-base">{searchTerm || selectedCategory !== 'All' ? 'Try adjusting your filters' : 'No quests available at the moment'}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6" data-section="quests">
-                {filteredQuests.map((quest) => (
-                  <QuestCard 
-                    key={quest.id} 
-                    {...quest} 
-                    onViewDetails={handleViewDetails} 
-                    questData={quest} 
-                    user={user} 
-                    isHighlighted={highlightQuest && quest.title === highlightQuest}
-                  />
-                ))}
+                {filteredQuests.map((quest) => (<QuestCard key={quest.id} {...quest} onViewDetails={handleViewDetails} questData={quest} user={user} isHighlighted={highlightQuest && quest.title === highlightQuest}/>))}
               </div>
             )}
           </div>
@@ -519,23 +440,23 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
         <section className="container mx-auto px-4 md:px-6 py-12 md:py-16">
           <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl md:rounded-2xl shadow-2xl overflow-hidden">
             <div className="grid md:grid-cols-2 gap-0">
-              {/* Left side - Placeholder Image */}
+              
+              {/* Left side - Image inside placeholder */}
               <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-6 md:p-12 flex items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10">
-                  <div className="absolute top-5 left-5 md:top-10 md:left-10 w-24 h-24 md:w-32 md:h-32 bg-white rounded-full"></div>
-                  <div className="absolute bottom-5 right-5 md:bottom-10 md:right-10 w-32 h-32 md:w-40 md:h-40 bg-white rounded-full"></div>
-                </div>
-                <div className="relative text-center text-white z-10">
-                  <div className="w-32 h-32 md:w-48 md:h-48 bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl md:rounded-3xl mx-auto mb-4 md:mb-6 flex items-center justify-center border-2 md:border-4 border-white border-opacity-30">
-                    <div className="text-center">
-                      <Sparkles className="w-12 h-12 md:w-20 md:h-20 mx-auto mb-2 md:mb-3" />
-                      <span className="text-lg md:text-2xl font-black">Quest</span>
-                      <br />
-                      <span className="text-sm md:text-lg font-bold">Guidelines</span>
-                    </div>
+                  <div className="absolute inset-0 opacity-10">
+                      <div className="absolute top-5 left-5 md:top-10 md:left-10 w-24 h-24 md:w-32 md:h-32 bg-white rounded-full"></div>
+                      <div className="absolute bottom-5 right-5 md:bottom-10 md:right-10 w-32 h-32 md:w-40 md:h-40 bg-white rounded-full"></div>
                   </div>
-                  <p className="text-sm md:text-lg font-semibold text-white opacity-90">Make Every Action Count</p>
-                </div>
+                  <div className="relative text-center text-white z-10">
+                      <div className="w-32 h-32 md:w-48 md:h-48 bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl md:rounded-3xl mx-auto mb-4 md:mb-6 flex items-center justify-center border-2 md:border-4 border-white border-opacity-30 overflow-hidden">
+                          <img
+                              src="/assets/designs/rules.jpg"
+                              alt="Quest rules and guidelines"
+                              className="w-full h-full object-cover"
+                          />
+                      </div>
+                      <p className="text-sm md:text-lg font-semibold text-white opacity-90">Make Every Action Count</p>
+                  </div>
               </div>
 
               {/* Right side - Guidelines */}
@@ -546,7 +467,6 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
                     Follow these principles to ensure your environmental impact is genuine and verified
                   </p>
                 </div>
-
                 <div className="space-y-4 md:space-y-6">
                   <div className="flex gap-3 md:gap-4 items-start">
                     <div className="w-10 h-10 md:w-14 md:h-14 bg-green-100 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
@@ -557,7 +477,6 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
                       <p className="text-xs md:text-sm text-gray-600 leading-relaxed">Ensure your actions contribute directly to the quest's environmental goal</p>
                     </div>
                   </div>
-
                   <div className="flex gap-3 md:gap-4 items-start">
                     <div className="w-10 h-10 md:w-14 md:h-14 bg-blue-100 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
                       <Camera className="w-5 h-5 md:w-7 md:h-7 text-blue-600"/>
@@ -567,7 +486,6 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
                       <p className="text-xs md:text-sm text-gray-600 leading-relaxed">Document your completion clearly with photos or videos for verification</p>
                     </div>
                   </div>
-
                   <div className="flex gap-3 md:gap-4 items-start">
                     <div className="w-10 h-10 md:w-14 md:h-14 bg-red-100 rounded-lg md:rounded-xl flex items-center justify-center flex-shrink-0">
                       <Handshake className="w-5 h-5 md:w-7 md:h-7 text-red-600"/>
@@ -587,24 +505,13 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
         {/* Footer */}
         <footer className="bg-green-700 text-white pt-16 pb-8 px-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
-          {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <img
-                src="/assets/hau-eco-quest-logo.png"
-                alt="HAU Eco-Quest Logo"
-                className="h-8 w-8"
-              />
+              <img src="/assets/hau-eco-quest-logo.png" alt="HAU Eco-Quest Logo" className="h-8 w-8"/>
               <h3 className="text-2xl font-bold">HAU Eco-Quest</h3>
             </div>
-            <p className="text-sm text-green-100">
-              Empowering students to become environmental champions through
-              engaging sustainability adventures. Join the movement to save our
-              planet!
-            </p>
+            <p className="text-sm text-green-100">Empowering students to become environmental champions through engaging sustainability adventures. Join the movement to save our planet!</p>
           </div>
-
-          {/* Adventure Paths */}
           <div>
             <h4 className="font-bold mb-4">Adventure Paths</h4>
             <ul className="space-y-2 text-sm text-green-100">
@@ -613,8 +520,6 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
               <li><button onClick={() => onPageChange('leaderboard')} className="hover:text-white">Hall of Fame</button></li>
             </ul>
           </div>
-
-          {/* Support Guild */}
           <div>
             <h4 className="font-bold mb-4">Support Guild</h4>
             <ul className="space-y-2 text-sm text-green-100">
@@ -622,8 +527,6 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
               <li><button onClick={() => onPageChange('alliancepartners')} className="hover:text-white">Alliance Partners</button></li>
             </ul>
           </div>
-
-          {/* Connect */}
           <div>
             <h4 className="font-bold mb-4">Connect with Us</h4>
             <div className="bg-green-600 p-4 rounded-lg text-sm">
@@ -633,12 +536,11 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
               <div className="flex gap-4 mt-4">
                 <a href="#"><img src={FacebookIcon} alt="Facebook" className="w-6 h-6" /></a>
                 <a href="#"><img src={InstagramIcon} alt="Instagram" className="w-6 h-6" /></a>
-                <a href="#"><img src={TiktokIcon} alt="Instagram" className="w-6 h-6" /></a>
+                <a href="#"><img src={TiktokIcon} alt="TikTok" className="w-6 h-6" /></a>
               </div>
             </div>
           </div>
         </div>
-
         <div className="max-w-6xl mx-auto text-center border-t border-green-600 mt-8 pt-6 text-green-200 text-sm">
           <p>© 2025 HAU Eco-Quest. All rights reserved. Built with for a sustainable future.</p>
         </div>
@@ -646,6 +548,5 @@ const QuestsPage = ({ onPageChange, pageParams }) => {
     </div>
   );
 };
-
 
 export default QuestsPage;
