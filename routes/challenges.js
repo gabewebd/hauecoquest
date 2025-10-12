@@ -577,11 +577,11 @@ router.get('/submissions/all', [auth, roleCheck('admin')], async (req, res) => {
 
 // @route   GET /api/challenges/submissions/user/:userId
 // @desc    Get challenge submissions for a specific user
-// @access  Private
-router.get('/submissions/user/:userId', auth, async (req, res) => {
+// @access  Public
+router.get('/submissions/user/:userId', async (req, res) => {
     try {
         const submissions = await ChallengeSubmission.find({ user_id: req.params.userId })
-            .populate('challenge_id', 'title points category')
+            .populate('challenge_id', 'title points category badgeTitle badge_url')
             .sort({ submitted_at: -1 });
         
         res.json(submissions);

@@ -9,7 +9,7 @@ import InstagramIcon from '../img/Instagram.png';
 import TiktokIcon from '../img/Tiktok.png';
 
 // --- QUEST CARD COMPONENT ---
-const QuestCard = ({ icon, title, description, difficulty, points, duration, participants, progress, color, onViewDetails, questData, user }) => {
+const QuestCard = ({ icon, title, description, difficulty, points, duration, participants, progress, color, onViewDetails, questData, user, isHighlighted }) => {
   const difficultyStyles = {
     Easy: 'bg-green-100 text-green-800 border border-green-300',
     Medium: 'bg-amber-100 text-amber-800 border border-amber-300',
@@ -90,7 +90,10 @@ const QuestCard = ({ icon, title, description, difficulty, points, duration, par
   };
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden hover:shadow-2xl transition-all group border border-gray-200">
+    <div 
+      className={`bg-white rounded-xl overflow-hidden hover:shadow-2xl transition-all group border-2 ${isHighlighted ? 'border-green-400 shadow-lg ring-4 ring-green-100 animate-pulse' : 'border-gray-200'}`}
+      data-quest-title={title}
+    >
       {/* Image Section */}
       <div className={`h-48 bg-gradient-to-br ${activeColor.gradient} flex items-center justify-center relative overflow-hidden`}>
         <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
@@ -165,7 +168,7 @@ const GuidelineCard = ({ icon, title, description, iconColor }) => (
 );
 
 // --- MAIN PAGE COMPONENT ---
-const QuestsPage = ({ onPageChange }) => {
+const QuestsPage = ({ onPageChange, pageParams }) => {
     const { user } = useUser();
     const [selectedQuest, setSelectedQuest] = useState(null);
     const [quests, setQuests] = useState([]);
@@ -174,10 +177,30 @@ const QuestsPage = ({ onPageChange }) => {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedDifficulty, setSelectedDifficulty] = useState('All');
     const [todayQuest, setTodayQuest] = useState(null);
+    const [highlightQuest, setHighlightQuest] = useState(null);
 
     useEffect(() => {
         fetchQuests();
     }, [user]);
+
+    // Handle quest highlighting when pageParams change
+    useEffect(() => {
+        if (pageParams && pageParams.highlightQuest) {
+            setHighlightQuest(pageParams.highlightQuest);
+            // Scroll to the quest after a short delay to ensure it's rendered
+            setTimeout(() => {
+                const questElement = document.querySelector(`[data-quest-title="${pageParams.highlightQuest}"]`);
+                if (questElement) {
+                    questElement.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }
+            }, 500);
+            // Clear highlight after a delay
+            setTimeout(() => setHighlightQuest(null), 3000);
+        }
+    }, [pageParams]);
 
     const fetchQuests = async () => {
         try {
@@ -457,7 +480,14 @@ const QuestsPage = ({ onPageChange }) => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                 {filteredQuests.map((quest) => (
-                  <QuestCard key={quest.id} {...quest} onViewDetails={handleViewDetails} questData={quest} user={user} />
+                  <QuestCard 
+                    key={quest.id} 
+                    {...quest} 
+                    onViewDetails={handleViewDetails} 
+                    questData={quest} 
+                    user={user} 
+                    isHighlighted={highlightQuest && quest.title === highlightQuest}
+                  />
                 ))}
               </div>
             )}

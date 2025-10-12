@@ -300,27 +300,27 @@ const AchievementSection = ({ achievements, challengeBadges = [] }) => (
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {challengeBadges.map((badge, index) => (
-                        <div key={index} className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm border border-purple-200 text-center hover:shadow-md transition-all">
+                        <div key={index} className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 text-center hover:shadow-md transition-all">
                             {badge.image_url ? (
                                 <img 
                                     src={badge.image_url} 
                                     alt={badge.name || 'Challenge Badge'} 
                                     className="w-20 h-20 mx-auto mb-4 rounded-lg object-cover shadow-md"
                                 />
-                            ) : (
-                                <div className="w-20 h-20 mx-auto mb-4 bg-purple-200 rounded-lg flex items-center justify-center text-3xl">
-                                    🏆
-                                </div>
-                            )}
-                            <h4 className="font-bold text-lg mb-2 text-purple-800">
-                                {badge.name || 'Challenge Badge'}
-                            </h4>
-                            <p className="text-purple-600 text-sm mb-2">
-                                {badge.description || 'Earned from completing a challenge'}
-                            </p>
-                            <p className="text-xs text-purple-500">
-                                Challenge Badge
-                            </p>
+                        ) : (
+                            <div className="w-20 h-20 mx-auto mb-4 bg-green-200 rounded-lg flex items-center justify-center text-3xl">
+                                🌳
+                            </div>
+                        )}
+                        <h4 className="font-bold text-lg mb-2 text-green-800">
+                            {badge.name === 'Plant Trees Challenge' ? 'Tree Planter' : (badge.name || 'Challenge Badge')}
+                        </h4>
+                        <p className="text-green-600 text-sm mb-2">
+                            {badge.name === 'Plant Trees Challenge' ? 'Earned by planting trees' : (badge.description || 'Earned from completing a challenge')}
+                        </p>
+                        <p className="text-xs text-green-500">
+                            Challenge Badge
+                        </p>
             </div>
                     ))}
         </div>
@@ -382,7 +382,7 @@ const OverviewTabContent = ({ dashboardData, onPageChange, userData }) => {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <StatCard icon={<CheckCircle className="w-8 h-8 text-green-500" />} value={dashboardData.questsCompleted} label="Quests Completed" change="+1 this month" />
-                <StatCard icon={<Target className="w-8 h-8 text-purple-500" />} value={dashboardData.challengesCompleted?.length || 0} label="Challenges Completed" change="+0 this month" />
+                <StatCard icon={<Target className="w-8 h-8 text-purple-500" />} value={dashboardData.challengesCompleted || 0} label="Challenges Completed" change="+0 this month" />
                 <StatCard icon={<Trophy className="w-8 h-8 text-yellow-500" />} value={dashboardData.ecoPoints} label="Eco Points" change="+150 this week" />
             </div>
 
@@ -2311,24 +2311,12 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
             const challengeSubmissions = challengeSubmissionsRes.ok ? await challengeSubmissionsRes.json() : [];
             const approvedSubmissions = challengeSubmissions.filter(sub => sub.status === 'approved');
             
-            // Get challenge badges from approved submissions
-            const challengeBadges = approvedSubmissions.map(submission => {
-                const challenge = challengesData.find(c => c._id === submission.challenge_id);
-                return challenge ? {
-                    ...challenge,
-                    badge_url: challenge.badge_url,
-                    badgeTitle: challenge.badgeTitle,
-                    title: challenge.title
-                } : null;
-            }).filter(Boolean);
-
-            // Get user's completed challenges from dashboard data
-            const completedChallenges = dashboardData.challengesCompleted || [];
-            const completedChallengeBadges = completedChallenges.map(challenge => ({
-                ...challenge,
-                image_url: challenge.badge_url,
-                name: challenge.badgeTitle,
-                title: challenge.title
+            // Get challenge badges from approved submissions (consistent with profile page)
+            const challengeBadges = approvedSubmissions.map(submission => ({
+                name: submission.challenge_id?.badgeTitle || submission.challenge_id?.title || 'Challenge Badge',
+                description: `Badge earned from completing ${submission.challenge_id?.title || 'challenge'}`,
+                image_url: submission.challenge_id?.badge_url,
+                challenge_id: submission.challenge_id?._id
             }));
 
             // Update dashboard data with real backend data
@@ -2346,8 +2334,8 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
                 weeklyPoints: dashboardData.weeklyPoints || 0,
                 monthlyQuests: dashboardData.monthlyQuests || 0,
                 communityChallenges: challengesData.filter(c => c.isActive).slice(0, 3),
-                challengeBadges: [...challengeBadges, ...completedChallengeBadges],
-                challengesCompleted: completedChallenges,
+                challengeBadges: challengeBadges,
+                challengesCompleted: approvedSubmissions.length,
                 weeklyProgress: dashboardData.weeklyProgress || [
                     { label: 'Mon', value: Math.floor(Math.random() * 20) + 5 },
                     { label: 'Tue', value: Math.floor(Math.random() * 20) + 8 },

@@ -165,7 +165,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => onPageChange('community')}
-            className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition"
+            className="flex items-center gap-2 bg-gray-100 hover:bg-green-100 text-gray-700 hover:text-green-700 px-4 py-2 rounded-lg transition-all duration-200 font-medium"
           >
             <ArrowLeft className="w-5 h-5" />
             Back to Community

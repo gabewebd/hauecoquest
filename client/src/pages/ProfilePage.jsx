@@ -33,7 +33,7 @@ const AchievementSection = ({ achievements, challengeBadges = [] }) => (
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {challengeBadges.map((badge, index) => (
-                    <div key={index} className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm border border-purple-200 text-center hover:shadow-md transition-all">
+                    <div key={index} className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 text-center hover:shadow-md transition-all">
                         {badge.image_url ? (
                             <img 
                                 src={badge.image_url} 
@@ -41,17 +41,17 @@ const AchievementSection = ({ achievements, challengeBadges = [] }) => (
                                 className="w-20 h-20 mx-auto mb-4 rounded-lg object-cover shadow-md"
                             />
                         ) : (
-                            <div className="w-20 h-20 mx-auto mb-4 bg-purple-200 rounded-lg flex items-center justify-center text-3xl">
-                                🏆
+                            <div className="w-20 h-20 mx-auto mb-4 bg-green-200 rounded-lg flex items-center justify-center text-3xl">
+                                🌳
                             </div>
                         )}
-                        <h4 className="font-bold text-lg mb-2 text-purple-800">
-                            {badge.name || 'Challenge Badge'}
+                        <h4 className="font-bold text-lg mb-2 text-green-800">
+                            {badge.name === 'Plant Trees Challenge' ? 'Tree Planter' : (badge.name || 'Challenge Badge')}
                         </h4>
-                        <p className="text-purple-600 text-sm mb-2">
-                            {badge.description || 'Earned from completing a challenge'}
+                        <p className="text-green-600 text-sm mb-2">
+                            {badge.name === 'Plant Trees Challenge' ? 'Earned by planting trees' : (badge.description || 'Earned from completing a challenge')}
                         </p>
-                        <p className="text-xs text-purple-500">
+                        <p className="text-xs text-green-500">
                             Challenge Badge
                         </p>
                     </div>
@@ -65,7 +65,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
   const { user, updateUser, deleteAccount } = useUser();
   
   // Determine if we're viewing own profile or someone else's
-  const isOwnProfile = !userId || userId === user?._id;
+  const isOwnProfile = !userId || (user && userId === user._id);
   const profileUserId = userId || user?._id;
   
   
@@ -132,33 +132,42 @@ const ProfilePage = ({ onPageChange, userId }) => {
   const fetchUserDataForProfile = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      
-      // Fetch quest submissions for the profile user
-      const questsRes = await fetch(`/api/quests/submissions/user/${profileUser._id}`, {
-        headers: { 'x-auth-token': token }
-      });
-      if (questsRes.ok) {
-        const questsData = await questsRes.json();
-        setUserQuests(questsData);
+      // Use quest submissions from profile data (already fetched publicly)
+      if (profileUser.questSubmissions) {
+        setUserQuests(profileUser.questSubmissions || []);
+      } else {
+        // Fallback to direct API call if profile data doesn't have quest submissions
+        const questsRes = await fetch(`/api/quests/submissions/user/${profileUser._id}`);
+        if (questsRes.ok) {
+          const questsData = await questsRes.json();
+          setUserQuests(questsData);
+        }
       }
 
-      // Fetch challenge submissions for the profile user
-      const challengeSubmissionsRes = await fetch(`/api/challenges/submissions/user/${profileUser._id}`, {
-        headers: { 'x-auth-token': token }
-      });
-      if (challengeSubmissionsRes.ok) {
-        const challengeSubmissionsData = await challengeSubmissionsRes.json();
-        setUserChallengeSubmissions(challengeSubmissionsData || []);
+      // Use challenge submissions from profile data (already fetched publicly)
+      if (profileUser.challengeSubmissions) {
+        setUserChallengeSubmissions(profileUser.challengeSubmissions || []);
+      } else {
+        // Fallback to direct API call if profile data doesn't have challenge submissions
+        const challengeSubmissionsRes = await fetch(`/api/challenges/submissions/user/${profileUser._id}`);
+        if (challengeSubmissionsRes.ok) {
+          const challengeSubmissionsData = await challengeSubmissionsRes.json();
+          setUserChallengeSubmissions(challengeSubmissionsData || []);
+        }
       }
 
-      // Fetch user's posts/activity
-      const postsRes = await fetch('/api/posts', {
-        headers: { 'x-auth-token': token }
-      });
+      // Fetch user's posts/activity (public endpoint)
+      const postsRes = await fetch('/api/posts');
       const postsData = await postsRes.json();
       const userPosts = postsData.filter(post => post.author?._id === profileUser._id || post.author === profileUser._id);
       setUserActivity(userPosts);
+
+      // Fetch user's photo history (public endpoint)
+      const photosRes = await fetch(`/api/users/${profileUser._id}/photos`);
+      if (photosRes.ok) {
+        const photosData = await photosRes.json();
+        setUserPhotos(photosData || []);
+      }
 
     } catch (error) {
       console.error('Error fetching profile user data:', error);
@@ -168,8 +177,13 @@ const ProfilePage = ({ onPageChange, userId }) => {
   };
 
   const fetchProfileUserData = async () => {
-    if (isOwnProfile) {
+    if (isOwnProfile && user) {
       setProfileUser(user);
+      return;
+    }
+
+    if (!profileUserId) {
+      console.error('No profile user ID available');
       return;
     }
 
@@ -190,13 +204,11 @@ const ProfilePage = ({ onPageChange, userId }) => {
     }
 
     try {
-      // Fetch profile user's quest submissions
-      if (displayUser?.role === 'user') {
-        const questsRes = await fetch(`/api/quests/submissions/user/${profileUserId}`);
-        if (questsRes.ok) {
-          const questsData = await questsRes.json();
-          setUserQuests(questsData);
-        }
+      // Fetch profile user's quest submissions (public data)
+      const questsRes = await fetch(`/api/quests/submissions/user/${profileUserId}`);
+      if (questsRes.ok) {
+        const questsData = await questsRes.json();
+        setUserQuests(questsData);
       } else {
         // For admin and partner, fetch quests they created
         const questsRes = await fetch('/api/quests');
@@ -245,13 +257,11 @@ const ProfilePage = ({ onPageChange, userId }) => {
         setUserPhotos([]);
       }
 
-      // Fetch profile user's challenge submissions
-      if (displayUser?.role === 'user') {
-        const challengeSubmissionsRes = await fetch(`/api/challenges/submissions/user/${profileUserId}`);
-        if (challengeSubmissionsRes.ok) {
-          const challengeSubmissionsData = await challengeSubmissionsRes.json();
-          setUserChallengeSubmissions(challengeSubmissionsData || []);
-        }
+      // Fetch profile user's challenge submissions (public data)
+      const challengeSubmissionsRes = await fetch(`/api/challenges/submissions/user/${profileUserId}`);
+      if (challengeSubmissionsRes.ok) {
+        const challengeSubmissionsData = await challengeSubmissionsRes.json();
+        setUserChallengeSubmissions(challengeSubmissionsData || []);
       }
 
     } catch (error) {
@@ -506,17 +516,17 @@ const ProfilePage = ({ onPageChange, userId }) => {
                 Start making a difference on campus.
               </p>
 
-              {/* Stats - Only show for user role */}
-              {displayUser?.role === 'user' && (
+              {/* Stats - Show for all users */}
+              {(displayUser?.role === 'user' || !displayUser?.role) && (
               <div className="flex gap-6 mt-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
                     <Trophy className="w-4 h-4 text-yellow-500" /> {displayUser?.eco_score || displayUser?.points || 0} points
                 </div>
                 <div className="flex items-center gap-1">
-                  <Award className="w-4 h-4 text-orange-500" /> {displayUser?.questsCompleted?.length || 0} quests completed
+                  <Award className="w-4 h-4 text-orange-500" /> {displayUser?.approvedQuestCount || displayUser?.questsCompleted?.length || userQuests.filter(sub => sub.status === 'approved').length} quests completed
                 </div>
                   <div className="flex items-center gap-1">
-                    <Award className="w-4 h-4 text-purple-500" /> {userChallengeSubmissions.filter(sub => sub.status === 'approved').length} challenges completed
+                    <Award className="w-4 h-4 text-purple-500" /> {displayUser?.approvedChallengeCount || userChallengeSubmissions.filter(sub => sub.status === 'approved').length} challenges completed
               </div>
                 </div>
               )}
@@ -547,7 +557,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
       <div className="mt-28 max-w-4xl mx-auto px-4 flex-grow">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-6">
           <div className="flex justify-center gap-3">
-          {displayUser?.role === 'user' ? 
+          {(displayUser?.role === 'user' || !displayUser?.role) ? 
               ["Activity", "Photo History", "Achievements"].map((tab) => (
               <button
                 key={tab}
@@ -736,7 +746,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
                               </span>
                             </div>
                             <button 
-                              onClick={() => onPageChange('quest-details', { questId: photo.quest_id })}
+                              onClick={() => onPageChange('quests', { highlightQuest: photo.quest_title || 'Campus Recycling Program' })}
                               className="w-full bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition text-sm font-semibold"
                             >
                               View Details
@@ -802,7 +812,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
                   {/* Badge Collection */}
                   <AchievementSection 
                     achievements={[]} 
-                    challengeBadges={userChallengeSubmissions
+                    challengeBadges={profileUser?.challengeBadges || userChallengeSubmissions
                       .filter(sub => sub.status === 'approved')
                       .map(submission => ({
                         name: submission.challenge_id?.badgeTitle || submission.challenge_id?.title || 'Challenge Badge',

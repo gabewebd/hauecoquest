@@ -140,13 +140,46 @@ router.get('/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
       .select('-password')
-      .populate('questsCompleted', 'title points category');
+      .populate('questsCompleted', 'title points category')
+      .populate('challengesCompleted', 'title points badgeTitle badge_url')
+      .populate('badges', 'name description image_url')
+      .populate('achievements');
 
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
 
-    res.json(user);
+    // Get user's challenge submissions (public data)
+    const ChallengeSubmission = require('../models/ChallengeSubmission');
+    const challengeSubmissions = await ChallengeSubmission.find({ user_id: req.params.id })
+      .populate('challenge_id', 'title points badgeTitle badge_url')
+      .sort({ submitted_at: -1 });
+
+    // Get user's quest submissions (public data)
+    const QuestSubmission = require('../models/QuestSubmission');
+    const questSubmissions = await QuestSubmission.find({ user_id: req.params.id })
+      .populate('quest_id', 'title points category')
+      .sort({ submitted_at: -1 });
+
+    // Filter approved submissions for badge display
+    const approvedChallengeSubmissions = challengeSubmissions.filter(sub => sub.status === 'approved');
+    const approvedQuestSubmissions = questSubmissions.filter(sub => sub.status === 'approved');
+    
+    const challengeBadges = approvedChallengeSubmissions.map(submission => ({
+      name: submission.challenge_id?.badgeTitle || submission.challenge_id?.title || 'Challenge Badge',
+      description: `Badge earned from completing ${submission.challenge_id?.title || 'challenge'}`,
+      image_url: submission.challenge_id?.badge_url,
+      challenge_id: submission.challenge_id?._id
+    }));
+
+    res.json({
+      ...user.toObject(),
+      challengeSubmissions,
+      questSubmissions,
+      challengeBadges,
+      approvedChallengeCount: approvedChallengeSubmissions.length,
+      approvedQuestCount: approvedQuestSubmissions.length
+    });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ msg: 'Server error' });
@@ -231,6 +264,7 @@ router.get('/:userId/photos', async (req, res) => {
       id: submission._id,
       photo_url: submission.photo_url,
       image_url: submission.photo_url, // Keep both for compatibility
+      quest_id: submission.quest_id?._id, // Include quest ID for navigation
       quest_title: submission.quest_id?.title || 'Unknown Quest',
       quest_category: submission.quest_id?.category || 'General',
       submitted_at: submission.submitted_at,
@@ -262,6 +296,7 @@ router.get('/photos', auth, async (req, res) => {
       id: submission._id,
       photo_url: submission.photo_url,
       image_url: submission.photo_url, // Keep both for compatibility
+      quest_id: submission.quest_id?._id, // Include quest ID for navigation
       quest_title: submission.quest_id?.title || 'Unknown Quest',
       quest_category: submission.quest_id?.category || 'General',
       submitted_at: submission.submitted_at,
