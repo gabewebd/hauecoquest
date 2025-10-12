@@ -191,7 +191,7 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
                     <div className="text-xs font-semibold text-gray-600">Duration</div>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg text-center">
-                    <div className="text-2xl font-bold text-purple-600 mb-1">{challenge.approvedParticipants || 0}</div>
+                    <div className="text-2xl font-bold text-purple-600 mb-1">{challenge.participants?.length || 0}</div>
                     <div className="text-xs font-semibold text-gray-600">Participants</div>
                   </div>
                   <div className="bg-yellow-50 p-4 rounded-lg text-center">
@@ -222,7 +222,7 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
                 <span className="font-bold text-green-800 text-lg">Current Status: In Progress</span>
               </div>
               <p className="text-green-700">
-                {challenge.approvedParticipants || 0} eco-warriors are actively participating in this challenge!
+                {challenge.participants?.length || 0} eco-warriors are actively participating in this challenge!
               </p>
             </div>
           </div>

@@ -301,6 +301,31 @@ router.put('/:id/submissions/:participantId/review', [auth, roleCheck('admin')],
             }
         }
 
+        // Create notification for challenge approval
+        if (status === 'approved') {
+            try {
+                const { createNotification } = require('./notifications');
+                const user = await User.findById(participant.user);
+                if (user) {
+                    await createNotification(
+                        user._id,
+                        'challenge_approved',
+                        'Challenge Approved!',
+                        `Your challenge submission for "${challenge.title}" has been approved! You earned ${challenge.points || 50} points and a badge.`,
+                        {
+                            challengeId: challenge._id,
+                            challengeTitle: challenge.title,
+                            pointsEarned: challenge.points || 50,
+                            participantId: participant._id
+                        }
+                    );
+                    console.log(`Challenge approval notification created for user ${user.username}`);
+                }
+            } catch (notificationError) {
+                console.error('Error creating challenge approval notification:', notificationError);
+            }
+        }
+
         await challenge.save();
 
         console.log(`Challenge submission ${status}. Progress: ${challenge.currentProgress}/${challenge.goal}`);
@@ -674,19 +699,24 @@ router.put('/submissions/:id/review', [auth, roleCheck('admin')], async (req, re
                 console.log(`Awarded ${pointsEarned} points and updated challenge completion for user ${user.username}`);
 
                 // Create notification for challenge approval
-                const { createNotification } = require('./notifications');
-                await createNotification(
-                    user._id,
-                    'challenge_approved',
-                    'Challenge Approved!',
-                    `Your challenge submission for "${challenge.title}" has been approved! You earned ${pointsEarned} points and a badge.`,
-                    {
-                        challengeId: challenge._id,
-                        challengeTitle: challenge.title,
-                        pointsEarned: pointsEarned,
-                        submissionId: submission._id
-                    }
-                );
+                try {
+                    const { createNotification } = require('./notifications');
+                    await createNotification(
+                        user._id,
+                        'challenge_approved',
+                        'Challenge Approved!',
+                        `Your challenge submission for "${challenge.title}" has been approved! You earned ${pointsEarned} points and a badge.`,
+                        {
+                            challengeId: challenge._id,
+                            challengeTitle: challenge.title,
+                            pointsEarned: pointsEarned,
+                            submissionId: submission._id
+                        }
+                    );
+                    console.log(`Challenge approval notification created for user ${user.username}`);
+                } catch (notificationError) {
+                    console.error('Error creating challenge approval notification:', notificationError);
+                }
 
 
                 // Update challenge progress

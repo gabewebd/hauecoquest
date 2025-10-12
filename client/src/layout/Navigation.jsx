@@ -256,59 +256,6 @@ export function Navigation({ currentPage, onPageChange }) {
                               Mark all as read
                             </button>
                           )}
-                          <button
-                            onClick={async () => {
-                              try {
-                                console.log('Creating test notification...');
-                                const token = localStorage.getItem('token');
-                                console.log('Token exists:', !!token);
-                                
-                                const response = await fetch('/api/notifications/test', {
-                                  method: 'POST',
-                                  headers: { 'x-auth-token': token }
-                                });
-                                
-                                console.log('Test notification response status:', response.status);
-                                const result = await response.json();
-                                console.log('Test notification result:', result);
-                                
-                                if (response.ok) {
-                                  console.log('Test notification created successfully, fetching notifications...');
-                                  // Wait a moment then fetch notifications
-                                  setTimeout(() => {
-                                    fetchUnreadNotifications();
-                                  }, 1000);
-                                }
-                              } catch (error) {
-                                console.error('Error creating test notification:', error);
-                              }
-                            }}
-                            className="text-xs text-blue-600 hover:text-blue-700 px-2 py-1 border border-blue-600 rounded"
-                          >
-                            Test
-                          </button>
-                          <button
-                            onClick={async () => {
-                              try {
-                                console.log('Testing direct API call...');
-                                const token = localStorage.getItem('token');
-                                console.log('Token:', token ? 'exists' : 'missing');
-                                
-                                const response = await fetch('/api/notifications', {
-                                  headers: { 'x-auth-token': token }
-                                });
-                                console.log('Direct API response status:', response.status);
-                                const result = await response.json();
-                                console.log('Direct API result:', result);
-                                console.log('Number of notifications found:', result.length);
-                              } catch (error) {
-                                console.error('Error with direct API call:', error);
-                              }
-                            }}
-                            className="text-xs text-red-600 hover:text-red-700 px-2 py-1 border border-red-600 rounded"
-                          >
-                            Direct
-                          </button>
                         </div>
                       </div>
                     </div>
