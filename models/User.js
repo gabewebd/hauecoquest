@@ -37,14 +37,6 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  profile_picture_url: {
-    type: String,
-    default: ''
-  },
-  hau_affiliation: {
-    type: String,
-    default: ''
-  },
   department: {
     type: String,
     enum: ['SOC', 'SAS', 'SEA', 'SBA', 'SED', 'CCJEF', 'SHTM', 'SNAMS'],
@@ -70,52 +62,40 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Quest'
   }],
-  streaks: {
-    current_streak: {
-      type: Number,
-      default: 0
+  challengesCompleted: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Challenge'
+  }],
+  badges: [{
+    name: String,
+    description: String,
+    image_url: String,
+    challenge_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Challenge'
     },
-    longest_streak: {
-      type: Number,
-      default: 0
-    },
-    last_activity: {
+    earnedAt: {
       type: Date,
       default: Date.now
     }
-  },
-  goals: {
-    energy_conservation: {
-      current: {
-        type: Number,
-        default: 0
-      },
-      target: {
-        type: Number,
-        default: 10
-      }
+  }],
+  achievements: [{
+    title: String,
+    description: String,
+    category: String,
+    progress: {
+      current: Number,
+      target: Number
     },
-    water_saved: {
-      current: {
-        type: Number,
-        default: 0
-      },
-      target: {
-        type: Number,
-        default: 500
-      }
+    isCompleted: {
+      type: Boolean,
+      default: false
     },
-    trees_planted: {
-      current: {
-        type: Number,
-        default: 0
-      },
-      target: {
-        type: Number,
-        default: 5
-      }
+    earnedAt: {
+      type: Date,
+      default: Date.now
     }
-  },
+  }],
   created_at: {
     type: Date,
     default: Date.now

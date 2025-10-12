@@ -26,8 +26,6 @@ const QuestSchema = new mongoose.Schema({
   }],
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   isActive: { type: Boolean, default: true },
-  imageUrl: { type: String },
-  isDailyQuest: { type: Boolean, default: false },
   created_at: { type: Date, default: Date.now }
 });
 

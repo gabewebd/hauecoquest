@@ -12,7 +12,7 @@ const ImageModal = ({ imageUrl, onClose }) => {
   if (!imageUrl) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="relative max-w-4xl max-h-full">
         <button
           onClick={onClose}
@@ -37,6 +37,13 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [showImageModal, setShowImageModal] = useState(false);
+  const [showFullText, setShowFullText] = useState(false);
+  
+  // Word limit for text preview
+  const WORD_LIMIT = 50;
+  const words = text.split(' ');
+  const shouldTruncate = words.length > WORD_LIMIT;
+  const displayText = showFullText ? text : (shouldTruncate ? words.slice(0, WORD_LIMIT).join(' ') + '...' : text);
 
   // Check if current user has liked this post based on the likes array
   const isLiked = user && likes && likes.includes(user._id); 
@@ -122,7 +129,19 @@ const PostCard = ({ avatar, name, title, time, text, quest, image, likes, commen
         </div>
       </div>
 
-      <p className="text-gray-800 mb-3 md:mb-4 leading-relaxed text-sm md:text-base">{text}</p>
+      <div className="mb-3 md:mb-4">
+        <p className="text-gray-800 leading-relaxed text-sm md:text-base whitespace-pre-wrap">
+          {displayText}
+        </p>
+        {shouldTruncate && (
+          <button
+            onClick={() => setShowFullText(!showFullText)}
+            className="text-green-600 hover:text-green-700 font-semibold text-sm mt-2 transition-colors"
+          >
+            {showFullText ? 'See less' : 'See more'}
+          </button>
+        )}
+      </div>
 
       {quest && (
         <div className="bg-green-50 border border-green-200 text-green-700 text-xs md:text-sm font-semibold px-2 md:px-3 py-1.5 md:py-2 rounded-lg inline-block mb-3 md:mb-4">
@@ -258,7 +277,7 @@ const CreatePostModal = ({ isOpen, onClose, onSubmit, user }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between rounded-t-2xl">
           <h3 className="text-2xl font-bold text-gray-900">Create New Post</h3>
@@ -850,29 +869,31 @@ const CommunityPage = ({ onPageChange }) => {
                       ))}
                     </div>
                     
-                    {/* Search Bar */}
-                    <div className="relative w-full md:w-64">
-                      <input
-                        type="text"
-                        placeholder="Search posts..."
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        className="w-full pl-8 md:pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm md:text-base"
-                      />
-                      <Search className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
+                    {/* Search Bar and Create Post Button */}
+                    <div className="flex gap-2 flex-1">
+                      <div className="relative flex-1">
+                        <input
+                          type="text"
+                          placeholder="Search posts..."
+                          value={searchTerm}
+                          onChange={handleSearchChange}
+                          className="w-full pl-8 md:pl-10 pr-4 py-2 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm md:text-base"
+                        />
+                        <Search className="absolute left-2 md:left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" />
+                      </div>
+                      
+                      {/* Create Post Button - Desktop */}
+                      {user && (
+                        <button
+                          onClick={() => setShowCreatePostModal(true)}
+                          className="hidden md:flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold text-sm"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Create Post
+                        </button>
+                      )}
                     </div>
                   </div>
-                  
-                  {/* Create Post Button - Mobile */}
-                  {user && (
-                    <button
-                      onClick={() => setShowCreatePostModal(true)}
-                      className="md:hidden flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition font-semibold text-sm"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Create Post
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -907,13 +928,6 @@ const CommunityPage = ({ onPageChange }) => {
                       />
                     ))}
 
-                    {posts.length > 10 && (
-                      <div className="text-center mt-4 md:mt-6 mb-16 md:mb-24">
-                        <button className="bg-white border-2 border-gray-200 font-bold text-gray-700 py-2 md:py-3 px-6 md:px-8 rounded-lg md:rounded-xl hover:bg-gray-50 transition-all text-sm md:text-base">
-                          Load More Posts
-                        </button>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
@@ -997,9 +1011,9 @@ const CommunityPage = ({ onPageChange }) => {
           <div>
             <div className="flex items-center gap-2 mb-3 md:mb-4">
               <img
-                src="/vite.svg"
+                src="/assets/hau-eco-quest-logo.png"
                 alt="HAU Eco-Quest Logo"
-                className="h-6 w-6 md:h-8 md:w-8 bg-white rounded-full p-1"
+                className="h-6 w-6 md:h-8 md:w-8"
               />
               <h3 className="text-xl md:text-2xl font-bold">HAU Eco-Quest</h3>
             </div>
@@ -1058,12 +1072,6 @@ const CommunityPage = ({ onPageChange }) => {
         user={user}
       />
 
-      {/* Debug info - remove this after fixing */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed top-4 right-4 bg-black bg-opacity-75 text-white p-2 rounded text-xs z-50">
-          User: {user ? user.username : 'Not logged in'}
-        </div>
-      )}
 
       {/* Sticky Create Post Button - Mobile only */}
       {user ? (

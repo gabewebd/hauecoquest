@@ -113,6 +113,18 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
                     {existingSubmission.status === 'rejected' && `Your submission was rejected. Reason: ${existingSubmission.rejection_reason || 'No reason provided'}`}
                 </p>
                 <p className="text-sm opacity-75">Submitted on {new Date(existingSubmission.submitted_at).toLocaleDateString()}</p>
+                {existingSubmission.status === 'rejected' && (
+                    <button
+                        onClick={() => {
+                            setFile(null);
+                            setReflection('');
+                            setIsSubmitted(false);
+                        }}
+                        className="mt-4 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+                    >
+                        Submit Again
+                    </button>
+                )}
             </div>
         );
     }
@@ -123,12 +135,6 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
                 <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-3" />
                 <h4 className="text-xl font-bold text-green-800 mb-2">Quest Submitted!</h4>
                 <p className="text-green-700">Your evidence has been sent to the Quest Master for review. You'll receive your points soon!</p>
-                <button
-                    onClick={() => setIsSubmitted(false)}
-                    className="mt-4 text-green-600 font-semibold hover:underline"
-                >
-                    Submit Another Quest
-                </button>
             </div>
         );
     }
@@ -144,7 +150,7 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
             <div>
                 {/* --- CHANGE: Updated label to remove word count mention --- */}
                 <label htmlFor="reflection" className="block text-sm font-semibold mb-2 text-gray-700">
-                    Reflection on Reforestation
+                    Reflection
                 </label>
                 <textarea
                     id="reflection"
@@ -162,12 +168,12 @@ const QuestSubmissionForm = ({ questId, onSubmissionSuccess, existingSubmission,
             {/* 2. File Upload */}
             <div>
                 <label className="block text-sm font-semibold mb-2 text-gray-700">
-                    Upload Photo/Video Proof (Geo-tagged evidence)
+                    Upload Photo Proof (Geo-tagged evidence)
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
                     <input
                         type="file"
-                        accept="image/*,video/*"
+                        accept="image/*"
                         onChange={handleFileChange}
                         className="hidden"
                         id="quest-photo-upload"
@@ -237,7 +243,7 @@ const QuestDetailsPage = ({ quest, onBack, onSubmissionSuccess, userRole }) => {
     const originalObjectives = quest.objectives || ["Complete the primary task as outlined in the quest description.", "Document your progress with photo evidence.", "Submit a reflection on the experience."];
     const objectives = originalObjectives.map(obj => obj.replace(/a short \(50-word\) /i, 'a '));
 
-    const submissionRequirements = quest.submissionRequirements || ["One high-resolution photo/video.", "A log or text summary of your results.", "Adherence to HAU Eco-Quest guidelines."];
+    const submissionRequirements = quest.submissionRequirements || ["One high-resolution photo.", "A log or text summary of your results.", "Adherence to HAU Eco-Quest guidelines."];
 
     // Determine quest status based on user's submission and quest capacity
     const getQuestStatus = () => {

@@ -297,8 +297,12 @@ const QuestModal = ({ quest, onClose, onSave }) => {
         location: '',
         date: '',
         maxParticipants: 50,
-        requirements: ''
+        requirements: '',
+        objectives: [''],
+        submissionRequirements: ['']
     });
+    const [objectives, setObjectives] = useState(quest?.objectives || ['']);
+    const [submissionRequirements, setSubmissionRequirements] = useState(quest?.submissionRequirements || ['']);
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(quest?.image_url || null);
 
@@ -312,9 +316,46 @@ const QuestModal = ({ quest, onClose, onSave }) => {
         }
     };
 
+    const addObjective = () => {
+        setObjectives([...objectives, '']);
+    };
+
+    const removeObjective = (index) => {
+        if (objectives.length > 1) {
+            setObjectives(objectives.filter((_, i) => i !== index));
+        }
+    };
+
+    const updateObjective = (index, value) => {
+        const newObjectives = [...objectives];
+        newObjectives[index] = value;
+        setObjectives(newObjectives);
+    };
+
+    const addSubmissionRequirement = () => {
+        setSubmissionRequirements([...submissionRequirements, '']);
+    };
+
+    const removeSubmissionRequirement = (index) => {
+        if (submissionRequirements.length > 1) {
+            setSubmissionRequirements(submissionRequirements.filter((_, i) => i !== index));
+        }
+    };
+
+    const updateSubmissionRequirement = (index, value) => {
+        const newRequirements = [...submissionRequirements];
+        newRequirements[index] = value;
+        setSubmissionRequirements(newRequirements);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ ...formData, photo: selectedFile });
+        onSave({ 
+            ...formData, 
+            photo: selectedFile,
+            objectives: objectives.filter(obj => obj.trim() !== ''),
+            submissionRequirements: submissionRequirements.filter(req => req.trim() !== '')
+        });
     };
 
     return (
@@ -335,7 +376,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             placeholder="e.g., Campus Tree Planting"
                         />
                     </div>
@@ -346,14 +387,12 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             <select
                                 value={formData.category}
                                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             >
                                 <option>Gardening & Planting</option>
                                 <option>Recycling & Waste</option>
                                 <option>Energy Conservation</option>
                                 <option>Water Conservation</option>
-                                <option>Education & Awareness</option>
-                                <option>Transportation</option>
                             </select>
                         </div>
 
@@ -362,7 +401,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             <select
                                 value={formData.difficulty}
                                 onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             >
                                 <option>Easy</option>
                                 <option>Medium</option>
@@ -379,7 +418,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 required
                                 value={formData.points}
                                 onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             />
                         </div>
 
@@ -390,7 +429,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 required
                                 value={formData.maxParticipants}
                                 onChange={(e) => setFormData({ ...formData, maxParticipants: parseInt(e.target.value) })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             />
                         </div>
                     </div>
@@ -403,7 +442,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 required
                                 value={formData.location}
                                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                                 placeholder="e.g., HAU Main Campus"
                             />
                         </div>
@@ -415,7 +454,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 required
                                 value={formData.date}
                                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                                 placeholder="e.g., 1 week"
                             />
                         </div>
@@ -427,58 +466,78 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             required
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             rows="4"
                             placeholder="Describe the quest objectives and activities..."
                         />
                     </div>
 
+                    {/* Objectives Section */}
                     <div>
-                        <label className="block text-sm font-semibold mb-2">Requirements</label>
-                        <textarea
-                            value={formData.requirements}
-                            onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                            rows="3"
-                            placeholder="List any requirements or materials needed..."
-                        />
+                        <label className="block text-sm font-semibold mb-2">Quest Objectives</label>
+                        {objectives.map((objective, index) => (
+                            <div key={index} className="flex gap-2 mb-2">
+                                <input
+                                    type="text"
+                                    value={objective}
+                                    onChange={(e) => updateObjective(index, e.target.value)}
+                                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
+                                    placeholder={`Objective ${index + 1}...`}
+                                />
+                                {objectives.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeObjective(index)}
+                                        className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                )}
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={addObjective}
+                            className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center gap-2"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Add Objective
+                        </button>
                     </div>
 
+                    {/* Submission Requirements Section */}
                     <div>
-                        <label className="block text-sm font-semibold mb-2">Quest Image</label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                        <label className="block text-sm font-semibold mb-2">Submission Requirements</label>
+                        {submissionRequirements.map((requirement, index) => (
+                            <div key={index} className="flex gap-2 mb-2">
                             <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileChange}
-                                className="hidden"
-                                id="quest-image-upload"
-                            />
-                            <label
-                                htmlFor="quest-image-upload"
-                                className="cursor-pointer block text-center"
-                            >
-                                {previewUrl ? (
-                                    <div className="space-y-2">
-                                        <img
-                                            src={previewUrl}
-                                            alt="Quest preview"
-                                            className="max-h-32 mx-auto rounded-lg"
-                                        />
-                                        <p className="text-sm text-green-600">Click to change image</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-2">
-                                        <div className="w-12 h-12 bg-gray-200 rounded-lg mx-auto flex items-center justify-center">
-                                            <Camera className="w-6 h-6 text-gray-400" />
-                                        </div>
-                                        <p className="text-sm text-gray-600">Click to upload quest image</p>
-                                        <p className="text-xs text-gray-400">PNG, JPG up to 10MB</p>
-                                    </div>
+                                    type="text"
+                                    value={requirement}
+                                    onChange={(e) => updateSubmissionRequirement(index, e.target.value)}
+                                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
+                                    placeholder={`Requirement ${index + 1}...`}
+                                />
+                                {submissionRequirements.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeSubmissionRequirement(index)}
+                                        className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
                                 )}
-                            </label>
                         </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={addSubmissionRequirement}
+                            className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center gap-2"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Add Requirement
+                        </button>
                     </div>
+
 
                     <div className="flex gap-3 pt-4">
                         <button
@@ -504,17 +563,18 @@ const QuestModal = ({ quest, onClose, onSave }) => {
 
 // --- COMMUNITY CHALLENGE MODAL ---
 const ChallengeModal = ({ challenge, onClose, onSave }) => {
-    const [formData, setFormData] = useState(challenge || {
-        title: '',
-        description: '',
-        content: '',
-        target: 100,
-        points: 50,
-        duration: '2-3 weeks',
-        location: 'HAU Campus',
-        category: 'Environmental',
+    const [formData, setFormData] = useState({
+        title: challenge?.title || '',
+        description: challenge?.description || '',
+        content: challenge?.content || '',
+        target: challenge?.target || 100,
+        points: challenge?.points || 50,
+        duration: challenge?.duration || '2-3 weeks',
+        location: challenge?.location || 'HAU Campus',
+        category: challenge?.category || 'Environmental',
+        badgeTitle: challenge?.badgeTitle || '',
         badge: null,
-        badgePreview: null
+        badgePreview: challenge?.badge_url || null
     });
 
     const handleFileChange = (e) => {
@@ -551,7 +611,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             placeholder="e.g., Plant 1,000 Trees Challenge"
                         />
                     </div>
@@ -562,7 +622,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                             required
                             value={formData.content}
                             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             rows="4"
                             placeholder="Describe the community challenge..."
                         />
@@ -576,7 +636,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                                 required
                                 value={formData.target}
                                 onChange={(e) => setFormData({ ...formData, target: parseInt(e.target.value) })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                                 placeholder="100"
                                 min="1"
                             />
@@ -588,12 +648,12 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                                 required
                                 value={formData.points}
                                 onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                                 placeholder="50"
                                 min="1"
                             />
                         </div>
-                    </div>
+                        </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -603,7 +663,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                                 required
                                 value={formData.duration}
                                 onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                                 placeholder="2-3 weeks"
                             />
                         </div>
@@ -614,10 +674,21 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                                 required
                                 value={formData.location}
                                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                                 placeholder="HAU Campus"
                             />
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Badge Title</label>
+                        <input
+                            type="text"
+                            value={formData.badgeTitle}
+                            onChange={(e) => setFormData({ ...formData, badgeTitle: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-300"
+                            placeholder="Enter badge title..."
+                        />
                     </div>
 
                     <div>
@@ -626,7 +697,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                             type="file"
                             accept="image/*"
                             onChange={handleFileChange}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                         />
                         <p className="text-xs text-gray-500 mt-1">Upload a badge image for participants who complete this challenge</p>
                         
@@ -696,7 +767,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             placeholder="e.g., Tips for Sustainable Living"
                         />
                     </div>
@@ -706,7 +777,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <select
                             value={formData.category}
                             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                         >
                             <option>Updates</option>
                             <option>Environmental Tips</option>
@@ -722,7 +793,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             required
                             value={formData.content}
                             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             rows="8"
                             placeholder="Write your post content here..."
                         />
@@ -734,7 +805,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             type="text"
                             value={formData.tags}
                             onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             placeholder="e.g., sustainability, recycling, climate"
                         />
                     </div>
@@ -745,7 +816,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             type="file"
                             accept="image/*"
                             onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                         />
                         <p className="text-xs text-gray-500 mt-1">Optional: Upload an image for this post</p>
                     </div>
@@ -863,19 +934,6 @@ const OverviewTab = ({ quests, posts, setActiveTab }) => {
                 />
             </div>
 
-            {/* Dashboard Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <GroupedBarChart 
-                    data={[weeklyProgressData, lastWeekData]} 
-                    title="Weekly Quest Activity" 
-                    categories={['This Week', 'Last Week']}
-                    colors={['#10B981', '#3B82F6']}
-                />
-                <DonutChart 
-                    data={questStatusData} 
-                    title="Quest Status Distribution" 
-                />
-            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
@@ -983,8 +1041,8 @@ const QuestsTab = ({ quests, setQuests }) => {
                 formData.append('points', questData.points);
                 formData.append('duration', questData.date);
                 formData.append('location', questData.location);
-                formData.append('objectives', JSON.stringify([questData.description]));
-                formData.append('submissionRequirements', JSON.stringify(questData.requirements ? [questData.requirements] : ['Photo proof required']));
+                formData.append('objectives', JSON.stringify(questData.objectives || [questData.description]));
+                formData.append('submissionRequirements', JSON.stringify(questData.submissionRequirements || ['Photo proof required']));
                 formData.append('maxParticipants', questData.maxParticipants);
                 formData.append('photo', questData.photo);
 
@@ -1008,8 +1066,8 @@ const QuestsTab = ({ quests, setQuests }) => {
                     points: questData.points,
                     duration: questData.date,
                     location: questData.location,
-                    objectives: [questData.description],
-                    submissionRequirements: questData.requirements ? [questData.requirements] : ['Photo proof required'],
+                    objectives: questData.objectives || [questData.description],
+                    submissionRequirements: questData.submissionRequirements || ['Photo proof required'],
                     maxParticipants: questData.maxParticipants
                 };
 
@@ -1131,16 +1189,6 @@ const QuestsTab = ({ quests, setQuests }) => {
                             ))}
                         </select>
                         
-                        {/* Status Filter */}
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
-                        >
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
                     </div>
                 </div>
 
@@ -1239,6 +1287,7 @@ const CommunityTab = ({ posts, setPosts }) => {
     const [showModal, setShowModal] = useState(false);
     const [showChallengeModal, setShowChallengeModal] = useState(false);
     const [editingPost, setEditingPost] = useState(null);
+    const [editingChallenge, setEditingChallenge] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [challenges, setChallenges] = useState([]);
     const [activeFilter, setActiveFilter] = useState('all'); // 'all', 'posts', 'challenges'
@@ -1326,39 +1375,75 @@ const CommunityTab = ({ posts, setPosts }) => {
         try {
             const token = localStorage.getItem('token');
             
-            // Use FormData to handle file uploads
-            const formData = new FormData();
-            formData.append('title', challengeData.title);
-            formData.append('content', challengeData.content);
-            formData.append('target', challengeData.target);
-            formData.append('points', challengeData.points);
-            formData.append('duration', challengeData.duration);
-            formData.append('location', challengeData.location);
-            
-            if (challengeData.badge) {
-                formData.append('badge', challengeData.badge);
-            }
+            if (editingChallenge) {
+                // Update existing challenge
+                const formData = new FormData();
+                formData.append('title', challengeData.title);
+                formData.append('content', challengeData.content);
+                formData.append('target', challengeData.target);
+                formData.append('points', challengeData.points);
+                formData.append('duration', challengeData.duration);
+                formData.append('location', challengeData.location);
+                formData.append('badgeTitle', challengeData.badgeTitle);
+                
+                if (challengeData.badge) {
+                    formData.append('badge', challengeData.badge);
+                }
+
+                const response = await fetch(`/api/challenges/${editingChallenge._id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'x-auth-token': token
+                    },
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.msg || 'Failed to update challenge');
+                }
+                
+                const updatedChallenge = await response.json();
+                setChallenges(challenges.map(c => c._id === editingChallenge._id ? updatedChallenge : c));
+                alert('Challenge updated successfully!');
+            } else {
+                // Create new challenge
+                const formData = new FormData();
+                formData.append('title', challengeData.title);
+                formData.append('content', challengeData.content);
+                formData.append('target', challengeData.target);
+                formData.append('points', challengeData.points);
+                formData.append('duration', challengeData.duration);
+                formData.append('location', challengeData.location);
+                formData.append('badgeTitle', challengeData.badgeTitle);
+                
+                if (challengeData.badge) {
+                    formData.append('badge', challengeData.badge);
+                }
 
             const response = await fetch('/api/challenges', {
                 method: 'POST',
                 headers: {
                     'x-auth-token': token
                 },
-                body: formData
-            });
+                    body: formData
+                });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.msg || 'Failed to create challenge');
-            }
-            
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.msg || 'Failed to create challenge');
+                }
+                
             const newChallenge = await response.json();
             setChallenges([newChallenge, ...challenges]);
             alert('Community challenge created successfully!');
+            }
+            
             setShowChallengeModal(false);
+            setEditingChallenge(null);
         } catch (error) {
-            console.error('Error creating challenge:', error);
-            alert(`Failed to create challenge: ${error.message}`);
+            console.error('Error saving challenge:', error);
+            alert(`Failed to save challenge: ${error.message}`);
         }
     };
 
@@ -1374,6 +1459,29 @@ const CommunityTab = ({ posts, setPosts }) => {
             }
         } catch (error) {
             console.error('Error fetching challenges:', error);
+        }
+    };
+
+    const handleDeleteChallenge = async (challengeId) => {
+        if (!confirm('Are you sure you want to delete this challenge?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/challenges/${challengeId}`, {
+                method: 'DELETE',
+                headers: { 'x-auth-token': token }
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.msg || 'Failed to delete challenge');
+            }
+            
+            // Refresh the challenges list
+            fetchChallenges();
+            alert('Challenge deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting challenge:', error);
+            alert(`Failed to delete challenge: ${error.message}`);
         }
     };
 
@@ -1434,19 +1542,19 @@ const CommunityTab = ({ posts, setPosts }) => {
                     
                     {/* Filters - Right */}
                     <div className="flex gap-2 flex-wrap">
-                        {['All', 'Posts', 'Challenges'].map((filter) => (
-                            <button
-                                key={filter}
-                                onClick={() => setActiveFilter(filter.toLowerCase())}
-                                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                                    activeFilter === filter.toLowerCase()
-                                        ? 'bg-green-600 text-white shadow-md'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
-                            >
-                                {filter}
-                            </button>
-                        ))}
+                            {['All', 'Posts', 'Challenges'].map((filter) => (
+                                <button
+                                    key={filter}
+                                    onClick={() => setActiveFilter(filter.toLowerCase())}
+                                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                                        activeFilter === filter.toLowerCase()
+                                            ? 'bg-green-600 text-white shadow-md'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    {filter}
+                                </button>
+                            ))}
                     </div>
                 </div>
 
@@ -1571,23 +1679,12 @@ const CommunityTab = ({ posts, setPosts }) => {
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={() => {
-                                                            // Edit challenge functionality
-                                                            alert('Edit challenge functionality coming soon!');
+                                                            setEditingChallenge(challenge);
+                                                            setShowChallengeModal(true);
                                                         }}
                                                         className="p-2 hover:bg-blue-50 rounded-lg transition"
                                                     >
                                                         <Edit className="w-5 h-5 text-blue-600" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => {
-                                                            if (confirm('Are you sure you want to delete this challenge?')) {
-                                                                // Delete challenge functionality
-                                                                alert('Delete challenge functionality coming soon!');
-                                                            }
-                                                        }}
-                                                        className="p-2 hover:bg-red-50 rounded-lg transition"
-                                                    >
-                                                        <Trash2 className="w-5 h-5 text-red-600" />
                                                     </button>
                                                 </div>
                                             </div>
@@ -1621,7 +1718,11 @@ const CommunityTab = ({ posts, setPosts }) => {
 
             {showChallengeModal && (
                 <ChallengeModal
-                    onClose={() => setShowChallengeModal(false)}
+                    challenge={editingChallenge}
+                    onClose={() => {
+                        setShowChallengeModal(false);
+                        setEditingChallenge(null);
+                    }}
                     onSave={handleSaveChallenge}
                 />
             )}
@@ -1629,152 +1730,7 @@ const CommunityTab = ({ posts, setPosts }) => {
     );
 };
 
-// --- ANALYTICS TAB ---
-const AnalyticsTab = ({ quests }) => {
-    const totalQuests = quests.length;
-    const activeQuests = quests.filter(q => q.isActive).length;
-    // Fix: Count quests that have actual completions, not just inactive quests
-    const completedQuests = quests.filter(q => q.completions && q.completions.length > 0).length;
-    const totalParticipants = quests.reduce((sum, q) => sum + (q.completions?.length || 0), 0);
-    const avgParticipants = totalQuests > 0 ? Math.round(totalParticipants / totalQuests) : 0;
 
-    const categoryStats = {};
-    quests.forEach(q => {
-        categoryStats[q.category] = (categoryStats[q.category] || 0) + 1;
-    });
-
-    // Generate chart data
-    const categoryData = Object.entries(categoryStats).map(([label, value]) => ({
-        label: label.split(' ')[0], // Shorten category names
-        value
-    }));
-
-    // Generate chart data from real quest data based on creation dates
-    const getWeeklyActivity = (quests, isThisWeek = true) => {
-        const now = new Date();
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - now.getDay() + (isThisWeek ? 0 : -7));
-        weekStart.setHours(0, 0, 0, 0);
-        
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        weekEnd.setHours(23, 59, 59, 999);
-        
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        return days.map(day => {
-            const dayIndex = days.indexOf(day);
-            const dayStart = new Date(weekStart);
-            dayStart.setDate(weekStart.getDate() + dayIndex);
-            dayStart.setHours(0, 0, 0, 0);
-            
-            const dayEnd = new Date(dayStart);
-            dayEnd.setHours(23, 59, 59, 999);
-            
-            const questsOnDay = quests.filter(quest => {
-                const questDate = new Date(quest.created_at);
-                return questDate >= dayStart && questDate <= dayEnd;
-            }).length;
-            
-            return { label: day, value: questsOnDay };
-        });
-    };
-
-    const weeklyData = getWeeklyActivity(quests, true);
-    const lastWeekData = getWeeklyActivity(quests, false);
-
-    const questStatusData = [
-        { label: 'Active', value: activeQuests },
-        { label: 'Completed', value: completedQuests },
-        { label: 'Draft', value: quests.filter(q => q.status === 'draft').length }
-    ];
-
-    return (
-        <div className="space-y-8">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm text-gray-500">Total Quests</p>
-                        <BookOpen className="w-5 h-5 text-green-500" />
-                    </div>
-                    <p className="text-3xl font-bold">{totalQuests}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                        {activeQuests} active, {completedQuests} completed
-                    </p>
-                </div>
-
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm text-gray-500">Total Participants</p>
-                        <Users className="w-5 h-5 text-blue-500" />
-                    </div>
-                    <p className="text-3xl font-bold">{totalParticipants}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                        Avg {avgParticipants} per quest
-                    </p>
-                </div>
-
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm text-gray-500">Completion Rate</p>
-                        <TrendingUp className="w-5 h-5 text-purple-500" />
-                    </div>
-                    <p className="text-3xl font-bold">
-                        {totalQuests > 0 ? Math.round((completedQuests / totalQuests) * 100) : 0}%
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                        {completedQuests} of {totalQuests} quests
-                    </p>
-                </div>
-            </div>
-
-            {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <GroupedBarChart 
-                    data={[weeklyData, lastWeekData]} 
-                    title="Weekly Quest Activity" 
-                    categories={['This Week', 'Last Week']}
-                    colors={['#10B981', '#3B82F6']}
-                />
-                <DonutChart 
-                    data={questStatusData} 
-                    title="Quest Status Distribution" 
-                />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <SimpleBarChart 
-                    data={categoryData} 
-                    title="Quests by Category" 
-                    color="blue" 
-                />
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <h3 className="text-xl font-bold mb-4">Top Performing Quests</h3>
-                    <div className="space-y-3">
-                        {quests
-                            .sort((a, b) => (b.completions?.length || 0) - (a.completions?.length || 0))
-                            .slice(0, 5)
-                            .map((quest, idx) => (
-                                <div key={quest._id} className="flex items-center gap-4 p-3 border border-gray-200 rounded-lg">
-                                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center font-bold text-green-700">
-                                        {idx + 1}
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="font-semibold">{quest.title}</p>
-                                        <p className="text-sm text-gray-500">{quest.category}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="font-bold text-green-600">{quest.completions?.length || 0}</p>
-                                        <p className="text-xs text-gray-500">participants</p>
-                                    </div>
-                                </div>
-                            ))}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
 
 // --- NOTIFICATIONS TAB ---
 const NotificationsTab = () => {
@@ -2184,7 +2140,6 @@ const PartnerDashboard = () => {
                     <TabButton id="quests" label="My Quests" icon={<BookOpen className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} badge={quests.filter(q => q.isActive).length} />
                     <TabButton id="community" label="Community" icon={<FileText className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="notifications" label="Notifications" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
-                    <TabButton id="analytics" label="Analytics" icon={<TrendingUp className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
 
                 {/* Tab Content */}
@@ -2192,7 +2147,6 @@ const PartnerDashboard = () => {
                 {activeTab === 'quests' && <QuestsTab quests={quests} setQuests={setQuests} />}
                 {activeTab === 'community' && <CommunityTab posts={posts} setPosts={setPosts} />}
                 {activeTab === 'notifications' && <NotificationsTab />}
-                {activeTab === 'analytics' && <AnalyticsTab quests={quests} />}
             </main>
         </div>
     );

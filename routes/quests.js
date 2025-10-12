@@ -62,7 +62,7 @@ router.get('/', async (req, res) => {
     if (difficulty) filter.difficulty = difficulty;
    
     const quests = await Quest.find(filter)
-      .populate('createdBy', 'username email')
+      .populate('createdBy', 'username email role')
       .sort({ created_at: -1 });
    
     res.json(quests);
@@ -99,7 +99,7 @@ router.get('/:id', async (req, res) => {
 // @route   POST /api/quests
 // @desc    Create a new quest
 // @access  Private (Partner/Admin only)
-router.post('/', [auth, checkRole('partner', 'admin'), upload.single('photo'), handleUploadError], async (req, res) => {
+router.post('/', [auth, checkRole('partner', 'admin')], async (req, res) => {
   try {
     const {
       title,
@@ -120,19 +120,6 @@ router.post('/', [auth, checkRole('partner', 'admin'), upload.single('photo'), h
     const parsedSubmissionRequirements = typeof submissionRequirements === 'string' ? JSON.parse(submissionRequirements) : submissionRequirements;
 
 
-    let imageUrl = null;
-    if (req.file) {
-      try {
-        const cloudinaryResult = await uploadToCloudinary(req.file, 'hau-eco-quest/quests');
-        imageUrl = cloudinaryResult.secure_url;
-        console.log(`Quest image uploaded to Cloudinary: ${cloudinaryResult.compression.compressionRatio}% compression achieved`);
-      } catch (error) {
-        console.error('Cloudinary upload error:', error);
-        return res.status(500).json({ msg: 'Failed to upload image' });
-      }
-    }
-
-
     const newQuest = new Quest({
       title,
       description,
@@ -145,8 +132,7 @@ router.post('/', [auth, checkRole('partner', 'admin'), upload.single('photo'), h
       submissionRequirements: parsedSubmissionRequirements,
       maxParticipants: maxParticipants || 100,
       createdBy: req.user.id,
-      isActive: true,
-      imageUrl: imageUrl
+      isActive: true
     });
 
 
@@ -227,21 +213,6 @@ router.delete('/:id', [auth, checkRole('admin')], async (req, res) => {
       return res.status(404).json({ msg: 'Quest not found' });
     }
 
-
-    // Delete image from Cloudinary if it exists
-    if (quest.imageUrl) {
-      try {
-        const publicId = extractPublicId(quest.imageUrl);
-        if (publicId) {
-          await deleteFromCloudinary(publicId);
-        }
-      } catch (error) {
-        console.error('Error deleting image from Cloudinary:', error);
-        // Continue with quest deletion even if image deletion fails
-      }
-    }
-
-
     await Quest.findByIdAndDelete(req.params.id);
     res.json({ msg: 'Quest deleted' });
   } catch (err) {
@@ -256,12 +227,20 @@ router.delete('/:id', [auth, checkRole('admin')], async (req, res) => {
 // @access  Private (User)
 router.post('/:id/submit', [auth, upload.single('photo'), handleUploadError], async (req, res) => {
   try {
+    console.log('Quest submission request received');
+    console.log('Quest ID:', req.params.id);
+    console.log('User ID:', req.user.id);
+    console.log('File received:', req.file ? 'Yes' : 'No');
+    console.log('Reflection text:', req.body.reflection_text);
+
     const quest = await Quest.findById(req.params.id);
    
     if (!quest) {
+      console.log('Quest not found:', req.params.id);
       return res.status(404).json({ msg: 'Quest not found' });
     }
 
+    console.log('Quest found:', quest.title);
 
     const { reflection_text } = req.body;
    
@@ -284,18 +263,32 @@ router.post('/:id/submit', [auth, upload.single('photo'), handleUploadError], as
     let photoUrl = '';
     if (req.file) {
       try {
-        const cloudinaryResult = await uploadToCloudinary(req.file, 'hau-eco-quest/submissions');
-        photoUrl = cloudinaryResult.secure_url;
-        console.log(`Quest submission photo uploaded to Cloudinary: ${cloudinaryResult.compression.compressionRatio}% compression achieved`);
+        // Check if Cloudinary is configured
+        if (!process.env.CLOUDINARY_URL && !process.env.CLOUDINARY_CLOUD_NAME) {
+          console.log('Cloudinary not configured, using local storage');
+          // Use local file path as fallback
+          photoUrl = `/uploads/${req.file.filename}`;
+        } else {
+          const cloudinaryResult = await uploadToCloudinary(req.file, 'hau-eco-quest/submissions');
+          photoUrl = cloudinaryResult.secure_url;
+          console.log(`Quest submission photo uploaded to Cloudinary: ${cloudinaryResult.compression.compressionRatio}% compression achieved`);
+        }
       } catch (error) {
         console.error('Cloudinary upload error:', error);
-        return res.status(500).json({ msg: 'Failed to upload photo' });
+        // Fallback to local storage
+        console.log('Falling back to local storage');
+        photoUrl = `/uploads/${req.file.filename}`;
       }
     }
 
 
     // Auto-approve if user is admin
     const isAdmin = user.role === 'admin';
+    console.log('Creating quest submission...');
+    console.log('User role:', user.role);
+    console.log('Is admin:', isAdmin);
+    console.log('Photo URL:', photoUrl);
+    
     const submission = new QuestSubmission({
       user_id: req.user.id,
       quest_id: req.params.id,
@@ -306,7 +299,7 @@ router.post('/:id/submit', [auth, upload.single('photo'), handleUploadError], as
       reviewed_at: isAdmin ? Date.now() : null
     });
 
-
+    console.log('Saving submission to database...');
     await submission.save();
     console.log(`Quest submission created: User ${user.username} submitted quest ${quest.title} with status: ${submission.status}`);
 
@@ -345,8 +338,9 @@ router.post('/:id/submit', [auth, upload.single('photo'), handleUploadError], as
       submission
     });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).json({ msg: 'Server error' });
+    console.error('Quest submission error:', err.message);
+    console.error('Full error:', err);
+    res.status(500).json({ msg: `Server error: ${err.message}` });
   }
 });
 

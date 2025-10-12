@@ -167,7 +167,6 @@ const LeaderboardPage = ({ onPageChange }) => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDepartment, setSelectedDepartment] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalQuests: 0,
@@ -314,42 +313,6 @@ const LeaderboardPage = ({ onPageChange }) => {
     originalRank: index + 1
   }));
 
-  // Filter users by search term while preserving original rankings
-  const searchFilteredUsers = usersWithRank.filter(user => {
-    if (!searchTerm) return true;
-    
-    const searchLower = searchTerm.toLowerCase();
-    const userName = (user.name || user.username || '').toLowerCase();
-    const userTitle = (user.title || '').toLowerCase();
-    const userDepartment = (user.department || '').toLowerCase();
-    const userEmail = (user.email || '').toLowerCase();
-    
-    return userName.includes(searchLower) ||
-           userTitle.includes(searchLower) ||
-           userDepartment.includes(searchLower) ||
-           userEmail.includes(searchLower);
-  });
-
-  // Filter departments by search term when "all" is selected
-  const searchFilteredDepartments = departments.filter(dept => {
-    const deptName = dept.department.toLowerCase();
-    const searchLower = searchTerm.toLowerCase();
-    
-    // Map department codes to full names for better search
-    const deptFullNames = {
-      'soc': 'school of computing',
-      'sas': 'school of arts and sciences',
-      'sea': 'school of engineering and architecture',
-      'sba': 'school of business and accountancy',
-      'sed': 'school of education',
-      'ccjef': 'college of criminal justice education and forensics',
-      'shtm': 'school of hospitality and tourism management',
-      'snams': 'school of nursing and allied medical sciences'
-    };
-    
-    return deptName.includes(searchLower) || 
-           (deptFullNames[deptName] && deptFullNames[deptName].includes(searchLower));
-  });
 
   const handleShowMore = () => {
     setDisplayCount(prev => prev + 10);
@@ -366,8 +329,8 @@ const LeaderboardPage = ({ onPageChange }) => {
     );
   }
 
-  const topThree = searchFilteredUsers.slice(0, 3);
-  const remainingUsers = searchFilteredUsers.slice(3, displayCount);
+  const topThree = usersWithRank.slice(0, 3);
+  const remainingUsers = usersWithRank.slice(3, displayCount);
 
   return (
     <div className="font-sans bg-gray-50 text-gray-900">
@@ -445,20 +408,8 @@ const LeaderboardPage = ({ onPageChange }) => {
         <section className="bg-white border-b border-gray-200 shadow-sm sticky top-16 z-40">
           <div className="container mx-auto px-6 py-4">
             <div className="flex flex-col md:flex-row gap-4">
-              {/* Search */}
-              <div className="relative flex-1">
-                <input 
-                  type="text" 
-                  placeholder={selectedDepartment === 'all' ? "Search departments..." : "Search users..."} 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-gray-50 text-gray-900 placeholder-gray-400 border-2 border-gray-200 rounded-lg px-4 py-2.5 pl-10 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" 
-                />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              </div>
-
               {/* Department Filter */}
-              <div className="w-full md:w-80">
+              <div className="w-full md:w-80 ml-auto">
                 <select
                   value={selectedDepartment}
                   onChange={(e) => setSelectedDepartment(e.target.value)}
@@ -486,9 +437,9 @@ const LeaderboardPage = ({ onPageChange }) => {
                   <h2 className="text-3xl font-bold text-gray-900 mb-2">Department Rankings</h2>
                   <p className="text-gray-600">Click on any department to view their top environmental champions</p>
                 </div>
-                {searchFilteredDepartments.length > 0 ? (
+                {departments.length > 0 ? (
                   <div className="space-y-4">
-                    {searchFilteredDepartments.map((department, index) => (
+                    {departments.map((department, index) => (
                       <DepartmentRow
                         key={department.department}
                         department={department}
@@ -509,7 +460,7 @@ const LeaderboardPage = ({ onPageChange }) => {
             </div>
           ) : (
             // Individual department leaderboard (now only showing regular users in that department)
-            searchFilteredUsers.length > 0 ? (
+            usersWithRank.length > 0 ? (
               <>
                 {/* Department Header */}
                 <div className="text-center mb-8">
@@ -530,21 +481,21 @@ const LeaderboardPage = ({ onPageChange }) => {
                 </div>
 
                 {/* Show top 3 champions if we have 3 or more users */}
-                {searchFilteredUsers.length >= 3 && (
+                {usersWithRank.length >= 3 && (
                   <div className="mb-12">
                     <h3 className="text-2xl font-bold text-center mb-8 text-gray-900">Top Champions</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
                       {/* 2nd Place */}
                       <div className="order-2 md:order-1">
-                        <TopChampionCard key={searchFilteredUsers[1].id} user={searchFilteredUsers[1]} rank={searchFilteredUsers[1].originalRank} onPageChange={onPageChange} />
+                        <TopChampionCard key={usersWithRank[1].id} user={usersWithRank[1]} rank={usersWithRank[1].originalRank} onPageChange={onPageChange} />
                       </div>
                       {/* 1st Place - Center and elevated */}
                       <div className="order-1 md:order-2 transform md:scale-110 md:-mt-4">
-                        <TopChampionCard key={searchFilteredUsers[0].id} user={searchFilteredUsers[0]} rank={searchFilteredUsers[0].originalRank} onPageChange={onPageChange} />
+                        <TopChampionCard key={usersWithRank[0].id} user={usersWithRank[0]} rank={usersWithRank[0].originalRank} onPageChange={onPageChange} />
                       </div>
                       {/* 3rd Place */}
                       <div className="order-3 md:order-3">
-                        <TopChampionCard key={searchFilteredUsers[2].id} user={searchFilteredUsers[2]} rank={searchFilteredUsers[2].originalRank} onPageChange={onPageChange} />
+                        <TopChampionCard key={usersWithRank[2].id} user={usersWithRank[2]} rank={usersWithRank[2].originalRank} onPageChange={onPageChange} />
                       </div>
                     </div>
                   </div>
@@ -553,22 +504,22 @@ const LeaderboardPage = ({ onPageChange }) => {
                 {/* Show all users in a simple list format */}
                 <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
                   <h3 className="text-2xl font-bold mb-4 text-gray-900">
-                    {searchFilteredUsers.length >= 3 ? 'Complete User Rankings' : 'User Rankings'}
+                    {usersWithRank.length >= 3 ? 'Complete User Rankings' : 'User Rankings'}
                   </h3>
-                  {searchFilteredUsers.length >= 3 ? (
+                  {usersWithRank.length >= 3 ? (
                     // If we have 3+ users, show remaining users (4th place and below)
                     remainingUsers.map((user, index) => (
                       <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={user.originalRank} onPageChange={onPageChange} />
                     ))
                   ) : (
                     // If we have fewer than 3 users, show all users with their original ranks
-                    searchFilteredUsers.map((user, index) => (
+                    usersWithRank.map((user, index) => (
                       <LeaderboardRow key={`${user.name}-${index}`} user={user} rank={user.originalRank} onPageChange={onPageChange} />
                     ))
                   )}
 
                   {/* Show More Button */}
-                  {searchFilteredUsers.length >= 3 && displayCount < searchFilteredUsers.length && (
+                  {usersWithRank.length >= 3 && displayCount < usersWithRank.length && (
                     <div className="text-center mt-6">
                       <button
                         onClick={handleShowMore}
@@ -618,9 +569,9 @@ const LeaderboardPage = ({ onPageChange }) => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <img
-                src="/vite.svg"
+                src="/assets/hau-eco-quest-logo.png"
                 alt="HAU Eco-Quest Logo"
-                className="h-8 w-8 bg-white rounded-full p-1"
+                className="h-8 w-8"
               />
               <h3 className="text-2xl font-bold">HAU Eco-Quest</h3>
             </div>

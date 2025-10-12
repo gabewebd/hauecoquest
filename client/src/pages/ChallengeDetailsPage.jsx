@@ -154,7 +154,6 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
           {/* Challenge Overview */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
             <div className="flex items-start gap-6 mb-6">
-              <div className="text-6xl">🌳</div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <h1 className="text-3xl font-bold text-gray-900">{challenge.title}</h1>
@@ -163,6 +162,23 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
                   </span>
                 </div>
                 <p className="text-gray-600 mb-4 leading-relaxed">{challenge.description}</p>
+                
+                {/* Badge Display */}
+                {challenge.badge_url && (
+                  <div className="mb-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <img 
+                        src={challenge.badge_url} 
+                        alt="Challenge Badge" 
+                        className="w-12 h-12 rounded-lg object-cover"
+                      />
+                      <div>
+                        <h4 className="font-semibold text-gray-800">Earn This Badge</h4>
+                        <p className="text-sm text-gray-600">{challenge.badgeTitle || 'Challenge Badge'}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               
                 {/* Stats */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -211,61 +227,7 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
             </div>
           </div>
 
-          {/* Challenge Objectives */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Challenge Objectives</h2>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Plant Native Trees</h3>
-                  <p className="text-gray-600">Successfully plant a minimum of 5 native tree saplings around campus.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Document Your Impact</h3>
-                  <p className="text-gray-600">Take geo-tagged photos of the planted trees with your team.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Share Your Reflection</h3>
-                  <p className="text-gray-600">Submit a reflection on the importance of reforestation and environmental impact.</p>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Submission Requirements */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Submission Requirements</h2>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <Camera className="w-5 h-5 text-red-500 mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Photo Evidence</h3>
-                  <p className="text-gray-600">One high-resolution, geo-tagged photo showing the newly planted trees and participant.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <FileText className="w-5 h-5 text-red-500 mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Reflection Document</h3>
-                  <p className="text-gray-600">A brief reflection on the importance of reforestation and environmental impact.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-red-500 mt-1 flex-shrink-0" />
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">Location Details</h3>
-                  <p className="text-gray-600">Provide details about the location where trees were planted.</p>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Existing Submission Status */}
           {user && user.role === 'user' && existingSubmission && (
@@ -295,7 +257,20 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
                     <X className="w-5 h-5" />
                     <span className="font-semibold">Submission Rejected</span>
                   </div>
-                  <p className="text-sm">Your submission was rejected. You can submit again with improved documentation.</p>
+                  <p className="text-sm mb-3">Your submission was rejected. You can submit again with improved documentation.</p>
+                  <button
+                    onClick={() => {
+                      setSubmissionData({
+                        reflection: '',
+                        photo: null,
+                        previewUrl: null
+                      });
+                      setExistingSubmission(null);
+                    }}
+                    className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+                  >
+                    Submit Again
+                  </button>
                 </div>
               )}
             </div>
@@ -309,7 +284,7 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
               {/* Reflection */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Reflection on Reforestation
+                  Reflection
                 </label>
                 <textarea
                   value={submissionData.reflection}
@@ -324,12 +299,12 @@ const ChallengeDetailsPage = ({ onPageChange, challengeId }) => {
               {/* Photo Upload */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Upload Photo/Video Proof (Geo-tagged evidence)
+                  Upload Photo Proof (Geo-tagged evidence)
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                   <input
                     type="file"
-                    accept="image/*,video/*"
+                    accept="image/*"
                     onChange={handleFileChange}
                     className="hidden"
                     id="challenge-photo-upload"

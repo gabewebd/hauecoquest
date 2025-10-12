@@ -42,8 +42,8 @@ export default function HomePage({ onPageChange }) {
         // Individual user leaderboard structure
         totalUsers = leaderboardData.length;
         totalPoints = leaderboardData.reduce((sum, user) => {
-          return sum + (user.eco_score || user.points || 0);
-        }, 0);
+        return sum + (user.eco_score || user.points || 0);
+      }, 0);
       }
       
       // Update stats with actual data
@@ -155,7 +155,7 @@ export default function HomePage({ onPageChange }) {
 
       <section className="py-12 md:py-20 px-4 md:px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             <div className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
               <div className="bg-green-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
                 <Target className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
@@ -169,13 +169,6 @@ export default function HomePage({ onPageChange }) {
               </div>
               <h2 className="text-2xl md:text-4xl font-black text-emerald-600 mb-2">{loading ? '...' : stats.totalUsers}+</h2>
               <p className="text-gray-600 font-semibold text-xs md:text-base">Eco-Warriors</p>
-            </div>
-            <div className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
-              <div className="bg-amber-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
-                <Trophy className="w-6 h-6 md:w-8 md:h-8 text-amber-600" />
-              </div>
-              <h2 className="text-2xl md:text-4xl font-black text-amber-600 mb-2">{loading ? '...' : stats.totalPoints}</h2>
-              <p className="text-gray-600 font-semibold text-xs md:text-base">Points Earned</p>
             </div>
             <div className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-lg hover:shadow-xl transition-all text-center">
               <div className="bg-teal-100 w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-3 md:mb-4">
@@ -292,9 +285,9 @@ export default function HomePage({ onPageChange }) {
           <div>
             <div className="flex items-center gap-2 mb-3 md:mb-4">
               <img
-                src="/vite.svg"
+                src="/assets/hau-eco-quest-logo.png"
                 alt="HAU Eco-Quest Logo"
-                className="h-6 w-6 md:h-8 md:w-8 bg-white rounded-full p-1"
+                className="h-6 w-6 md:h-8 md:w-8"
               />
               <h3 className="text-xl md:text-2xl font-bold">HAU Eco-Quest</h3>
             </div>

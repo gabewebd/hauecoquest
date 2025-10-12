@@ -155,7 +155,15 @@ const DonutChart = ({ data, title, size = 120 }) => {
     const total = data.reduce((sum, item) => sum + item.value, 0);
     let cumulativePercentage = 0;
     
-    const colors = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
+    // Improved color palette with better contrast and visual appeal
+    const colors = [
+        '#10B981', // Green for Users
+        '#3B82F6', // Blue for Partners  
+        '#F59E0B', // Amber for Admins
+        '#EF4444', // Red for Pending
+        '#8B5CF6', // Purple for additional roles
+        '#06B6D4'  // Cyan for other roles
+    ];
     
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300">
@@ -327,7 +335,19 @@ const GroupedBarChart = ({ data, title, categories, colors = ['#3B82F6', '#10B98
 };
 
 // --- OVERVIEW TAB ---
-const OverviewTab = ({ stats, setActiveTab }) => (
+const OverviewTab = ({ stats, setActiveTab, users }) => {
+    // Calculate real user role distribution
+    const userRoleData = users.reduce((acc, user) => {
+        acc[user.role] = (acc[user.role] || 0) + 1;
+        return acc;
+    }, {});
+
+    const roleChartData = Object.entries(userRoleData).map(([label, value]) => ({
+        label: label.charAt(0).toUpperCase() + label.slice(1),
+        value
+    }));
+
+    return (
     <div className="space-y-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard icon={<Users className="w-6 h-6 text-blue-500" />} value={stats.totalUsers} label="Total Users" bgColor="bg-blue-50" />
@@ -338,52 +358,6 @@ const OverviewTab = ({ stats, setActiveTab }) => (
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <GroupedBarChart 
-                data={[
-                    [
-                        { label: 'Mon', value: Math.floor(stats.totalUsers * 0.1) + 2 },
-                        { label: 'Tue', value: Math.floor(stats.totalUsers * 0.15) + 3 },
-                        { label: 'Wed', value: Math.floor(stats.totalUsers * 0.2) + 4 },
-                        { label: 'Thu', value: Math.floor(stats.totalUsers * 0.12) + 2 },
-                        { label: 'Fri', value: Math.floor(stats.totalUsers * 0.25) + 5 },
-                        { label: 'Sat', value: Math.floor(stats.totalUsers * 0.18) + 3 },
-                        { label: 'Sun', value: Math.floor(stats.totalUsers * 0.1) + 1 }
-                    ],
-                    [
-                        { label: 'Mon', value: Math.floor(stats.totalUsers * 0.12) + 3 },
-                        { label: 'Tue', value: Math.floor(stats.totalUsers * 0.18) + 4 },
-                        { label: 'Wed', value: Math.floor(stats.totalUsers * 0.22) + 5 },
-                        { label: 'Thu', value: Math.floor(stats.totalUsers * 0.15) + 3 },
-                        { label: 'Fri', value: Math.floor(stats.totalUsers * 0.28) + 6 },
-                        { label: 'Sat', value: Math.floor(stats.totalUsers * 0.2) + 4 },
-                        { label: 'Sun', value: Math.floor(stats.totalUsers * 0.12) + 2 }
-                    ]
-                ]} 
-                title="Weekly Platform Activity" 
-                categories={['This Week', 'Last Week']}
-                colors={['#10B981', '#3B82F6']}
-            />
-            <DonutChart 
-                data={[
-                    { label: 'Users', value: stats.totalUsers - stats.pendingPartners },
-                    { label: 'Partners', value: Math.floor(stats.totalUsers * 0.1) },
-                    { label: 'Admins', value: Math.floor(stats.totalUsers * 0.02) },
-                    { label: 'Pending', value: stats.pendingPartners }
-                ]} 
-                title="User Role Distribution" 
-            />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <SimpleBarChart 
-                data={[
-                    { label: 'Active', value: stats.activeQuests },
-                    { label: 'Completed', value: Math.floor(stats.activeQuests * 0.7) },
-                    { label: 'Draft', value: Math.floor(stats.activeQuests * 0.3) }
-                ]} 
-                title="Quest Status Overview" 
-                color="green" 
-            />
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -395,19 +369,49 @@ const OverviewTab = ({ stats, setActiveTab }) => (
                     />
                     <QuickAction
                         icon={<BookOpen className="w-6 h-6 text-green-500" />}
-                        title="Manage Quests"
-                        subtitle="Create and edit quests"
-                        onClick={() => setActiveTab('quests')}
+                        title="Review Quests" 
+                        subtitle="Approve or reject quest submissions" 
+                        onClick={() => setActiveTab('submissions')} 
                     />
                     <QuickAction
-                        icon={<BarChart className="w-6 h-6 text-purple-500" />}
-                        title="View Analytics"
-                        subtitle="System performance metrics"
-                        onClick={() => setActiveTab('analytics')}
+                        icon={<FileText className="w-6 h-6 text-purple-500" />} 
+                        title="Community Posts" 
+                        subtitle="Manage community content" 
+                        onClick={() => setActiveTab('community')} 
+                    />
+                    <QuickAction 
+                        icon={<Users className="w-6 h-6 text-orange-500" />} 
+                        title="Notifications" 
+                        subtitle="Send announcements to users" 
+                        onClick={() => setActiveTab('notifications')} 
                     />
                 </div>
             </div>
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">User Role Distribution</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600 mb-1">
+                            {userRoleData.user || 0}
+                        </div>
+                        <div className="text-sm text-blue-700 font-semibold">Users</div>
+                    </div>
+                    <div className="text-center p-4 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600 mb-1">
+                            {userRoleData.partner || 0}
+                        </div>
+                        <div className="text-sm text-purple-700 font-semibold">Partners</div>
+                    </div>
+                    <div className="text-center p-4 bg-red-50 rounded-lg">
+                        <div className="text-2xl font-bold text-red-600 mb-1">
+                            {userRoleData.admin || 0}
+                        </div>
+                        <div className="text-sm text-red-700 font-semibold">Admins</div>
+                    </div>
+                </div>
+            </div>
         </div>
+
 
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <h3 className="text-xl font-bold mb-4">Recent Activity</h3>
@@ -434,9 +438,38 @@ const OverviewTab = ({ stats, setActiveTab }) => (
         </div>
     </div>
 );
+};
 
 // --- USER PROFILE MODAL ---
 const UserProfileModal = ({ user, onClose }) => {
+    const [userData, setUserData] = useState(user);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            fetchUpdatedUserData();
+        }
+    }, [user]);
+
+    const fetchUpdatedUserData = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/users/${user._id}`, {
+                headers: { 'x-auth-token': token }
+            });
+            
+            if (response.ok) {
+                const updatedUser = await response.json();
+                setUserData(updatedUser);
+            }
+        } catch (error) {
+            console.error('Error fetching updated user data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (!user) return null;
 
     const getRoleIcon = (role) => {
@@ -456,7 +489,7 @@ const UserProfileModal = ({ user, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
                     <h3 className="text-2xl font-bold">User Profile</h3>
@@ -466,24 +499,32 @@ const UserProfileModal = ({ user, onClose }) => {
                 </div>
 
                 <div className="p-6 space-y-6">
-                    <div className="text-center">
-                        <div className={`w-20 h-20 bg-gradient-to-br ${getRoleColor(user.role)} rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg`}>
-                            {getRoleIcon(user.role)}
+                    {loading && (
+                        <div className="text-center py-8">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                            <p className="text-gray-500 mt-2">Loading updated user data...</p>
                         </div>
-                        <h4 className="text-2xl font-bold">{user.username}</h4>
-                        <p className="text-gray-500">{user.email}</p>
+                    )}
+                    {!loading && (
+                        <>
+                    <div className="text-center">
+                        <div className={`w-20 h-20 bg-gradient-to-br ${getRoleColor(userData.role)} rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg`}>
+                            {getRoleIcon(userData.role)}
+                        </div>
+                        <h4 className="text-2xl font-bold">{userData.username}</h4>
+                        <p className="text-gray-500">{userData.email}</p>
                         <div className="flex items-center justify-center gap-2 mt-2">
-                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${user.role === 'partner'
+                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${userData.role === 'partner'
                                     ? 'bg-purple-100 text-purple-700'
-                                    : user.role === 'admin'
+                                    : userData.role === 'admin'
                                         ? 'bg-red-100 text-red-700'
                                         : 'bg-blue-100 text-blue-700'
                                 }`}>
-                                {user.role}
+                                {userData.role}
                             </span>
-                            {user.requested_role && !user.is_approved && (
+                            {userData.requested_role && !userData.is_approved && (
                                 <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
-                                    Pending {user.requested_role}
+                                    Pending {userData.requested_role}
                                 </span>
                             )}
                         </div>
@@ -495,14 +536,14 @@ const UserProfileModal = ({ user, onClose }) => {
                                 <Award className="w-4 h-4 text-green-600" />
                                 <h5 className="font-semibold text-sm text-green-700">Eco Score</h5>
                             </div>
-                            <p className="text-2xl font-bold text-green-600">{user.eco_score || 0}</p>
+                            <p className="text-2xl font-bold text-green-600">{userData.eco_score || 0}</p>
                         </div>
                         <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200 hover:shadow-md transition-all">
                             <div className="flex items-center gap-2 mb-1">
                                 <Award className="w-4 h-4 text-blue-600" />
                                 <h5 className="font-semibold text-sm text-blue-700">Points</h5>
                             </div>
-                            <p className="text-2xl font-bold text-blue-600">{user.points || 0}</p>
+                            <p className="text-2xl font-bold text-blue-600">{userData.points || 0}</p>
                         </div>
                     </div>
 
@@ -515,21 +556,21 @@ const UserProfileModal = ({ user, onClose }) => {
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center p-2 hover:bg-white rounded-lg transition-colors">
                                     <span className="text-gray-600">HAU Affiliation:</span>
-                                    <span className="font-semibold text-gray-800">{user.hau_affiliation || 'Not specified'}</span>
+                                    <span className="font-semibold text-gray-800">{userData.hau_affiliation || 'Not specified'}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-2 hover:bg-white rounded-lg transition-colors">
                                     <span className="text-gray-600">Avatar Theme:</span>
-                                    <span className="font-semibold text-gray-800">{user.avatar_theme || 'Default'}</span>
+                                    <span className="font-semibold text-gray-800">{userData.avatar_theme || 'Default'}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-2 hover:bg-white rounded-lg transition-colors">
                                     <span className="text-gray-600">Header Theme:</span>
-                                    <span className="font-semibold text-gray-800">{user.header_theme || 'Default'}</span>
+                                    <span className="font-semibold text-gray-800">{userData.header_theme || 'Default'}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-2 hover:bg-white rounded-lg transition-colors">
                                     <span className="text-gray-600">Approval Status:</span>
-                                    <span className={`font-semibold flex items-center gap-1 ${user.is_approved ? 'text-green-600' : 'text-yellow-600'}`}>
-                                        {user.is_approved ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-                                        {user.is_approved ? 'Approved' : 'Pending'}
+                                    <span className={`font-semibold flex items-center gap-1 ${userData.is_approved ? 'text-green-600' : 'text-yellow-600'}`}>
+                                        {userData.is_approved ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+                                        {userData.is_approved ? 'Approved' : 'Pending'}
                                     </span>
                                 </div>
                             </div>
@@ -543,19 +584,21 @@ const UserProfileModal = ({ user, onClose }) => {
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center p-2 hover:bg-white rounded-lg transition-colors">
                                     <span className="text-gray-600">Quests Completed:</span>
-                                    <span className="font-semibold text-gray-800">{user.questsCompleted?.length || 0}</span>
+                                    <span className="font-semibold text-gray-800">{userData.questsCompleted?.length || 0}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-2 hover:bg-white rounded-lg transition-colors">
                                     <span className="text-gray-600">Member Since:</span>
-                                    <span className="font-semibold text-gray-800">{new Date(user.created_at).toLocaleDateString()}</span>
+                                    <span className="font-semibold text-gray-800">{new Date(userData.created_at).toLocaleDateString()}</span>
                                 </div>
                                 <div className="flex justify-between items-center p-2 hover:bg-white rounded-lg transition-colors">
                                     <span className="text-gray-600">Last Active:</span>
-                                    <span className="font-semibold text-gray-800">{user.updated_at ? new Date(user.updated_at).toLocaleDateString() : 'Unknown'}</span>
+                                    <span className="font-semibold text-gray-800">{userData.updated_at ? new Date(userData.updated_at).toLocaleDateString() : 'Unknown'}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    </>
+                    )}
                 </div>
             </div>
         </div>
@@ -600,18 +643,6 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
 
     return (
         <div className="space-y-8">
-            {/* User Statistics Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <DonutChart 
-                    data={roleChartData} 
-                    title="User Role Distribution" 
-                />
-                <SimpleBarChart 
-                    data={statusChartData} 
-                    title="User Status Overview" 
-                    color="blue" 
-                />
-            </div>
 
             {/* Pending Role Approvals (Partner & Admin) */}
             {pendingPartners.length > 0 && (
@@ -661,53 +692,53 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
             {/* User Management Table */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                 <div className="mb-6">
-                    <h3 className="text-xl font-bold">User Management</h3>
-                    <p className="text-sm text-gray-500">Manage all user accounts and roles</p>
-                </div>
+                        <h3 className="text-xl font-bold">User Management</h3>
+                        <p className="text-sm text-gray-500">Manage all user accounts and roles</p>
+                    </div>
 
                 {/* Search and Filters */}
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
                     {/* Search Bar - Left */}
                     <div className="relative w-full md:w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search users..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
-                        />
-                    </div>
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search users..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                            />
+                        </div>
                     
                     {/* Filters - Right */}
                     <div className="flex gap-2 flex-wrap">
-                        <button
-                            onClick={() => setFilterRole('all')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'all'
-                                    ? 'bg-gray-500 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                        >
-                            All Roles
-                        </button>
-                        <button
-                            onClick={() => setFilterRole('student')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'student'
-                                    ? 'bg-blue-500 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                        >
-                            Students
-                        </button>
-                        <button
-                            onClick={() => setFilterRole('partner')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'partner'
-                                    ? 'bg-purple-500 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
-                        >
-                            Partners
-                        </button>
+                            <button
+                                onClick={() => setFilterRole('all')}
+                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'all'
+                                        ? 'bg-gray-500 text-white'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                All Roles
+                            </button>
+                            <button
+                                onClick={() => setFilterRole('student')}
+                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'student'
+                                        ? 'bg-blue-500 text-white'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                Students
+                            </button>
+                            <button
+                                onClick={() => setFilterRole('partner')}
+                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'partner'
+                                        ? 'bg-purple-500 text-white'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                Partners
+                            </button>
                     </div>
                 </div>
 
@@ -742,13 +773,6 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
                                     <td className="px-4 py-3 text-sm text-gray-600">{new Date(user.created_at).toLocaleDateString()}</td>
                                     <td className="px-4 py-3">
                                         <div className="flex gap-2">
-                                            <button
-                                                onClick={() => setSelectedUser(user)}
-                                                className="p-2 hover:bg-blue-50 rounded-lg transition"
-                                                title="View Profile"
-                                            >
-                                                <Users className="w-4 h-4 text-blue-600" />
-                                            </button>
                                             <button
                                                 onClick={() => onDeleteUser(user._id)}
                                                 className="p-2 hover:bg-red-50 rounded-lg transition"
@@ -789,6 +813,8 @@ const QuestModal = ({ quest, onClose, onSave }) => {
         objectives: '',
         submissionRequirements: ''
     });
+    const [objectives, setObjectives] = useState(quest?.objectives || ['']);
+    const [submissionRequirements, setSubmissionRequirements] = useState(quest?.submissionRequirements || ['']);
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(quest?.imageUrl || null);
     const [isUploading, setIsUploading] = useState(false);
@@ -803,13 +829,50 @@ const QuestModal = ({ quest, onClose, onSave }) => {
         }
     };
 
+    const addObjective = () => {
+        setObjectives([...objectives, '']);
+    };
+
+    const removeObjective = (index) => {
+        if (objectives.length > 1) {
+            setObjectives(objectives.filter((_, i) => i !== index));
+        }
+    };
+
+    const updateObjective = (index, value) => {
+        const newObjectives = [...objectives];
+        newObjectives[index] = value;
+        setObjectives(newObjectives);
+    };
+
+    const addSubmissionRequirement = () => {
+        setSubmissionRequirements([...submissionRequirements, '']);
+    };
+
+    const removeSubmissionRequirement = (index) => {
+        if (submissionRequirements.length > 1) {
+            setSubmissionRequirements(submissionRequirements.filter((_, i) => i !== index));
+        }
+    };
+
+    const updateSubmissionRequirement = (index, value) => {
+        const newRequirements = [...submissionRequirements];
+        newRequirements[index] = value;
+        setSubmissionRequirements(newRequirements);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSave({ ...formData, image: selectedFile });
+        onSave({ 
+            ...formData, 
+            image: selectedFile,
+            objectives: objectives.filter(obj => obj.trim() !== ''),
+            submissionRequirements: submissionRequirements.filter(req => req.trim() !== '')
+        });
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
                     <h3 className="text-2xl font-bold">{quest ? 'Edit Quest' : 'Create New Quest'}</h3>
@@ -826,7 +889,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             placeholder="e.g., Campus Tree Planting"
                         />
                     </div>
@@ -837,14 +900,12 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             <select
                                 value={formData.category}
                                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             >
                                 <option>Gardening & Planting</option>
                                 <option>Recycling & Waste</option>
                                 <option>Energy Conservation</option>
                                 <option>Water Conservation</option>
-                                <option>Education & Awareness</option>
-                                <option>Transportation</option>
                             </select>
                         </div>
 
@@ -853,7 +914,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             <select
                                 value={formData.difficulty}
                                 onChange={(e) => setFormData({ ...formData, difficulty: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             >
                                 <option>Easy</option>
                                 <option>Medium</option>
@@ -870,7 +931,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 required
                                 value={formData.points}
                                 onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             />
                         </div>
 
@@ -881,7 +942,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 required
                                 value={formData.maxParticipants}
                                 onChange={(e) => setFormData({ ...formData, maxParticipants: parseInt(e.target.value) })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             />
                         </div>
                     </div>
@@ -894,7 +955,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 required
                                 value={formData.location}
                                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                                 placeholder="e.g., HAU Main Campus"
                             />
                         </div>
@@ -906,7 +967,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                                 required
                                 value={formData.duration}
                                 onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                                 placeholder="e.g., 1 week"
                             />
                         </div>
@@ -918,85 +979,78 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                             required
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             rows="4"
                             placeholder="Describe the quest objectives and activities..."
                         />
                     </div>
 
+                    {/* Objectives Section */}
                     <div>
-                        <label className="block text-sm font-semibold mb-2">Objectives</label>
-                        <textarea
-                            value={formData.objectives}
-                            onChange={(e) => setFormData({ ...formData, objectives: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                            rows="3"
-                            placeholder="List quest objectives..."
-                        />
+                        <label className="block text-sm font-semibold mb-2">Quest Objectives</label>
+                        {objectives.map((objective, index) => (
+                            <div key={index} className="flex gap-2 mb-2">
+                                <input
+                                    type="text"
+                                    value={objective}
+                                    onChange={(e) => updateObjective(index, e.target.value)}
+                                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
+                                    placeholder={`Objective ${index + 1}...`}
+                                />
+                                {objectives.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeObjective(index)}
+                                        className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                )}
+                    </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={addObjective}
+                            className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center gap-2"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Add Objective
+                        </button>
                     </div>
 
+                    {/* Submission Requirements Section */}
                     <div>
                         <label className="block text-sm font-semibold mb-2">Submission Requirements</label>
-                        <textarea
-                            value={formData.submissionRequirements}
-                            onChange={(e) => setFormData({ ...formData, submissionRequirements: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                            rows="3"
-                            placeholder="List submission requirements..."
-                        />
+                        {submissionRequirements.map((requirement, index) => (
+                            <div key={index} className="flex gap-2 mb-2">
+                        <input
+                                    type="text"
+                                    value={requirement}
+                                    onChange={(e) => updateSubmissionRequirement(index, e.target.value)}
+                                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
+                                    placeholder={`Requirement ${index + 1}...`}
+                                />
+                                {submissionRequirements.length > 1 && (
+                                    <button
+                                        type="button"
+                                        onClick={() => removeSubmissionRequirement(index)}
+                                        className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                )}
+                        </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={addSubmissionRequirement}
+                            className="mt-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition flex items-center gap-2"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Add Requirement
+                        </button>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-semibold mb-2">Quest Image</label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-green-400 transition-colors">
-                        <input
-                            type="file"
-                            accept="image/*"
-                                onChange={handleFileChange}
-                                className="hidden"
-                                id="quest-image-upload"
-                                disabled={isUploading}
-                            />
-                            <label
-                                htmlFor="quest-image-upload"
-                                className={`cursor-pointer block text-center ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            >
-                                {previewUrl ? (
-                                    <div className="space-y-3">
-                                        <img
-                                            src={previewUrl}
-                                            alt="Quest preview"
-                                            className="max-h-48 mx-auto rounded-lg shadow-md"
-                                        />
-                                        <div className="flex items-center justify-center gap-2">
-                                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                            <p className="text-sm text-green-600 font-medium">Image ready for upload</p>
-                                        </div>
-                                        <p className="text-xs text-gray-500">Click to change image</p>
-                                    </div>
-                                ) : (
-                                    <div className="space-y-3">
-                                        <div className="w-16 h-16 bg-gray-100 rounded-lg mx-auto flex items-center justify-center">
-                                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium text-gray-700">Upload quest image</p>
-                                            <p className="text-xs text-gray-500">PNG, JPG, WebP up to 10MB</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </label>
-                        </div>
-                        {selectedFile && (
-                            <div className="mt-2 p-2 bg-green-50 rounded-lg">
-                                <p className="text-xs text-green-700">
-                                    <strong>Selected:</strong> {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
-                                </p>
-                            </div>
-                        )}
-                    </div>
 
                     <div className="flex gap-3 pt-4">
                         <button
@@ -1026,8 +1080,6 @@ const QuestsTab = ({ quests, setQuests }) => {
     const [editingQuest, setEditingQuest] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [creatorFilter, setCreatorFilter] = useState('all');
 
     const handleSaveQuest = async (questData) => {
         try {
@@ -1043,8 +1095,8 @@ const QuestsTab = ({ quests, setQuests }) => {
                     points: questData.points,
                     duration: questData.duration,
                     location: questData.location,
-                    objectives: questData.objectives ? [questData.objectives] : [],
-                    submissionRequirements: questData.submissionRequirements ? [questData.submissionRequirements] : ['Photo proof required'],
+                    objectives: questData.objectives || [],
+                    submissionRequirements: questData.submissionRequirements || ['Photo proof required'],
                     maxParticipants: questData.maxParticipants
                 };
 
@@ -1070,8 +1122,8 @@ const QuestsTab = ({ quests, setQuests }) => {
                 formData.append('points', questData.points);
                 formData.append('duration', questData.duration);
                 formData.append('location', questData.location);
-                formData.append('objectives', JSON.stringify(questData.objectives ? [questData.objectives] : []));
-                formData.append('submissionRequirements', JSON.stringify(questData.submissionRequirements ? [questData.submissionRequirements] : ['Photo proof required']));
+                formData.append('objectives', JSON.stringify(questData.objectives || []));
+                formData.append('submissionRequirements', JSON.stringify(questData.submissionRequirements || ['Photo proof required']));
                 formData.append('maxParticipants', questData.maxParticipants);
 
                 if (questData.image) {
@@ -1127,13 +1179,7 @@ const QuestsTab = ({ quests, setQuests }) => {
         const matchesSearch = quest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                              quest.description.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesCategory = categoryFilter === 'all' || quest.category === categoryFilter;
-        const matchesStatus = statusFilter === 'all' || 
-                             (statusFilter === 'active' && quest.isActive) ||
-                             (statusFilter === 'inactive' && !quest.isActive);
-        const matchesCreator = creatorFilter === 'all' || 
-                              (creatorFilter === 'admin' && quest.createdBy === 'admin') ||
-                              (creatorFilter === 'partner' && quest.createdBy === 'partner');
-        return matchesSearch && matchesCategory && matchesStatus && matchesCreator;
+        return matchesSearch && matchesCategory;
     });
 
     // Get unique categories for filter
@@ -1184,27 +1230,6 @@ const QuestsTab = ({ quests, setQuests }) => {
                             ))}
                         </select>
                         
-                        {/* Status Filter */}
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
-                        >
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                        
-                        {/* Creator Filter */}
-                        <select
-                            value={creatorFilter}
-                            onChange={(e) => setCreatorFilter(e.target.value)}
-                            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
-                        >
-                            <option value="all">All Creators</option>
-                            <option value="admin">Admin Created</option>
-                            <option value="partner">Partner Created</option>
-                        </select>
                     </div>
                 </div>
 
@@ -1461,6 +1486,8 @@ const AnalyticsTab = ({ stats, users, quests }) => {
 const CommunityTab = ({ posts, setPosts }) => {
     const [showModal, setShowModal] = useState(false);
     const [showChallengeModal, setShowChallengeModal] = useState(false);
+    const [editingPost, setEditingPost] = useState(null);
+    const [editingChallenge, setEditingChallenge] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [postFilter, setPostFilter] = useState('all'); // all, admin, partner, user
     const [challenges, setChallenges] = useState([]);
@@ -1471,6 +1498,33 @@ const CommunityTab = ({ posts, setPosts }) => {
         try {
             const token = localStorage.getItem('token');
 
+            if (editingPost) {
+                // Update existing post - use JSON for updates
+                const payload = {
+                    title: postData.title,
+                    content: postData.content,
+                    category: postData.category,
+                    tags: postData.tags.split(',').map(t => t.trim()).filter(t => t)
+                };
+
+                const response = await fetch(`/api/posts/${editingPost._id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.msg || 'Failed to update post');
+                }
+                const updatedPost = await response.json();
+                setPosts(posts.map(p => p._id === editingPost._id ? updatedPost : p));
+                alert('Post updated successfully!');
+            } else {
+                // Create new post
                 const formData = new FormData();
                 formData.append('title', postData.title);
                 formData.append('content', postData.content);
@@ -1495,8 +1549,11 @@ const CommunityTab = ({ posts, setPosts }) => {
                 }
                 const newPost = await response.json();
                 setPosts([newPost, ...posts]);
+                alert('Post created successfully!');
+            }
 
             setShowModal(false);
+            setEditingPost(null);
         } catch (error) {
             console.error('Error saving post:', error);
             alert(`Failed to save post: ${error.message}`);
@@ -1515,13 +1572,17 @@ const CommunityTab = ({ posts, setPosts }) => {
             formData.append('points', challengeData.points);
             formData.append('duration', challengeData.duration);
             formData.append('location', challengeData.location);
+            formData.append('badgeTitle', challengeData.badgeTitle);
             
             if (challengeData.badge) {
                 formData.append('badge', challengeData.badge);
             }
 
-            const response = await fetch('/api/challenges', {
-                method: 'POST',
+            const url = editingChallenge ? `/api/challenges/${editingChallenge._id}` : '/api/challenges';
+            const method = editingChallenge ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     'x-auth-token': token
                 },
@@ -1530,16 +1591,24 @@ const CommunityTab = ({ posts, setPosts }) => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.msg || 'Failed to create challenge');
+                throw new Error(errorData.msg || `Failed to ${editingChallenge ? 'update' : 'create'} challenge`);
             }
             
-            const newChallenge = await response.json();
-            setChallenges([newChallenge, ...challenges]);
+            const updatedChallenge = await response.json();
+            
+            if (editingChallenge) {
+                setChallenges(prev => prev.map(c => c._id === editingChallenge._id ? updatedChallenge : c));
+                alert('Challenge updated successfully!');
+            } else {
+                setChallenges(prev => [updatedChallenge, ...prev]);
             alert('Community challenge created successfully!');
+            }
+            
             setShowChallengeModal(false);
+            setEditingChallenge(null);
         } catch (error) {
-            console.error('Error creating challenge:', error);
-            alert(`Failed to create challenge: ${error.message}`);
+            console.error('Error saving challenge:', error);
+            alert(`Failed to save challenge: ${error.message}`);
         }
     };
 
@@ -1562,6 +1631,11 @@ const CommunityTab = ({ posts, setPosts }) => {
         fetchChallenges();
         setLoading(false);
     }, []);
+
+    const handleEditPost = (post) => {
+        setEditingPost(post);
+        setShowModal(true);
+    };
 
     const handleDeletePost = async (postId) => {
         const reason = prompt('Please provide a reason for deleting this post:');
@@ -1674,15 +1748,15 @@ const CommunityTab = ({ posts, setPosts }) => {
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
                     {/* Search Bar - Left */}
                     <div className="relative w-full md:w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Search content..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
-                        />
-                    </div>
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search content..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                            />
+                        </div>
                     
                     {/* Filters - Right */}
                     <div className="flex gap-3 flex-wrap">
@@ -1772,6 +1846,15 @@ const CommunityTab = ({ posts, setPosts }) => {
                                                     )}
                                                 </div>
                                                 <div className="flex gap-2">
+                                                    {/* Show edit button only for admin's own posts */}
+                                                    {post.author?.role === 'admin' && (
+                                                        <button
+                                                            onClick={() => handleEditPost(post)}
+                                                            className="p-2 hover:bg-green-50 rounded-lg transition border border-green-200"
+                                                        >
+                                                            <Edit className="w-5 h-5 text-green-600" />
+                                                        </button>
+                                                    )}
                                                     <button
                                                         onClick={() => handleDeletePost(post._id)}
                                                         className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
@@ -1832,23 +1915,12 @@ const CommunityTab = ({ posts, setPosts }) => {
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={() => {
-                                                            // Edit challenge functionality
-                                                            alert('Edit challenge functionality coming soon!');
+                                                            setEditingChallenge(challenge);
+                                                            setShowChallengeModal(true);
                                                         }}
                                                         className="p-2 hover:bg-blue-50 rounded-lg transition border border-blue-200"
                                                     >
                                                         <Edit className="w-5 h-5 text-blue-600" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => {
-                                                            if (confirm('Are you sure you want to delete this challenge?')) {
-                                                                // Delete challenge functionality
-                                                                alert('Delete challenge functionality coming soon!');
-                                                            }
-                                                        }}
-                                                        className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
-                                                    >
-                                                        <Trash2 className="w-5 h-5 text-red-600" />
                                                     </button>
                                                 </div>
                                             </div>
@@ -1871,9 +1943,10 @@ const CommunityTab = ({ posts, setPosts }) => {
 
             {showModal && (
                 <PostModal
-                    post={null}
+                    post={editingPost}
                     onClose={() => {
                         setShowModal(false);
+                        setEditingPost(null);
                     }}
                     onSave={handleSavePost}
                 />
@@ -1881,7 +1954,11 @@ const CommunityTab = ({ posts, setPosts }) => {
 
             {showChallengeModal && (
                 <ChallengeModal
-                    onClose={() => setShowChallengeModal(false)}
+                    challenge={editingChallenge}
+                    onClose={() => {
+                        setShowChallengeModal(false);
+                        setEditingChallenge(null);
+                    }}
                     onSave={handleSaveChallenge}
                 />
             )}
@@ -2278,89 +2355,89 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                 {/* Quest Submissions */}
                 {activeTab === 'quests' && (
                     filteredSubmissions.length === 0 ? (
-                        <div className="text-center py-12">
-                            <FileCheck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <div className="text-center py-12">
+                        <FileCheck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                             <p className="text-gray-500">No {filter !== 'all' ? filter : ''} quest submissions found</p>
-                        </div>
-                    ) : (
-                        <div className="space-y-4">
-                            {filteredSubmissions.map(submission => (
-                                <div key={submission._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                                <h4 className="text-lg font-bold">{submission.quest_id?.title || 'Unknown Quest'}</h4>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {filteredSubmissions.map(submission => (
+                            <div key={submission._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                            <h4 className="text-lg font-bold">{submission.quest_id?.title || 'Unknown Quest'}</h4>
                                                 <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Quest</span>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                        submission.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                                            'bg-red-100 text-red-700'
-                                                    }`}>
-                                                    {submission.status.toUpperCase()}
-                                                </span>
-                                            </div>
-                                            <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
-                                                <span className="flex items-center gap-1">
-                                                    <Users className="w-4 h-4" />
-                                                    {submission.user_id?.username || 'Unknown User'}
-                                                </span>
-                                                <span className="flex items-center gap-1">
-                                                    <Award className="w-4 h-4" />
-                                                    {submission.quest_id?.points || 0} points
-                                                </span>
-                                                <span className="flex items-center gap-1">
-                                                    <Clock className="w-4 h-4" />
-                                                    {new Date(submission.submitted_at).toLocaleDateString()}
-                                                </span>
-                                                <span className="flex items-center gap-1 text-xs">
-                                                    <Shield className="w-4 h-4" />
-                                                    {submission.user_id?.role || 'user'}
-                                                </span>
-                                            </div>
-                                            {submission.reflection_text && (
-                                                <p className="text-sm text-gray-600 mt-2 italic">"{submission.reflection_text}"</p>
-                                            )}
-                                            {submission.status === 'rejected' && submission.rejection_reason && (
-                                                <p className="text-sm text-red-600 mt-2">
-                                                    <strong>Rejection Reason:</strong> {submission.rejection_reason}
-                                                </p>
-                                            )}
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                    submission.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                                        'bg-red-100 text-red-700'
+                                                }`}>
+                                                {submission.status.toUpperCase()}
+                                            </span>
                                         </div>
-                                        <div className="flex gap-2">
-                                            <button
+                                        <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
+                                            <span className="flex items-center gap-1">
+                                                <Users className="w-4 h-4" />
+                                                {submission.user_id?.username || 'Unknown User'}
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Award className="w-4 h-4" />
+                                                {submission.quest_id?.points || 0} points
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Clock className="w-4 h-4" />
+                                                {new Date(submission.submitted_at).toLocaleDateString()}
+                                            </span>
+                                            <span className="flex items-center gap-1 text-xs">
+                                                <Shield className="w-4 h-4" />
+                                                {submission.user_id?.role || 'user'}
+                                            </span>
+                                        </div>
+                                        {submission.reflection_text && (
+                                            <p className="text-sm text-gray-600 mt-2 italic">"{submission.reflection_text}"</p>
+                                        )}
+                                        {submission.status === 'rejected' && submission.rejection_reason && (
+                                            <p className="text-sm text-red-600 mt-2">
+                                                <strong>Rejection Reason:</strong> {submission.rejection_reason}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
                                                 onClick={() => setSelectedSubmission({...submission, type: 'quest'})}
-                                                className="p-2 hover:bg-blue-50 hover:shadow-md rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-400 transform hover:scale-105"
-                                                title="View Details"
-                                            >
-                                                <Eye className="w-5 h-5 text-blue-600 hover:text-blue-700" />
-                                            </button>
-                                            {submission.status === 'pending' && (
-                                                <>
-                                                    <button
-                                                        onClick={(e) => {
-                                                            console.log('🚀 BUTTON CLICKED: Approve button clicked for submission:', submission._id);
-                                                            console.log('🚀 BUTTON CLICKED: Submission status:', submission.status);
-                                                            console.log('🚀 BUTTON CLICKED: Event:', e);
+                                            className="p-2 hover:bg-blue-50 hover:shadow-md rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-400 transform hover:scale-105"
+                                            title="View Details"
+                                        >
+                                            <Eye className="w-5 h-5 text-blue-600 hover:text-blue-700" />
+                                        </button>
+                                        {submission.status === 'pending' && (
+                                            <>
+                                                <button
+                                                    onClick={(e) => {
+                                                        console.log('🚀 BUTTON CLICKED: Approve button clicked for submission:', submission._id);
+                                                        console.log('🚀 BUTTON CLICKED: Submission status:', submission.status);
+                                                        console.log('🚀 BUTTON CLICKED: Event:', e);
                                                             handleApprove(submission._id, 'quest');
-                                                        }}
-                                                        className="p-2 hover:bg-green-50 hover:shadow-md rounded-lg transition-all duration-200 border border-green-200 hover:border-green-400 transform hover:scale-105"
-                                                        title="Approve"
-                                                    >
-                                                        <CheckCircle className="w-5 h-5 text-green-600 hover:text-green-700" />
-                                                    </button>
-                                                    <button
+                                                    }}
+                                                    className="p-2 hover:bg-green-50 hover:shadow-md rounded-lg transition-all duration-200 border border-green-200 hover:border-green-400 transform hover:scale-105"
+                                                    title="Approve"
+                                                >
+                                                    <CheckCircle className="w-5 h-5 text-green-600 hover:text-green-700" />
+                                                </button>
+                                                <button
                                                         onClick={() => handleReject(submission._id, 'quest')}
-                                                        className="p-2 hover:bg-red-50 hover:shadow-md rounded-lg transition-all duration-200 border border-red-200 hover:border-red-400 transform hover:scale-105"
-                                                        title="Reject"
-                                                    >
-                                                        <XCircle className="w-5 h-5 text-red-600 hover:text-red-700" />
-                                                    </button>
-                                                </>
-                                            )}
-                                        </div>
+                                                    className="p-2 hover:bg-red-50 hover:shadow-md rounded-lg transition-all duration-200 border border-red-200 hover:border-red-400 transform hover:scale-105"
+                                                    title="Reject"
+                                                >
+                                                    <XCircle className="w-5 h-5 text-red-600 hover:text-red-700" />
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        ))}
+                    </div>
                     )
                 )}
 
@@ -2451,7 +2528,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
 
             {/* Submission Details Modal */}
             {selectedSubmission && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
                         <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
                             <h3 className="text-2xl font-bold">Submission Details</h3>
@@ -2558,11 +2635,11 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
 
 // --- POST MODAL ---
 const PostModal = ({ post, onClose, onSave }) => {
-    const [formData, setFormData] = useState(post || {
-        title: '',
-        content: '',
-        category: 'Updates',
-        tags: ''
+    const [formData, setFormData] = useState({
+        title: post?.title || '',
+        content: post?.content || '',
+        category: post?.category || 'Updates',
+        tags: post?.tags ? (Array.isArray(post.tags) ? post.tags.join(', ') : post.tags) : ''
     });
 
     const handleSubmit = (e) => {
@@ -2571,10 +2648,10 @@ const PostModal = ({ post, onClose, onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">Create New Post</h3>
+                    <h3 className="text-2xl font-bold">{post ? 'Edit Post' : 'Create New Post'}</h3>
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
                         <X className="w-5 h-5" />
                     </button>
@@ -2588,7 +2665,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             placeholder="Enter post title..."
                         />
                     </div>
@@ -2598,7 +2675,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <select
                             value={formData.category}
                             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                         >
                             <option value="Updates">Updates</option>
                             <option value="Tips">Tips</option>
@@ -2613,7 +2690,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             required
                             value={formData.content}
                             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             rows="4"
                             placeholder="Write your post content..."
                         />
@@ -2625,7 +2702,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             type="text"
                             value={formData.tags}
                             onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                             placeholder="e.g., environment, tips, community"
                         />
                     </div>
@@ -2636,7 +2713,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             type="file"
                             accept="image/*"
                             onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-400 focus:border-green-300"
                         />
                         <p className="text-xs text-gray-500 mt-1">Optional: Upload an image for this post</p>
                     </div>
@@ -2664,16 +2741,17 @@ const PostModal = ({ post, onClose, onSave }) => {
 };
 
 // --- CHALLENGE MODAL ---
-const ChallengeModal = ({ onClose, onSave }) => {
+const ChallengeModal = ({ challenge, onClose, onSave }) => {
     const [formData, setFormData] = useState({
-        title: '',
-        content: '',
-        target: 100,
-        points: 50,
-        duration: '2-3 weeks',
-        location: 'HAU Campus',
+        title: challenge?.title || '',
+        content: challenge?.description || '',
+        target: challenge?.target || 100,
+        points: challenge?.points || 50,
+        duration: challenge?.duration || '2-3 weeks',
+        location: challenge?.location || 'HAU Campus',
+        badgeTitle: challenge?.badgeTitle || '',
         badge: null,
-        badgePreview: null
+        badgePreview: challenge?.badge_url || null
     });
 
     const handleFileChange = (e) => {
@@ -2693,7 +2771,7 @@ const ChallengeModal = ({ onClose, onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
                     <h3 className="text-2xl font-bold">Create Community Challenge</h3>
@@ -2710,7 +2788,7 @@ const ChallengeModal = ({ onClose, onSave }) => {
                             required
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-300"
                             placeholder="Enter challenge title..."
                         />
                     </div>
@@ -2721,7 +2799,7 @@ const ChallengeModal = ({ onClose, onSave }) => {
                             required
                             value={formData.content}
                             onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-300"
                             rows="4"
                             placeholder="Describe the community challenge..."
                         />
@@ -2735,7 +2813,7 @@ const ChallengeModal = ({ onClose, onSave }) => {
                                 required
                                 value={formData.target}
                                 onChange={(e) => setFormData({ ...formData, target: parseInt(e.target.value) })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-300"
                                 placeholder="100"
                                 min="1"
                             />
@@ -2747,7 +2825,7 @@ const ChallengeModal = ({ onClose, onSave }) => {
                                 required
                                 value={formData.points}
                                 onChange={(e) => setFormData({ ...formData, points: parseInt(e.target.value) })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-300"
                                 placeholder="50"
                                 min="1"
                             />
@@ -2762,7 +2840,7 @@ const ChallengeModal = ({ onClose, onSave }) => {
                                 required
                                 value={formData.duration}
                                 onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-300"
                                 placeholder="2-3 weeks"
                             />
                         </div>
@@ -2773,10 +2851,21 @@ const ChallengeModal = ({ onClose, onSave }) => {
                                 required
                                 value={formData.location}
                                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-300"
                                 placeholder="HAU Campus"
                             />
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-semibold mb-2">Badge Title</label>
+                        <input
+                            type="text"
+                            value={formData.badgeTitle}
+                            onChange={(e) => setFormData({ ...formData, badgeTitle: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-300"
+                            placeholder="Enter badge title..."
+                        />
                     </div>
 
                     <div>
@@ -2785,7 +2874,7 @@ const ChallengeModal = ({ onClose, onSave }) => {
                             type="file"
                             accept="image/*"
                             onChange={handleFileChange}
-                            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-300"
                         />
                         <p className="text-xs text-gray-500 mt-1">Upload a badge image for participants who complete this challenge</p>
                         
@@ -2806,7 +2895,7 @@ const ChallengeModal = ({ onClose, onSave }) => {
                             type="submit"
                             className="flex-1 bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition font-semibold"
                         >
-                            Create Challenge
+                            {challenge ? 'Update Challenge' : 'Create Challenge'}
                         </button>
                         <button
                             type="button"
@@ -2966,6 +3055,29 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleDeleteChallenge = async (challengeId) => {
+        if (!confirm('Are you sure you want to delete this challenge?')) return;
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/challenges/${challengeId}`, {
+                method: 'DELETE',
+                headers: { 'x-auth-token': token }
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.msg || 'Failed to delete challenge');
+            }
+            
+            // Refresh the challenges list
+            fetchData();
+            alert('Challenge deleted successfully!');
+        } catch (error) {
+            console.error('Error deleting challenge:', error);
+            alert(`Failed to delete challenge: ${error.message}`);
+        }
+    };
+
     if (!user) {
         return (
             <div className="pt-24 text-center">
@@ -3026,17 +3138,15 @@ const AdminDashboard = () => {
                     <TabButton id="community" label="Community" icon={<FileText className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="submissions" label="Submissions" icon={<FileCheck className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="notifications" label="Notifications" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
-                    <TabButton id="analytics" label="Analytics" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
 
                 {/* Tab Content */}
-                {activeTab === 'overview' && <OverviewTab stats={stats} setActiveTab={setActiveTab} />}
+                {activeTab === 'overview' && <OverviewTab stats={stats} setActiveTab={setActiveTab} users={users} />}
                 {activeTab === 'users' && <UsersTab users={users} pendingPartners={pendingPartners} onApprove={handleApprovePartner} onReject={handleRejectPartner} onDeleteUser={handleDeleteUser} />}
                 {activeTab === 'quests' && <QuestsTab quests={quests} setQuests={setQuests} />}
                 {activeTab === 'community' && <CommunityTab posts={posts} setPosts={setPosts} />}
                 {activeTab === 'submissions' && <SubmissionsTab />}
                 {activeTab === 'notifications' && <NotificationsTab />}
-                {activeTab === 'analytics' && <AnalyticsTab stats={stats} users={users} quests={quests} />}
             </main>
         </div>
     );

@@ -4,75 +4,47 @@ const auth = require('../middleware/auth');
 const User = require('../models/User');
 const Quest = require('../models/Quest');
 const QuestSubmission = require('../models/QuestSubmission');
-const UserBadge = require('../models/UserBadge');
-const Badge = require('../models/Badge');
 const Challenge = require('../models/Challenge');
+const ChallengeSubmission = require('../models/ChallengeSubmission');
 
 // @route   GET /api/dashboard/user
 // @desc    Get user dashboard data
 // @access  Private
 router.get('/user', auth, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id)
+      .populate('questsCompleted', 'title category points difficulty')
+      .populate('challengesCompleted', 'title points badgeTitle badge_url')
+      .populate('badges', 'name description image_url')
+      .populate('achievements');
+    
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
 
     // Get user's quest submissions
-    const submissions = await QuestSubmission.find({ user_id: req.user.id })
+    const questSubmissions = await QuestSubmission.find({ user_id: req.user.id })
       .populate('quest_id', 'title category points difficulty')
       .sort({ submitted_at: -1 });
 
-    // Get user's badges progress
-    const allBadges = await Badge.find();
-    const userBadges = await UserBadge.find({ user_id: req.user.id })
-      .populate('badge_id', 'name description image_url criteria');
+    // Get user's challenge submissions
+    const challengeSubmissions = await ChallengeSubmission.find({ user_id: req.user.id })
+      .populate('challenge_id', 'title points badgeTitle badge_url')
+      .sort({ submitted_at: -1 });
 
-    // Calculate badge progress
-    const badgeProgress = allBadges.map(badge => {
-      const userBadge = userBadges.find(ub => ub.badge_id._id.toString() === badge._id.toString());
-      const isEarned = !!userBadge;
-      
-      let progress = 0;
-      let current = 0;
-      let target = 0;
+    // Calculate total points from both quests and challenges
+    const questPoints = user.questsCompleted.reduce((sum, quest) => sum + (quest.points || 0), 0);
+    const challengePoints = user.challengesCompleted.reduce((sum, challenge) => sum + (challenge.points || 0), 0);
+    const totalPoints = questPoints + challengePoints;
 
-      if (badge.criteria.type === 'first_quest') {
-        current = user.questsCompleted.length >= 1 ? 1 : 0;
-        target = 1;
-        progress = current * 100;
-      } else if (badge.criteria.type === 'quests_completed') {
-        current = user.questsCompleted.length;
-        target = badge.criteria.value;
-        progress = Math.min((current / target) * 100, 100);
-      } else if (badge.criteria.type === 'energy_conservation') {
-        current = user.goals.energy_conservation.current;
-        target = badge.criteria.value;
-        progress = Math.min((current / target) * 100, 100);
-      } else if (badge.criteria.type === 'water_saved') {
-        current = user.goals.water_saved.current;
-        target = badge.criteria.value;
-        progress = Math.min((current / target) * 100, 100);
-      }
-
-      return {
-        ...badge.toObject(),
-        isEarned,
-        progress: Math.round(progress),
-        current,
-        target,
-        earnedAt: userBadge ? userBadge.earned_at : null
-      };
-    });
-
-    // Get next badges to unlock
-    const nextBadges = badgeProgress
-      .filter(badge => !badge.isEarned)
-      .sort((a, b) => b.progress - a.progress)
-      .slice(0, 3);
+    // Update user points if they don't match
+    if (user.points !== totalPoints) {
+      user.points = totalPoints;
+      user.eco_score = totalPoints; // Keep eco_score in sync
+      await user.save();
+    }
 
     // Calculate level and progress
-    const totalPoints = user.points || 0;
     const level = Math.floor(totalPoints / 100) + 1;
     const levelProgress = (totalPoints % 100) / 100 * 100;
 
@@ -81,21 +53,29 @@ router.get('/user', auth, async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        points: user.points,
-        eco_score: user.eco_score,
+        points: totalPoints,
+        eco_score: totalPoints,
         level,
         levelProgress,
-        streaks: user.streaks,
-        goals: user.goals,
         avatar_theme: user.avatar_theme,
-        header_theme: user.header_theme
+        header_theme: user.header_theme,
+        department: user.department,
+        role: user.role
       },
-      submissions,
-      badges: {
-        total: allBadges.length,
-        earned: userBadges.length,
-        progress: badgeProgress,
-        nextBadges
+      questSubmissions,
+      challengeSubmissions,
+      questsCompleted: user.questsCompleted,
+      challengesCompleted: user.challengesCompleted,
+      badges: user.badges,
+      achievements: user.achievements,
+      stats: {
+        totalQuests: user.questsCompleted.length,
+        totalChallenges: user.challengesCompleted.length,
+        totalBadges: user.badges.length,
+        totalAchievements: user.achievements.length,
+        questPoints,
+        challengePoints,
+        totalPoints
       }
     });
   } catch (err) {

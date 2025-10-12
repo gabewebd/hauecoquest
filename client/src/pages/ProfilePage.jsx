@@ -7,12 +7,59 @@ import {
   User,
   UserCircle,
   Trash2,
+  Crown,
+  TreePine,
+  Recycle,
+  Sun,
+  Droplets,
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
 import { userAPI } from "../utils/api";
 import FacebookIcon from '../img/Facebook.png';
 import InstagramIcon from '../img/Instagram.png';
 import TiktokIcon from '../img/Tiktok.png';
+
+// AchievementSection component for Badge Collection (same as DashboardPage.jsx)
+const AchievementSection = ({ achievements, challengeBadges = [] }) => (
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <h3 className="text-xl font-bold mb-4">Badge Collection</h3>
+        {challengeBadges.length === 0 ? (
+            <div className="text-center py-8">
+                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                    🏆
+                </div>
+                <p className="text-gray-500">No badges earned yet. Complete challenges to earn badges!</p>
+            </div>
+        ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {challengeBadges.map((badge, index) => (
+                    <div key={index} className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm border border-purple-200 text-center hover:shadow-md transition-all">
+                        {badge.image_url ? (
+                            <img 
+                                src={badge.image_url} 
+                                alt={badge.name || 'Challenge Badge'} 
+                                className="w-20 h-20 mx-auto mb-4 rounded-lg object-cover shadow-md"
+                            />
+                        ) : (
+                            <div className="w-20 h-20 mx-auto mb-4 bg-purple-200 rounded-lg flex items-center justify-center text-3xl">
+                                🏆
+                            </div>
+                        )}
+                        <h4 className="font-bold text-lg mb-2 text-purple-800">
+                            {badge.name || 'Challenge Badge'}
+                        </h4>
+                        <p className="text-purple-600 text-sm mb-2">
+                            {badge.description || 'Earned from completing a challenge'}
+                        </p>
+                        <p className="text-xs text-purple-500">
+                            Challenge Badge
+                        </p>
+                    </div>
+                ))}
+            </div>
+        )}
+    </div>
+);
 
 const ProfilePage = ({ onPageChange, userId }) => {
   const { user, updateUser, deleteAccount } = useUser();
@@ -24,6 +71,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
   
   const [activeTab, setActiveTab] = useState("Activity");
   const [userCreatedQuests, setUserCreatedQuests] = useState([]);
+  const [userCreatedChallenges, setUserCreatedChallenges] = useState([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editTab, setEditTab] = useState("avatar");
   const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar_theme || "Leaf");
@@ -74,6 +122,51 @@ const ProfilePage = ({ onPageChange, userId }) => {
     }
   }, [user, isOwnProfile]);
 
+  // Fetch data for other profiles too
+  useEffect(() => {
+    if (profileUser && !isOwnProfile) {
+      fetchUserDataForProfile();
+    }
+  }, [profileUser, isOwnProfile]);
+
+  const fetchUserDataForProfile = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Fetch quest submissions for the profile user
+      const questsRes = await fetch(`/api/quests/submissions/user/${profileUser._id}`, {
+        headers: { 'x-auth-token': token }
+      });
+      if (questsRes.ok) {
+        const questsData = await questsRes.json();
+        setUserQuests(questsData);
+      }
+
+      // Fetch challenge submissions for the profile user
+      const challengeSubmissionsRes = await fetch(`/api/challenges/submissions/user/${profileUser._id}`, {
+        headers: { 'x-auth-token': token }
+      });
+      if (challengeSubmissionsRes.ok) {
+        const challengeSubmissionsData = await challengeSubmissionsRes.json();
+        setUserChallengeSubmissions(challengeSubmissionsData || []);
+      }
+
+      // Fetch user's posts/activity
+      const postsRes = await fetch('/api/posts', {
+        headers: { 'x-auth-token': token }
+      });
+      const postsData = await postsRes.json();
+      const userPosts = postsData.filter(post => post.author?._id === profileUser._id || post.author === profileUser._id);
+      setUserActivity(userPosts);
+
+    } catch (error) {
+      console.error('Error fetching profile user data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchProfileUserData = async () => {
     if (isOwnProfile) {
       setProfileUser(user);
@@ -111,6 +204,18 @@ const ProfilePage = ({ onPageChange, userId }) => {
           const questsData = await questsRes.json();
           const createdQuests = questsData.filter(quest => quest.createdBy && quest.createdBy._id === profileUserId);
           setUserCreatedQuests(createdQuests);
+        }
+
+        // Fetch challenges they created
+        const challengesRes = await fetch('/api/challenges');
+        if (challengesRes.ok) {
+          const challengesData = await challengesRes.json();
+          const createdChallenges = challengesData.filter(challenge => challenge.createdBy && challenge.createdBy._id === profileUserId);
+          console.log('Fetched profile user created challenges:', createdChallenges);
+          setUserCreatedChallenges(createdChallenges);
+        } else {
+          console.error('Failed to fetch profile user challenges:', challengesRes.status, challengesRes.statusText);
+          setUserCreatedChallenges([]);
         }
       }
 
@@ -174,6 +279,20 @@ const ProfilePage = ({ onPageChange, userId }) => {
                 const questsData = await questsRes.json();
                 const createdQuests = questsData.filter(quest => quest.createdBy && quest.createdBy._id === user._id);
                 setUserCreatedQuests(createdQuests);
+
+                // Fetch challenges they created
+                const challengesRes = await fetch('/api/challenges', {
+                    headers: { 'x-auth-token': token }
+                });
+                if (challengesRes.ok) {
+                    const challengesData = await challengesRes.json();
+                    const createdChallenges = challengesData.filter(challenge => challenge.createdBy && challenge.createdBy._id === user._id);
+                    console.log('Fetched created challenges:', createdChallenges);
+                    setUserCreatedChallenges(createdChallenges);
+                } else {
+                    console.error('Failed to fetch challenges:', challengesRes.status, challengesRes.statusText);
+                    setUserCreatedChallenges([]);
+                }
             }
 
             // Fetch user's posts/activity
@@ -191,12 +310,24 @@ const ProfilePage = ({ onPageChange, userId }) => {
             const badgesData = await badgesRes.json();
             setUserAchievements(badgesData);
 
+            // Fetch user's challenge submissions
+            const challengeSubmissionsRes = await fetch(`/api/challenges/submissions/user/${user._id}`, {
+                headers: { 'x-auth-token': token }
+            });
+            if (challengeSubmissionsRes.ok) {
+                const challengeSubmissionsData = await challengeSubmissionsRes.json();
+                setUserChallengeSubmissions(challengeSubmissionsData || []);
+            } else {
+                console.error('Failed to fetch challenge submissions:', challengeSubmissionsRes.status, challengeSubmissionsRes.statusText);
+                setUserChallengeSubmissions([]);
+            }
+
             // Fetch user's photo history
             const photosRes = await fetch(`/api/users/${user._id}/photos`, {
                 headers: { 'x-auth-token': token }
             });
             if (photosRes.ok) {
-                const photosData = await photosRes.json();
+            const photosData = await photosRes.json();
                 console.log('Fetched user photos:', photosData);
                 setUserPhotos(photosData || []);
             } else {
@@ -228,7 +359,6 @@ const ProfilePage = ({ onPageChange, userId }) => {
     return achievements;
   };
 
-  // Rest of your code stays the same...
 
   // Avatars with lucide-react icons and colors
   const avatars = [
@@ -349,7 +479,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
                   />
                 ) : null}
                 <div className={`w-full h-full ${currentAvatar?.bg} flex justify-center items-center`} style={{display: currentAvatar?.image ? 'none' : 'flex'}}>
-                  <UserCircle className={`w-20 h-20 ${currentAvatar?.color}`} />
+                <UserCircle className={`w-20 h-20 ${currentAvatar?.color}`} />
                 </div>
               </div>
               <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
@@ -371,21 +501,26 @@ const ProfilePage = ({ onPageChange, userId }) => {
                   {displayUser?.role === 'admin' ? 'Admin' : displayUser?.role === 'partner' ? 'Partner' : 'Student'}
                 </span>
               </div>
-              <p className="text-gray-600">{displayUser?.hau_affiliation || "HAU Student"}</p>
+              <p className="text-gray-600">{displayUser?.department || displayUser?.hau_affiliation || "HAU Student"}</p>
               <p className="text-sm text-gray-500 mt-1">
                 Environmental science student passionate about making a
                 difference on campus.
               </p>
 
-              {/* Stats */}
+              {/* Stats - Only show for user role */}
+              {displayUser?.role === 'user' && (
               <div className="flex gap-6 mt-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
-                  <Trophy className="w-4 h-4 text-yellow-500" /> {displayUser?.eco_score || displayUser?.points || 0} points
+                    <Trophy className="w-4 h-4 text-yellow-500" /> {displayUser?.eco_score || displayUser?.points || 0} points
                 </div>
                 <div className="flex items-center gap-1">
                   <Award className="w-4 h-4 text-orange-500" /> {displayUser?.questsCompleted?.length || 0} quests completed
                 </div>
+                  <div className="flex items-center gap-1">
+                    <Award className="w-4 h-4 text-purple-500" /> {userChallengeSubmissions.filter(sub => sub.status === 'approved').length} challenges completed
               </div>
+                </div>
+              )}
             </div>
 
             {/* Actions - Only show edit button for own profile */}
@@ -413,34 +548,34 @@ const ProfilePage = ({ onPageChange, userId }) => {
       <div className="mt-28 max-w-4xl mx-auto px-4 flex-grow">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-6">
           <div className="flex justify-center gap-3">
-            {displayUser?.role === 'user' ? 
-              ["Activity", "Quests", "Photo History", "Achievements"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
+          {displayUser?.role === 'user' ? 
+              ["Activity", "Photo History", "Achievements"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all duration-200 text-sm ${
-                    activeTab === tab
+                  activeTab === tab
                       ? "bg-green-500 text-white shadow-md"
                       : "bg-white text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  {tab}
-                </button>
-              )) :
-              ["Activity", "Created Quests", "Photo History", "Achievements"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
+                }`}
+              >
+                {tab}
+              </button>
+            )) :
+              ["Activity"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
                   className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all duration-200 text-sm ${
-                    activeTab === tab
+                  activeTab === tab
                       ? "bg-green-500 text-white shadow-md"
                       : "bg-white text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))
-            }
+                }`}
+              >
+                {tab}
+              </button>
+            ))
+          }
           </div>
         </div>
 
@@ -462,105 +597,96 @@ const ProfilePage = ({ onPageChange, userId }) => {
                       <p className="text-gray-500">No activity yet. Start posting to build your activity feed!</p>
                     </div>
                   ) : (
-                    userActivity.map((post, index) => (
-                      <div key={index} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <h3 className="font-bold text-lg mb-2">{post.title}</h3>
-                        <p className="text-gray-600 mb-3">{post.content}</p>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>{new Date(post.created_at).toLocaleDateString()}</span>
-                          <span>{post.likes?.length || 0} likes</span>
-                          <span>{post.comments?.length || 0} comments</span>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
-
-              {activeTab === "Quests" && (
-                <div className="space-y-6">
-                  {userQuests.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-                      <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                        🎯
-                      </div>
-                      <p className="text-gray-500">No quest submissions yet. Start completing quests to build your quest history!</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-4">
-                      {userQuests.map((quest, index) => (
-                        <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-bold text-lg text-gray-900 truncate">{quest.quest_id?.title || 'Quest Submission'}</h3>
-                              <p className="text-gray-600 text-sm mt-1 line-clamp-2">{quest.quest_id?.description || quest.reflection_text || 'Quest description'}</p>
+                    userActivity.map((post, index) => {
+                      const PostCard = ({ post }) => {
+                        const [showFullText, setShowFullText] = useState(false);
+                        const WORD_LIMIT = 50;
+                        
+                        const displayText = showFullText 
+                          ? post.content 
+                          : post.content.split(' ').slice(0, WORD_LIMIT).join(' ') + (post.content.split(' ').length > WORD_LIMIT ? '...' : '');
+                        
+                        return (
+                          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200">
+                            {/* Post Header */}
+                            <div className="p-6 pb-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <div>
+                                  <h4 className="font-semibold text-gray-900">{post.author?.username || 'Unknown User'}</h4>
+                                  <p className="text-xs text-gray-500">{new Date(post.created_at).toLocaleDateString()}</p>
+                                </div>
+                                <div>
+                                  <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
+                                    {post.category}
+                                  </span>
+                                </div>
+                              </div>
+                              
+                              <h3 className="font-bold text-xl mb-3 text-gray-900">{post.title}</h3>
+                              <p className="text-gray-700 mb-4 leading-relaxed whitespace-pre-wrap">{displayText}</p>
+                              
+                              {post.content.split(' ').length > WORD_LIMIT && (
+                                <button
+                                  onClick={() => setShowFullText(!showFullText)}
+                                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                >
+                                  {showFullText ? 'See less' : 'See more'}
+                                </button>
+                              )}
                             </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-3 flex-shrink-0 ${
-                              quest.status === 'approved' ? 'bg-green-100 text-green-700' :
-                              quest.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-red-100 text-red-700'
-                            }`}>
-                              {quest.status}
-                            </span>
+
+                            {/* Post Image */}
+                            {post.image_url && (
+                              <div className="px-6 pb-4">
+                                <img 
+                                  src={post.image_url} 
+                                  alt={post.title}
+                                  className="w-full h-64 object-cover rounded-lg shadow-sm"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                            )}
+
+                            {/* Post Footer */}
+                            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-6 text-sm text-gray-500">
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-red-500">❤️</span>
+                                    <span>{post.likes?.length || 0} likes</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-blue-500">💬</span>
+                                    <span>{post.comments?.length || 0} comments</span>
+                                  </div>
+                                </div>
+                                {post.tags && post.tags.length > 0 && (
+                                  <div className="flex gap-2">
+                                    {post.tags.slice(0, 3).map((tag, tagIndex) => (
+                                      <span key={tagIndex} className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
+                                        #{tag}
+                                      </span>
+                                    ))}
+                                    {post.tags.length > 3 && (
+                                      <span className="text-xs text-gray-400">+{post.tags.length - 3} more</span>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-3">
-                            <span>Submitted: {new Date(quest.submitted_at).toLocaleDateString()}</span>
-                            <span>{quest.quest_id?.points || 0} points</span>
-                            <span>Category: {quest.quest_id?.category || 'General'}</span>
-                            <span>Difficulty: {quest.quest_id?.difficulty || 'Medium'}</span>
-                          </div>
-                          <div className="flex justify-end">
-                            <button 
-                              onClick={() => onPageChange('quest-details', quest.quest_id?._id)}
-                              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition text-sm font-semibold"
-                            >
-                              View Details
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                        );
+                      };
+                      
+                      return <PostCard key={index} post={post} />;
+                    })
                   )}
                 </div>
               )}
 
-              {activeTab === "Created Quests" && (
-                <div className="space-y-4">
-                  {userCreatedQuests.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                      <p>No quests created yet</p>
-                    </div>
-                  ) : (
-                    userCreatedQuests.map((quest, index) => (
-                      <div key={index} className="bg-white p-6 rounded-xl shadow-md border">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-bold text-lg">{quest.title}</h3>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            quest.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
-                          }`}>
-                            {quest.isActive ? 'Active' : 'Inactive'}
-                          </span>
-                        </div>
-                        <p className="text-gray-600 mb-3">{quest.description}</p>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <span>Created: {new Date(quest.createdAt).toLocaleDateString()}</span>
-                            <span>{quest.points} points</span>
-                            <span>Category: {quest.category}</span>
-                            <span>Difficulty: {quest.difficulty}</span>
-                          </div>
-                          <button 
-                            onClick={() => onPageChange('quest-details', quest._id)}
-                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition text-sm font-semibold"
-                          >
-                            View Details
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
+
 
               {activeTab === "Photo History" && (
                 <div className="space-y-6">
@@ -598,7 +724,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
                               <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Quest</span>
                             </div>
                             <p className="text-xs text-gray-500 mb-2">{photo.quest_category}</p>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between mb-3">
                               <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                                 photo.status === 'approved' ? 'bg-green-100 text-green-700' :
                                 photo.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
@@ -610,6 +736,12 @@ const ProfilePage = ({ onPageChange, userId }) => {
                                 {new Date(photo.submitted_at).toLocaleDateString()}
                               </span>
                             </div>
+                            <button 
+                              onClick={() => onPageChange('quest-details', { questId: photo.quest_id })}
+                              className="w-full bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition text-sm font-semibold"
+                            >
+                              View Details
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -639,7 +771,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
                               <span className="px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">Challenge</span>
                             </div>
                             <p className="text-xs text-gray-500 mb-2">{submission.challenge_id?.category || 'Community Challenge'}</p>
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between mb-3">
                               <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                                 submission.status === 'approved' ? 'bg-green-100 text-green-700' :
                                 submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
@@ -651,6 +783,12 @@ const ProfilePage = ({ onPageChange, userId }) => {
                                 {new Date(submission.submitted_at).toLocaleDateString()}
                               </span>
                             </div>
+                            <button 
+                              onClick={() => onPageChange('challenge-details', submission.challenge_id?._id)}
+                              className="w-full bg-purple-500 text-white px-3 py-2 rounded-lg hover:bg-purple-600 transition text-sm font-semibold"
+                            >
+                              View Details
+                            </button>
                           </div>
                         </div>
                       ))}
@@ -659,27 +797,180 @@ const ProfilePage = ({ onPageChange, userId }) => {
                 </div>
               )}
 
+
               {activeTab === "Achievements" && (
                 <div className="space-y-6">
-                  {userAchievements.length === 0 ? (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-                      <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500">No achievements yet. Complete quests to earn badges!</p>
+                  {/* Badge Collection */}
+                  <AchievementSection 
+                    achievements={[]} 
+                    challengeBadges={userChallengeSubmissions
+                      .filter(sub => sub.status === 'approved')
+                      .map(submission => ({
+                        name: submission.challenge_id?.badgeTitle || submission.challenge_id?.title || 'Challenge Badge',
+                        description: `Badge earned from completing ${submission.challenge_id?.title || 'challenge'}`,
+                        image_url: submission.challenge_id?.badge_url,
+                        challenge_id: submission.challenge_id?._id
+                      }))
+                    } 
+                  />
+
+                  {/* Quest Achievements */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 className="text-xl font-bold mb-4">Quest Achievements</h3>
+                    {(() => {
+                      try {
+                        // Define quest achievements with progress tracking (same as DashboardPage.jsx)
+                        const questAchievements = [
+                          {
+                            id: 'first_quest',
+                            title: 'First Steps',
+                            description: 'Complete your first quest',
+                            icon: <Trophy className="w-5 h-5" />,
+                            color: 'green',
+                            requirement: 1,
+                            current: userQuests?.length || 0,
+                            completed: (userQuests?.length || 0) >= 1
+                          },
+                          {
+                            id: 'quest_master',
+                            title: 'Quest Master',
+                            description: 'Complete 5 quests',
+                            icon: <Award className="w-5 h-5" />,
+                            color: 'blue',
+                            requirement: 5,
+                            current: userQuests?.length || 0,
+                            completed: (userQuests?.length || 0) >= 5
+                          },
+                          {
+                            id: 'quest_champion',
+                            title: 'Quest Champion',
+                            description: 'Complete 10 quests',
+                            icon: <Crown className="w-5 h-5" />,
+                            color: 'purple',
+                            requirement: 10,
+                            current: userQuests?.length || 0,
+                            completed: (userQuests?.length || 0) >= 10
+                          },
+                          {
+                            id: 'gardening_expert',
+                            title: 'Gardening Expert',
+                            description: 'Complete 3 Gardening & Planting quests',
+                            icon: <TreePine className="w-5 h-5" />,
+                            color: 'green',
+                            requirement: 3,
+                            current: userQuests?.filter(q => q.quest_id?.category === 'Gardening & Planting').length || 0,
+                            completed: (userQuests?.filter(q => q.quest_id?.category === 'Gardening & Planting').length || 0) >= 3
+                          },
+                          {
+                            id: 'recycling_expert',
+                            title: 'Recycling Expert',
+                            description: 'Complete 3 Recycling & Waste quests',
+                            icon: <Recycle className="w-5 h-5" />,
+                            color: 'blue',
+                            requirement: 3,
+                            current: userQuests?.filter(q => q.quest_id?.category === 'Recycling & Waste').length || 0,
+                            completed: (userQuests?.filter(q => q.quest_id?.category === 'Recycling & Waste').length || 0) >= 3
+                          },
+                          {
+                            id: 'energy_expert',
+                            title: 'Energy Expert',
+                            description: 'Complete 3 Energy Conservation quests',
+                            icon: <Sun className="w-5 h-5" />,
+                            color: 'yellow',
+                            requirement: 3,
+                            current: userQuests?.filter(q => q.quest_id?.category === 'Energy Conservation').length || 0,
+                            completed: (userQuests?.filter(q => q.quest_id?.category === 'Energy Conservation').length || 0) >= 3
+                          },
+                          {
+                            id: 'water_expert',
+                            title: 'Water Expert',
+                            description: 'Complete 3 Water Conservation quests',
+                            icon: <Droplets className="w-5 h-5" />,
+                            color: 'cyan',
+                            requirement: 3,
+                            current: userQuests?.filter(q => q.quest_id?.category === 'Water Conservation').length || 0,
+                            completed: (userQuests?.filter(q => q.quest_id?.category === 'Water Conservation').length || 0) >= 3
+                          }
+                        ];
+
+                        return questAchievements.length === 0 ? (
+                          <div className="text-center py-8 text-gray-500">
+                            <Trophy className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                            <p>No quest achievements available yet. Complete quests to unlock achievements!</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {userAchievements.map((userBadge, index) => (
-                        <div key={index} className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-xl shadow-sm border border-yellow-200 text-center">
-                          <div className="text-4xl mb-3">{userBadge.badge_id?.image_url || '🏆'}</div>
-                          <h3 className="font-bold text-lg mb-2 text-yellow-800">{userBadge.badge_id?.name || 'Achievement'}</h3>
-                          <p className="text-yellow-600 text-sm mb-2">{userBadge.badge_id?.description || 'Great job!'}</p>
-                          <p className="text-xs text-yellow-500">
-                            Earned: {new Date(userBadge.earned_at).toLocaleDateString()}
-                          </p>
+                          <div className="space-y-4">
+                            {questAchievements.map((achievement) => (
+                              <div 
+                                key={achievement.id} 
+                                className={`p-4 rounded-lg border transition-all ${
+                                  achievement.completed 
+                                    ? `bg-gradient-to-r from-${achievement.color}-50 to-${achievement.color}-100 border-${achievement.color}-200` 
+                                    : 'bg-gray-50 border-gray-200'
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                                    achievement.completed 
+                                      ? `bg-${achievement.color}-500 text-white` 
+                                      : 'bg-gray-300 text-gray-500'
+                                  }`}>
+                                    {achievement.completed ? achievement.icon : <Trophy className="w-5 h-5" />}
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className={`font-semibold ${
+                                      achievement.completed 
+                                        ? `text-${achievement.color}-800` 
+                                        : 'text-gray-600'
+                                    }`}>
+                                      {achievement.title}
+                                    </h4>
+                                    <p className={`text-sm ${
+                                      achievement.completed 
+                                        ? `text-${achievement.color}-600` 
+                                        : 'text-gray-500'
+                                    }`}>
+                                      {achievement.description}
+                                    </p>
+                                    <div className="mt-2">
+                                      <div className="flex justify-between text-xs mb-1">
+                                        <span className={achievement.completed ? `text-${achievement.color}-700` : 'text-gray-500'}>
+                                          Progress: {achievement.current}/{achievement.requirement}
+                                        </span>
+                                        <span className={achievement.completed ? `text-${achievement.color}-700 font-semibold` : 'text-gray-500'}>
+                                          {achievement.completed ? '✓ Completed' : 'In Progress'}
+                                        </span>
+                                      </div>
+                                      <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div 
+                                          className={`h-2 rounded-full transition-all duration-300 ${
+                                            achievement.completed 
+                                              ? `bg-${achievement.color}-500` 
+                                              : 'bg-gray-400'
+                                          }`}
+                                          style={{ 
+                                            width: `${Math.min((achievement.current / achievement.requirement) * 100, 100)}%` 
+                                          }}
+                                        ></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
                         </div>
                       ))}
                     </div>
-                  )}
+                        );
+                      } catch (error) {
+                        console.error('Error rendering achievements:', error);
+                        return (
+                          <div className="text-center py-8 text-gray-500">
+                            <Trophy className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                            <p>No achievements available yet. Complete quests to unlock achievements!</p>
+                          </div>
+                        );
+                      }
+                    })()}
+                  </div>
                 </div>
               )}
             </>
@@ -689,41 +980,41 @@ const ProfilePage = ({ onPageChange, userId }) => {
 
       {/* Edit Modal */}
       {isEditOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
           <div className="bg-white rounded-xl p-8 w-full max-w-2xl relative shadow-lg border border-gray-200">
             {/* Header Tabs */}
             <div className="bg-gray-50 rounded-xl p-3 mb-6">
               <div className="flex gap-3">
-                <button
-                  onClick={() => setEditTab("profile")}
+              <button
+                onClick={() => setEditTab("profile")}
                   className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all duration-200 text-sm ${
-                    editTab === "profile"
+                  editTab === "profile"
                       ? "bg-green-500 text-white shadow-md"
                       : "bg-white text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  Edit Profile
-                </button>
-                <button
-                  onClick={() => setEditTab("avatar")}
+                }`}
+              >
+                Edit Profile
+              </button>
+              <button
+                onClick={() => setEditTab("avatar")}
                   className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all duration-200 text-sm ${
-                    editTab === "avatar"
+                  editTab === "avatar"
                       ? "bg-green-500 text-white shadow-md"
                       : "bg-white text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  Choose Avatar
-                </button>
-                <button
-                  onClick={() => setEditTab("header")}
+                }`}
+              >
+                Choose Avatar
+              </button>
+              <button
+                onClick={() => setEditTab("header")}
                   className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-all duration-200 text-sm ${
-                    editTab === "header"
+                  editTab === "header"
                       ? "bg-green-500 text-white shadow-md"
                       : "bg-white text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  Header Theme
-                </button>
+                }`}
+              >
+                Header Theme
+              </button>
               </div>
             </div>
 
@@ -731,13 +1022,13 @@ const ProfilePage = ({ onPageChange, userId }) => {
             {editTab === "profile" && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Username</label>
+                  <label className="block text-sm font-semibold mb-2">Full Name</label>
                   <input
                     type="text"
                     value={editedUsername}
                     onChange={(e) => setEditedUsername(e.target.value)}
-                    className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="Enter your username"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    placeholder="Enter your full name"
                   />
                 </div>
                 
@@ -770,7 +1061,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
                         />
                       ) : null}
                       <div className={`w-full h-full ${avatar.bg} flex justify-center items-center`} style={{display: avatar.image ? 'none' : 'flex'}}>
-                        <UserCircle className={`w-16 h-16 ${avatar.color}`} />
+                      <UserCircle className={`w-16 h-16 ${avatar.color}`} />
                       </div>
                     </div>
                     <h3 className="mt-2 font-medium">{avatar.name}</h3>
@@ -800,14 +1091,14 @@ const ProfilePage = ({ onPageChange, userId }) => {
                       style={{
                         backgroundImage: `url(${headerImages[theme]})`
                       }}
-                    >
-                      {headerTheme === theme && (
+                  >
+                    {headerTheme === theme && (
                         <div className="w-full h-full bg-black bg-opacity-20 flex items-center justify-center">
-                          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                            <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                        <div className="w-4 h-4 bg-green-500 rounded-full"></div>
                           </div>
-                        </div>
-                      )}
+                      </div>
+                    )}
                     </div>
                     <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
                       {theme.charAt(0).toUpperCase() + theme.slice(1)}
@@ -843,9 +1134,9 @@ const ProfilePage = ({ onPageChange, userId }) => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <img
-                src="/vite.svg"
+                src="/assets/hau-eco-quest-logo.png"
                 alt="HAU Eco-Quest Logo"
-                className="h-8 w-8 bg-white rounded-full p-1"
+                className="h-8 w-8"
               />
               <h3 className="text-2xl font-bold">HAU Eco-Quest</h3>
             </div>

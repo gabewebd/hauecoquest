@@ -287,49 +287,44 @@ const DonutChart = ({ data, title, size = 120 }) => {
     );
 };
 
-const AchievementSection = ({ achievements }) => (
+const AchievementSection = ({ achievements, challengeBadges = [] }) => (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 className="text-xl font-bold mb-4">Badge Collection</h3>
-        <div className="bg-purple-50 text-purple-800 p-6 rounded-xl text-center">
-            <p className="text-5xl font-bold">{achievements.length}</p>
-            <p className="font-semibold">Badges Earned</p>
-            <p className="text-xs">Out of 35 available badges</p>
-        </div>
-        {achievements.length > 0 && (
-            <div className="mt-4">
-                <h4 className="font-semibold text-gray-800 mb-3">Recent Badges</h4>
-            <div className="space-y-3">
-                    {achievements.slice(0, 3).map((achievement, index) => (
-                        <ActivityItem 
-                            key={index}
-                            icon={<Badge className="text-green-500"/>} 
-                            title={achievement.badge_id?.name || 'Achievement'} 
-                            subtitle={achievement.badge_id?.description || 'Great job!'} 
-                            time={new Date(achievement.earned_at).toLocaleDateString()} 
-                        />
-                    ))}
+            <h3 className="text-xl font-bold mb-4">Badge Collection</h3>
+            {challengeBadges.length === 0 ? (
+                <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                        🏆
             </div>
+                    <p className="text-gray-500">No badges earned yet. Complete challenges to earn badges!</p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {challengeBadges.map((badge, index) => (
+                        <div key={index} className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm border border-purple-200 text-center hover:shadow-md transition-all">
+                            {badge.image_url ? (
+                                <img 
+                                    src={badge.image_url} 
+                                    alt={badge.name || 'Challenge Badge'} 
+                                    className="w-20 h-20 mx-auto mb-4 rounded-lg object-cover shadow-md"
+                                />
+                            ) : (
+                                <div className="w-20 h-20 mx-auto mb-4 bg-purple-200 rounded-lg flex items-center justify-center text-3xl">
+                                    🏆
+                                </div>
+                            )}
+                            <h4 className="font-bold text-lg mb-2 text-purple-800">
+                                {badge.name || 'Challenge Badge'}
+                            </h4>
+                            <p className="text-purple-600 text-sm mb-2">
+                                {badge.description || 'Earned from completing a challenge'}
+                            </p>
+                            <p className="text-xs text-purple-500">
+                                Challenge Badge
+                            </p>
+            </div>
+                    ))}
         </div>
-        )}
-            <div className="mt-4 space-y-3">
-                <p className="font-semibold text-sm">Next Badges to Unlock</p>
-                {achievements.length > 0 ? (
-                    achievements.slice(0, 2).map((achievement, index) => (
-                        <GoalItem 
-                            key={index}
-                            title={achievement.badge_id?.name || 'Next Badge'} 
-                            value={`${achievement.current || 0}/${achievement.target || 10}`} 
-                            progress={achievement.progress || 0} 
-                            label={achievement.badge_id?.description || 'Complete quests to unlock'} 
-                        />
-                    ))
-                ) : (
-                    <>
-                        <GoalItem title="First Quest" value="0/1" progress={0} label="Complete your first quest" />
-                        <GoalItem title="Quest Master" value="0/5" progress={0} label="Complete 5 quests" />
-                    </>
-                )}
-        </div>
+            )}
     </div>
 );
 
@@ -385,23 +380,10 @@ const OverviewTabContent = ({ dashboardData, onPageChange, userData }) => {
             </div>
             
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <StatCard icon={<CheckCircle className="w-8 h-8 text-green-500" />} value={dashboardData.questsCompleted} label="Quests Completed" change="+1 this month" />
-                <StatCard icon={<Award className="w-8 h-8 text-orange-500" />} value={dashboardData.badgesEarned} label="Badges Earned" change="+0 new" />
+                <StatCard icon={<Target className="w-8 h-8 text-purple-500" />} value={dashboardData.challengesCompleted?.length || 0} label="Challenges Completed" change="+0 this month" />
                 <StatCard icon={<Trophy className="w-8 h-8 text-yellow-500" />} value={dashboardData.ecoPoints} label="Eco Points" change="+150 this week" />
-            </div>
-
-            {/* Dashboard Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <DonutChart 
-                    data={questTypeData} 
-                    title="Quest Distribution" 
-                />
-                <SimpleBarChart 
-                    data={categoryData} 
-                    title="Category Progress" 
-                    color="blue" 
-                />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -412,45 +394,10 @@ const OverviewTabContent = ({ dashboardData, onPageChange, userData }) => {
                         <QuickLink icon={<User className="w-5 h-5 text-green-500" />} title="View Community" subtitle="Connect with Eco-Heroes" onClick={() => onPageChange('community')} />
                     </div>
                 </div>
+                
+                <AchievementSection achievements={dashboardData.achievements} challengeBadges={dashboardData.challengeBadges} />
             </div>
 
-            {/* Community Challenges */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-xl font-bold">Community Challenges</h3>
-                    <button 
-                        onClick={() => onPageChange('community')}
-                        className="text-green-600 hover:text-green-700 font-semibold text-sm"
-                    >
-                        View All
-                    </button>
-                </div>
-                <div className="space-y-4">
-                    {dashboardData.communityChallenges && dashboardData.communityChallenges.length > 0 ? (
-                        dashboardData.communityChallenges.slice(0, 3).map((challenge, index) => (
-                            <div key={index} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                                    <Target className="w-6 h-6 text-purple-600" />
-                                </div>
-                                <div className="flex-1">
-                                    <h4 className="font-semibold text-sm text-gray-800">{challenge.title}</h4>
-                                    <p className="text-xs text-gray-600">{challenge.description}</p>
-                                    <div className="flex items-center gap-4 mt-1">
-                                        <span className="text-xs text-gray-500">{challenge.participants?.length || 0} participants</span>
-                                        <span className="text-xs text-gray-500">{challenge.current_progress || 0} / {challenge.target} progress</span>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-sm font-semibold text-purple-600">{challenge.points || 0} pts</span>
-                                    <p className="text-xs text-gray-500">{challenge.duration}</p>
-                                </div>
-                            </div>
-                        ))
-                    ) : (
-                        <p className="text-gray-500 text-sm">No community challenges available</p>
-                    )}
-                </div>
-            </div>
         </div>
     );
 };
@@ -459,6 +406,8 @@ const OverviewTabContent = ({ dashboardData, onPageChange, userData }) => {
 const QuestsTab = ({ onPageChange }) => {
     const [quests, setQuests] = useState([]);
     const [userSubmissions, setUserSubmissions] = useState([]);
+    const [challenges, setChallenges] = useState([]);
+    const [userChallengeSubmissions, setUserChallengeSubmissions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
@@ -467,6 +416,8 @@ const QuestsTab = ({ onPageChange }) => {
     useEffect(() => {
         fetchQuests();
         fetchUserSubmissions();
+        fetchChallenges();
+        fetchUserChallengeSubmissions();
     }, []);
 
     const fetchQuests = async () => {
@@ -485,10 +436,43 @@ const QuestsTab = ({ onPageChange }) => {
             const data = await questAPI.getMySubmissions();
             console.log('Fetched user submissions:', data);
             setUserSubmissions(data || []);
-            setLoading(false);
         } catch (error) {
             console.error('Error fetching user submissions:', error);
             setUserSubmissions([]);
+        }
+    };
+
+    const fetchChallenges = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('/api/challenges', {
+                headers: { 'x-auth-token': token }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setChallenges(data);
+            }
+        } catch (error) {
+            console.error('Error fetching challenges:', error);
+            setChallenges([]);
+        }
+    };
+
+    const fetchUserChallengeSubmissions = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user'));
+            const response = await fetch(`/api/challenges/submissions/user/${user._id}`, {
+                headers: { 'x-auth-token': token }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setUserChallengeSubmissions(data);
+            }
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching challenge submissions:', error);
+            setUserChallengeSubmissions([]);
             setLoading(false);
         }
     };
@@ -783,6 +767,105 @@ const QuestsTab = ({ onPageChange }) => {
                 )}
             </div>
 
+            {/* My Challenge Submissions Section */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <div className="flex items-center gap-2 mb-6">
+                    <Target className="w-6 h-6 text-purple-500" />
+                    <h3 className="text-xl font-bold">My Challenge Submissions</h3>
+                    <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm font-semibold">
+                        {userChallengeSubmissions.length}
+                    </span>
+                </div>
+                
+                {userChallengeSubmissions.length > 0 ? (
+                    <div className="space-y-4">
+                        {userChallengeSubmissions.map(submission => {
+                            const challenge = challenges.find(c => c._id === submission.challenge_id);
+                            if (!challenge) return null;
+                            
+                            const getStatusColor = (status) => {
+                                switch (status) {
+                                    case 'approved': return 'bg-green-50 border-green-200';
+                                    case 'pending': return 'bg-blue-50 border-blue-200';
+                                    case 'rejected': return 'bg-red-50 border-red-200';
+                                    default: return 'bg-gray-50 border-gray-200';
+                                }
+                            };
+                            
+                            const getStatusBadge = (status) => {
+                                switch (status) {
+                                    case 'approved': return 'bg-green-100 text-green-700';
+                                    case 'pending': return 'bg-blue-100 text-blue-700';
+                                    case 'rejected': return 'bg-red-100 text-red-700';
+                                    default: return 'bg-gray-100 text-gray-700';
+                                }
+                            };
+                            
+                            return (
+                                <div key={submission._id} className={`border rounded-xl p-5 ${getStatusColor(submission.status)}`}>
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                                <h4 className="text-lg font-bold">{challenge.title}</h4>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusBadge(submission.status)}`}>
+                                                    {submission.status === 'approved' ? 'Completed' : 
+                                                     submission.status === 'pending' ? 'Pending Review' : 
+                                                     submission.status === 'rejected' ? 'Rejected' : submission.status}
+                                                </span>
+                                                <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
+                                                    Challenge
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
+                                            <span className="flex items-center gap-1">
+                                                    <Award className="w-4 h-4" />
+                                                    {challenge.points} points
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                                <Calendar className="w-4 h-4" />
+                                                    {submission.status === 'approved' ? 
+                                                        `Completed: ${new Date(submission.approved_at || submission.submitted_at).toLocaleDateString()}` :
+                                                        `Submitted: ${new Date(submission.submitted_at).toLocaleDateString()}`
+                                                    }
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Trophy className="w-4 h-4" />
+                                                    {challenge.badgeTitle || 'Challenge Badge'}
+                                            </span>
+                                        </div>
+                                            {submission.reflection_text && (
+                                                <p className="text-sm text-gray-600 line-clamp-2">{submission.reflection_text}</p>
+                                        )}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button 
+                                                onClick={() => onPageChange('challenge-details', challenge._id)}
+                                                className="flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition font-semibold"
+                                        >
+                                                <Eye className="w-4 h-4" />
+                                                View Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            );
+                        })}
+                </div>
+                ) : (
+                    <div className="text-center py-12">
+                        <Target className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <h3 className="text-xl font-bold text-gray-600 mb-2">No Challenge Submissions</h3>
+                        <p className="text-gray-500 mb-4">You haven't submitted any challenges yet.</p>
+                        <button 
+                            onClick={() => onPageChange('community')}
+                            className="bg-purple-500 text-white px-6 py-2 rounded-lg hover:bg-purple-600 transition font-semibold"
+                        >
+                            Browse Community Challenges
+                        </button>
+            </div>
+                )}
+            </div>
+
         </div>
     );
 };
@@ -917,34 +1000,40 @@ const NotificationsTab = () => {
 
 // --- ACHIEVEMENTS TAB ---
 const AchievementsTab = () => {
-    const [badgeData, setBadgeData] = useState({
-        totalBadges: 0,
-        earnedBadges: 0,
-        badgeProgress: [],
-        nextBadges: []
-    });
+    const [userQuests, setUserQuests] = useState([]);
+    const [userChallengeSubmissions, setUserChallengeSubmissions] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchBadgeData();
+        fetchUserData();
     }, []);
 
-    const fetchBadgeData = async () => {
+    const fetchUserData = async () => {
         try {
             const token = localStorage.getItem('token');
-            const userId = JSON.parse(localStorage.getItem('user'))._id;
+            const user = JSON.parse(localStorage.getItem('user'));
             
-            const response = await fetch(`/api/badges/user/${userId}/progress`, {
+            // Fetch user's quest submissions
+            const questsRes = await fetch('/api/quests/submissions/my', {
                 headers: { 'x-auth-token': token }
             });
-            
-            if (response.ok) {
-                const data = await response.json();
-                setBadgeData(data);
+            if (questsRes.ok) {
+                const questsData = await questsRes.json();
+                setUserQuests(questsData);
             }
+
+            // Fetch user's challenge submissions
+            const challengeSubmissionsRes = await fetch(`/api/challenges/submissions/user/${user._id}`, {
+                headers: { 'x-auth-token': token }
+            });
+            if (challengeSubmissionsRes.ok) {
+                const challengeSubmissionsData = await challengeSubmissionsRes.json();
+                setUserChallengeSubmissions(challengeSubmissionsData || []);
+            }
+
             setLoading(false);
         } catch (error) {
-            console.error('Error fetching badge data:', error);
+            console.error('Error fetching user data:', error);
             setLoading(false);
         }
     };
@@ -953,103 +1042,413 @@ const AchievementsTab = () => {
         return (
             <div className="flex justify-center items-center py-12">
                 <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="ml-3 text-gray-600">Loading achievements...</p>
             </div>
         );
     }
 
+    // Create challenge badges array from approved submissions
+    const challengeBadges = userChallengeSubmissions
+        .filter(sub => sub.status === 'approved')
+        .map(submission => ({
+            name: submission.challenge_id?.badgeTitle || submission.challenge_id?.title || 'Challenge Badge',
+            description: `Badge earned from completing ${submission.challenge_id?.title || 'challenge'}`,
+            image_url: submission.challenge_id?.badge_url,
+            challenge_id: submission.challenge_id?._id
+        }));
+
+    // Define quest achievements with progress tracking
+    const questAchievements = [
+        {
+            id: 'first_quest',
+            title: 'First Steps',
+            description: 'Complete your first quest',
+            icon: <Trophy className="w-5 h-5" />,
+            color: 'green',
+            requirement: 1,
+            current: userQuests.length,
+            completed: userQuests.length >= 1
+        },
+        {
+            id: 'quest_master',
+            title: 'Quest Master',
+            description: 'Complete 5 quests',
+            icon: <Award className="w-5 h-5" />,
+            color: 'blue',
+            requirement: 5,
+            current: userQuests.length,
+            completed: userQuests.length >= 5
+        },
+        {
+            id: 'quest_champion',
+            title: 'Quest Champion',
+            description: 'Complete 10 quests',
+            icon: <Crown className="w-5 h-5" />,
+            color: 'purple',
+            requirement: 10,
+            current: userQuests.length,
+            completed: userQuests.length >= 10
+        },
+        {
+            id: 'gardening_expert',
+            title: 'Gardening Expert',
+            description: 'Complete 3 Gardening & Planting quests',
+            icon: <TreePine className="w-5 h-5" />,
+            color: 'green',
+            requirement: 3,
+            current: userQuests.filter(q => q.quest_id?.category === 'Gardening & Planting').length,
+            completed: userQuests.filter(q => q.quest_id?.category === 'Gardening & Planting').length >= 3
+        },
+        {
+            id: 'recycling_expert',
+            title: 'Recycling Expert',
+            description: 'Complete 3 Recycling & Waste quests',
+            icon: <Recycle className="w-5 h-5" />,
+            color: 'blue',
+            requirement: 3,
+            current: userQuests.filter(q => q.quest_id?.category === 'Recycling & Waste').length,
+            completed: userQuests.filter(q => q.quest_id?.category === 'Recycling & Waste').length >= 3
+        },
+        {
+            id: 'energy_expert',
+            title: 'Energy Expert',
+            description: 'Complete 3 Energy Conservation quests',
+            icon: <Sun className="w-5 h-5" />,
+            color: 'yellow',
+            requirement: 3,
+            current: userQuests.filter(q => q.quest_id?.category === 'Energy Conservation').length,
+            completed: userQuests.filter(q => q.quest_id?.category === 'Energy Conservation').length >= 3
+        },
+        {
+            id: 'water_expert',
+            title: 'Water Expert',
+            description: 'Complete 3 Water Conservation quests',
+            icon: <Droplets className="w-5 h-5" />,
+            color: 'cyan',
+            requirement: 3,
+            current: userQuests.filter(q => q.quest_id?.category === 'Water Conservation').length,
+            completed: userQuests.filter(q => q.quest_id?.category === 'Water Conservation').length >= 3
+        }
+    ];
+
     return (
         <div className="space-y-6">
-            {/* Badge Collection Summary */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 className="text-xl font-bold mb-4">Badge Collection</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-purple-50 p-6 rounded-xl text-center">
-                        <div className="text-4xl font-bold text-purple-600 mb-2">{badgeData.earnedBadges}</div>
-                        <div className="text-sm text-purple-600 mb-1">Badges Earned</div>
-                        <div className="text-xs text-gray-500">Out of {badgeData.totalBadges} available badges</div>
+            {/* Quest Achievements */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-xl font-bold mb-4">Quest Achievements</h3>
+                {questAchievements.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                        <Trophy className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                        <p>No quest achievements available yet. Complete quests to unlock achievements!</p>
                     </div>
-                    <div className="bg-green-50 p-6 rounded-xl text-center">
-                        <div className="text-4xl font-bold text-green-600 mb-2">{Math.round((badgeData.earnedBadges / badgeData.totalBadges) * 100)}%</div>
-                        <div className="text-sm text-green-600 mb-1">Completion Rate</div>
-                        <div className="text-xs text-gray-500">Keep going to earn more badges!</div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Next Badges to Unlock */}
-            {badgeData.nextBadges.length > 0 && (
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <h3 className="text-xl font-bold mb-4">Next Badges to Unlock</h3>
+                ) : (
                     <div className="space-y-4">
-                        {badgeData.nextBadges.map((badge, index) => (
-                            <div key={badge._id} className="border border-gray-200 rounded-lg p-4">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                                        <Trophy className="w-5 h-5 text-gray-500" />
+                        {questAchievements.map((achievement) => (
+                            <div 
+                                key={achievement.id} 
+                                className={`p-4 rounded-lg border transition-all ${
+                                    achievement.completed 
+                                        ? `bg-gradient-to-r from-${achievement.color}-50 to-${achievement.color}-100 border-${achievement.color}-200` 
+                                        : 'bg-gray-50 border-gray-200'
+                                }`}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                                        achievement.completed 
+                                            ? `bg-${achievement.color}-500 text-white` 
+                                            : 'bg-gray-300 text-gray-500'
+                                    }`}>
+                                        {achievement.completed ? achievement.icon : <Trophy className="w-5 h-5" />}
                                     </div>
                                     <div className="flex-1">
-                                        <h4 className="font-semibold">{badge.name}</h4>
-                                        <p className="text-sm text-gray-600">{badge.description}</p>
+                                        <h4 className={`font-semibold ${
+                                            achievement.completed 
+                                                ? `text-${achievement.color}-800` 
+                                                : 'text-gray-600'
+                                        }`}>
+                                            {achievement.title}
+                                        </h4>
+                                        <p className={`text-sm ${
+                                            achievement.completed 
+                                                ? `text-${achievement.color}-600` 
+                                                : 'text-gray-500'
+                                        }`}>
+                                            {achievement.description}
+                                        </p>
+                                        <div className="mt-2">
+                                            <div className="flex justify-between text-xs mb-1">
+                                                <span className={achievement.completed ? `text-${achievement.color}-700` : 'text-gray-500'}>
+                                                    Progress: {achievement.current}/{achievement.requirement}
+                                                </span>
+                                                <span className={achievement.completed ? `text-${achievement.color}-700 font-semibold` : 'text-gray-500'}>
+                                                    {achievement.completed ? '✓ Completed' : 'In Progress'}
+                                                </span>
+                                            </div>
+                                            <div className="w-full bg-gray-200 rounded-full h-2">
+                                                <div 
+                                                    className={`h-2 rounded-full transition-all duration-300 ${
+                                                        achievement.completed 
+                                                            ? `bg-${achievement.color}-500` 
+                                                            : 'bg-gray-400'
+                                                    }`}
+                                                    style={{ 
+                                                        width: `${Math.min((achievement.current / achievement.requirement) * 100, 100)}%` 
+                                                    }}
+                                                ></div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="text-right">
-                                        <div className="text-sm font-semibold">{badge.current}/{badge.target}</div>
-                                        <div className="text-xs text-gray-500">{badge.progress}%</div>
-                                    </div>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div 
-                                        className="bg-orange-400 h-2 rounded-full transition-all duration-300"
-                                        style={{ width: `${badge.progress}%` }}
-                                    ></div>
                                 </div>
                             </div>
                         ))}
                     </div>
-                </div>
-            )}
-
-            {/* All Badges Progress */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 className="text-xl font-bold mb-4">All Badges Progress</h3>
-                <div className="space-y-3">
-                    {badgeData.badgeProgress.map((badge, index) => (
-                        <div key={badge._id} className={`border border-gray-200 rounded-lg p-3 ${badge.isEarned ? 'bg-green-50 border-green-200' : 'bg-gray-50'}`}>
-                            <div className="flex items-center gap-3">
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${badge.isEarned ? 'bg-green-500' : 'bg-gray-300'}`}>
-                                    {badge.isEarned ? <Trophy className="w-4 h-4 text-white" /> : <Trophy className="w-4 h-4 text-gray-500" />}
-                                </div>
-                                <div className="flex-1">
-                                    <h4 className={`font-semibold ${badge.isEarned ? 'text-green-800' : 'text-gray-700'}`}>
-                                        {badge.name}
-                                    </h4>
-                                    <p className="text-sm text-gray-600">{badge.description}</p>
-                                </div>
-                                <div className="text-right">
-                                    <div className="text-sm font-semibold">{badge.current}/{badge.target}</div>
-                                    <div className="text-xs text-gray-500">{badge.progress}%</div>
-                                </div>
-                            </div>
-                            {!badge.isEarned && (
-                                <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                                    <div 
-                                        className="bg-orange-400 h-1.5 rounded-full transition-all duration-300"
-                                        style={{ width: `${badge.progress}%` }}
-                                    ></div>
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
+                )}
             </div>
         </div>
     );
 };
 
-const ProgressTabContent = ({ dashboardData, userData, levelProgress }) => (
-    <div className="space-y-8">
-        <AchievementSection achievements={dashboardData.achievements} />
+const ProgressTabContent = ({ dashboardData, userData, levelProgress }) => {
+    const [quests, setQuests] = useState([]);
+    const [userSubmissions, setUserSubmissions] = useState([]);
+    const [challenges, setChallenges] = useState([]);
+    const [userChallengeSubmissions, setUserChallengeSubmissions] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [categoryFilter, setCategoryFilter] = useState('all');
+
+    useEffect(() => {
+        fetchQuests();
+        fetchUserSubmissions();
+        fetchChallenges();
+        fetchUserChallengeSubmissions();
+    }, []);
+
+    const fetchQuests = async () => {
+        try {
+            const { questAPI } = await import('../utils/api');
+            const data = await questAPI.getAllQuests();
+            setQuests(data);
+        } catch (error) {
+            console.error('Error fetching quests:', error);
+        }
+    };
+
+    const fetchUserSubmissions = async () => {
+        try {
+            const { questAPI } = await import('../utils/api');
+            const data = await questAPI.getMySubmissions();
+            console.log('Fetched user submissions:', data);
+            setUserSubmissions(data || []);
+        } catch (error) {
+            console.error('Error fetching user submissions:', error);
+            setUserSubmissions([]);
+        }
+    };
+
+    const fetchChallenges = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('/api/challenges', {
+                headers: { 'x-auth-token': token }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setChallenges(data);
+            }
+        } catch (error) {
+            console.error('Error fetching challenges:', error);
+            setChallenges([]);
+        }
+    };
+
+    const fetchUserChallengeSubmissions = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user'));
+            const response = await fetch(`/api/challenges/submissions/user/${user._id}`, {
+                headers: { 'x-auth-token': token }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setUserChallengeSubmissions(data);
+            }
+            setLoading(false);
+        } catch (error) {
+            console.error('Error fetching challenge submissions:', error);
+            setUserChallengeSubmissions([]);
+            setLoading(false);
+        }
+    };
+
+    // Filter quest submissions based on search term and category
+    const filteredQuestSubmissions = userSubmissions.filter(submission => {
+        const questId = submission.quest_id?._id || submission.quest_id;
+        const quest = quests.find(q => q._id === questId);
+        if (!quest) return false;
+        
+        const matchesSearch = quest.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                             quest.description.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = categoryFilter === 'all' || quest.category === categoryFilter;
+        
+        return matchesSearch && matchesCategory;
+    });
+
+    // Get unique categories from quests
+    const categories = [...new Set(quests.map(quest => quest.category))];
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center py-12">
+                <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="ml-3 text-gray-600">Loading your progress...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-8">
+            {/* Search and Filter Controls */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <div className="flex-1">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <input
+                                type="text"
+                                placeholder="Search quest submissions..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            />
+                        </div>
                     </div>
-);
+                    <div className="md:w-64">
+                        <select
+                            value={categoryFilter}
+                            onChange={(e) => setCategoryFilter(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        >
+                            <option value="all">All Categories</option>
+                            {categories.map(category => (
+                                <option key={category} value={category}>{category}</option>
+                            ))}
+                        </select>
+                </div>
+                </div>
+            </div>
+
+            {/* Quest Submissions */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-xl font-bold mb-4">Quest Submissions</h3>
+                {filteredQuestSubmissions.length === 0 ? (
+                    <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                            🎯
+                        </div>
+                        <p className="text-gray-500">
+                            {userSubmissions.length === 0 
+                                ? "No quest submissions yet. Start completing quests to build your quest history!"
+                                : "No quest submissions match your search criteria."
+                            }
+                        </p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                        {filteredQuestSubmissions.map((submission, index) => {
+                            const questId = submission.quest_id?._id || submission.quest_id;
+                            const quest = quests.find(q => q._id === questId);
+                            if (!quest) return null;
+                            
+                            return (
+                                <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="font-bold text-lg text-gray-900 truncate">{quest.title}</h3>
+                                            <p className="text-gray-600 text-sm mt-1 line-clamp-2">{quest.description}</p>
+                                        </div>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-3 flex-shrink-0 ${
+                                            submission.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                            submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                            'bg-red-100 text-red-700'
+                                        }`}>
+                                            {submission.status}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-3">
+                                        <span>Submitted: {new Date(submission.submitted_at).toLocaleDateString()}</span>
+                                        <span>{quest.points} points</span>
+                                        <span>Category: {quest.category}</span>
+                                        <span>Difficulty: {quest.difficulty}</span>
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <button 
+                                            onClick={() => window.location.href = `/quest-details/${quest._id}`}
+                                            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition text-sm font-semibold"
+                                        >
+                                            View Details
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+
+            {/* Challenge Submissions */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-xl font-bold mb-4">Challenge Submissions</h3>
+                {userChallengeSubmissions.length === 0 ? (
+                    <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                            🏆
+                        </div>
+                        <p className="text-gray-500">No challenge submissions yet. Start completing challenges to build your challenge history!</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                        {userChallengeSubmissions.map((submission, index) => {
+                            const challenge = challenges.find(c => c._id === submission.challenge_id);
+                            if (!challenge) return null;
+                            
+                            return (
+                                <div key={index} className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
+                                    <div className="flex items-start justify-between mb-3">
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="font-bold text-lg text-gray-900 truncate">{challenge.title}</h3>
+                                            <p className="text-gray-600 text-sm mt-1 line-clamp-2">{challenge.description}</p>
+                                        </div>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ml-3 flex-shrink-0 ${
+                                            submission.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                            submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                            'bg-red-100 text-red-700'
+                                        }`}>
+                                            {submission.status}
+                                        </span>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500 mb-3">
+                                        <span>Submitted: {new Date(submission.submitted_at).toLocaleDateString()}</span>
+                                        <span>{challenge.points} points</span>
+                                        <span>Badge: {challenge.badgeTitle || 'Challenge Badge'}</span>
+                                    </div>
+                                    <div className="flex justify-end">
+                                        <button 
+                                            onClick={() => window.location.href = `/challenge-details/${challenge._id}`}
+                                            className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition text-sm font-semibold"
+                                        >
+                                            View Details
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
 
 // --- COMMUNITY TAB ---
 const CommunityTab = ({ onPageChange }) => {
@@ -1249,7 +1648,7 @@ const CommunityTab = ({ onPageChange }) => {
             <div className="flex justify-center items-center py-12">
                 <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
                 <p className="ml-3 text-gray-600">Loading community data...</p>
-                </div>
+            </div>
         );
     }
 
@@ -1271,7 +1670,7 @@ const CommunityTab = ({ onPageChange }) => {
                         <PlusCircle className="w-4 h-4" />
                         Create Post
                     </button>
-                </div>
+                    </div>
 
                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
                     {/* Search Bar - Left */}
@@ -1301,10 +1700,10 @@ const CommunityTab = ({ onPageChange }) => {
                                 {filter}
                             </button>
                         ))}
-            </div>
                 </div>
+            </div>
 
-                <div className="space-y-4">
+                    <div className="space-y-4">
                     {/* Posts Section */}
                     {(activeFilter === 'all' || activeFilter === 'posts') && (
                         <div>
@@ -1313,19 +1712,19 @@ const CommunityTab = ({ onPageChange }) => {
                                 <div className="text-center py-8 bg-gray-50 rounded-lg">
                                     <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
                                     <p className="text-gray-500 text-sm">No posts found</p>
-                                </div>
+                                    </div>
                             ) : (
                                 <div className="space-y-3">
                                     {filteredPosts.map(post => (
                                         <div key={post._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
                                             <div className="flex items-start justify-between gap-4">
-                                                <div className="flex-1">
+                                    <div className="flex-1">
                                                     <div className="flex items-center gap-3 mb-2 flex-wrap">
                                                         <h4 className="text-lg font-bold">{post.title}</h4>
                                                         <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
                                                             {post.category}
                                                         </span>
-                                                    </div>
+                                    </div>
                                                     <p className="text-sm text-gray-600 mb-3 line-clamp-2">{post.content}</p>
                                                     <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                                                         <span className="flex items-center gap-1">
@@ -1344,7 +1743,7 @@ const CommunityTab = ({ onPageChange }) => {
                                                             <MessageCircle className="w-4 h-4" />
                                                             {post.comments?.length || 0} comments
                                                         </span>
-                                                    </div>
+                                    </div>
                                                     {post.tags && post.tags.length > 0 && (
                                                         <div className="flex gap-2 mt-2 flex-wrap">
                                                             {post.tags.map((tag, idx) => (
@@ -1352,7 +1751,7 @@ const CommunityTab = ({ onPageChange }) => {
                                                                     #{tag}
                                                                 </span>
                                                             ))}
-                                                        </div>
+                                </div>
                                                     )}
                                                 </div>
                                                 <div className="flex gap-2">
@@ -1372,13 +1771,13 @@ const CommunityTab = ({ onPageChange }) => {
                                                         <Trash2 className="w-5 h-5 text-red-600" />
                                                     </button>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    ))}
                                 </div>
+                            </div>
+                        ))}
+                    </div>
                             )}
-                        </div>
-                    )}
+                </div>
+            )}
 
                     {/* Challenges Section */}
                     {(activeFilter === 'all' || activeFilter === 'challenges') && (
@@ -1410,10 +1809,10 @@ const CommunityTab = ({ onPageChange }) => {
                                             }
                                         };
 
-                                        return (
+                    return (
                                             <div key={challenge._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
                                                 <div className="flex items-start justify-between gap-4">
-                                                    <div className="flex-1">
+                                <div className="flex-1">
                                                         <div className="flex items-center gap-3 mb-2 flex-wrap">
                                                             <h4 className="text-lg font-bold">{challenge.title}</h4>
                                                             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700">
@@ -1429,7 +1828,7 @@ const CommunityTab = ({ onPageChange }) => {
                                                             }`}>
                                                                 {challenge.isActive ? 'Active' : 'Inactive'}
                                                             </span>
-                                                        </div>
+                                </div>
                                                         <p className="text-sm text-gray-600 mb-3 line-clamp-2">{challenge.description}</p>
                                                         <div className="flex flex-wrap gap-4 text-sm text-gray-500">
                                                             <span className="flex items-center gap-1">
@@ -1457,8 +1856,8 @@ const CommunityTab = ({ onPageChange }) => {
                                                                     Submitted: {new Date(challenge.userProgress.submittedAt).toLocaleDateString()}
                                                                 </span>
                                                             )}
-                                                        </div>
-                                                    </div>
+                                </div>
+                            </div>
                                                     <div className="flex gap-2">
                                                         <button
                                                             onClick={() => onPageChange('challenge-details', challenge._id)}
@@ -1469,8 +1868,8 @@ const CommunityTab = ({ onPageChange }) => {
                                                     </div>
                                                 </div>
                                             </div>
-                                        );
-                                    })}
+                    );
+                })}
                                 </div>
                             )}
                         </div>
@@ -1481,9 +1880,9 @@ const CommunityTab = ({ onPageChange }) => {
                         <div className="text-center py-12">
                             <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                             <p className="text-gray-500">No content found. Create your first post!</p>
-                        </div>
-                    )}
                 </div>
+                    )}
+            </div>
             </div>
 
             {/* Post Modal */}
@@ -1516,14 +1915,14 @@ const PostModal = ({ post, onClose, onSave }) => {
     };
 
                     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
                     <h3 className="text-2xl font-bold">{post ? 'Edit Post' : 'Create New Post'}</h3>
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
                         <X className="w-5 h-5" />
                     </button>
-                </div>
+                    </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div>
@@ -1535,8 +1934,8 @@ const PostModal = ({ post, onClose, onSave }) => {
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             placeholder="e.g., Tips for Sustainable Living"
-                        />
-            </div>
+                    />
+                </div>
 
                     <div>
                         <label className="block text-sm font-semibold mb-2">Category</label>
@@ -1551,7 +1950,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             <option>Events</option>
                             <option>News</option>
                         </select>
-        </div>
+            </div>
 
                     <div>
                         <label className="block text-sm font-semibold mb-2">Content</label>
@@ -1563,7 +1962,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             rows="8"
                             placeholder="Write your post content here..."
                         />
-                    </div>
+                </div>
 
                     <div>
                         <label className="block text-sm font-semibold mb-2">Tags (comma-separated)</label>
@@ -1574,7 +1973,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                             placeholder="e.g., sustainability, recycling, climate"
                         />
-                    </div>
+            </div>
 
                     <div>
                         <label className="block text-sm font-semibold mb-2">Post Image</label>
@@ -1585,7 +1984,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                         <p className="text-xs text-gray-500 mt-1">Optional: Upload an image for this post</p>
-                    </div>
+        </div>
 
                     <div className="flex gap-3 pt-4">
                         <button
@@ -1712,7 +2111,7 @@ const RoleRequestCard = ({ user, onRequestRole }) => {
             </div>
 
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
                         <div className="p-6">
                             <h3 className="text-2xl font-bold mb-4">Request Role Upgrade</h3>
@@ -1907,10 +2306,35 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
             const challengesRes = await fetch('/api/challenges', { headers });
             const challengesData = challengesRes.ok ? await challengesRes.json() : [];
 
+            // Fetch user's approved challenge submissions for badges
+            const challengeSubmissionsRes = await fetch(`/api/challenges/submissions/user/${user._id}`, { headers });
+            const challengeSubmissions = challengeSubmissionsRes.ok ? await challengeSubmissionsRes.json() : [];
+            const approvedSubmissions = challengeSubmissions.filter(sub => sub.status === 'approved');
+            
+            // Get challenge badges from approved submissions
+            const challengeBadges = approvedSubmissions.map(submission => {
+                const challenge = challengesData.find(c => c._id === submission.challenge_id);
+                return challenge ? {
+                    ...challenge,
+                    badge_url: challenge.badge_url,
+                    badgeTitle: challenge.badgeTitle,
+                    title: challenge.title
+                } : null;
+            }).filter(Boolean);
+
+            // Get user's completed challenges from dashboard data
+            const completedChallenges = dashboardData.challengesCompleted || [];
+            const completedChallengeBadges = completedChallenges.map(challenge => ({
+                ...challenge,
+                image_url: challenge.badge_url,
+                name: challenge.badgeTitle,
+                title: challenge.title
+            }));
+
             // Update dashboard data with real backend data
             setDashboardData({
-                questsCompleted: dashboardData.submissions?.length || 0,
-                badgesEarned: dashboardData.badges?.earned || 0,
+                questsCompleted: dashboardData.questsCompleted?.length || 0,
+                badgesEarned: dashboardData.badges?.length || 0,
                 ecoPoints: dashboardData.user?.points || 0,
                 questsInProgress: dashboardData.questsInProgress || 0,
                 availableQuests: dashboardData.availableQuests || 0,
@@ -1922,6 +2346,8 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
                 weeklyPoints: dashboardData.weeklyPoints || 0,
                 monthlyQuests: dashboardData.monthlyQuests || 0,
                 communityChallenges: challengesData.filter(c => c.isActive).slice(0, 3),
+                challengeBadges: [...challengeBadges, ...completedChallengeBadges],
+                challengesCompleted: completedChallenges,
                 weeklyProgress: dashboardData.weeklyProgress || [
                     { label: 'Mon', value: Math.floor(Math.random() * 20) + 5 },
                     { label: 'Tue', value: Math.floor(Math.random() * 20) + 8 },
@@ -1997,8 +2423,6 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
                 {/* Navigation Tabs */}
                 <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 inline-flex items-center gap-3 mb-8">
                     <TabButton id="overview" label="Overview" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
-                    <TabButton id="quests" label="Quests" icon={<BookOpen className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
-                    <TabButton id="community" label="Community" icon={<FileText className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="achievements" label="Achievements" icon={<Trophy className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="notifications" label="Notifications" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
@@ -2007,11 +2431,8 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
                 {activeTab === 'overview' && (
                     <div className="space-y-8">
                         <OverviewTabContent dashboardData={dashboardData} onPageChange={onPageChange} userData={userData} />
-                        <ProgressTabContent dashboardData={dashboardData} userData={userData} levelProgress={levelProgress} />
                     </div>
                 )}
-                {activeTab === 'quests' && <QuestsTab onPageChange={onPageChange} />}
-                {activeTab === 'community' && <CommunityTab onPageChange={onPageChange} />}
                 {activeTab === 'achievements' && <AchievementsTab />}
                 {activeTab === 'notifications' && <NotificationsTab />}
             </main>
@@ -2020,3 +2441,4 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
 };
 
 export default DashboardPage;
+

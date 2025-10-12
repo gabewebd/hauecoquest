@@ -3,12 +3,23 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Heart, MessageCircle, Share2, User, Calendar, Tag, Eye, X } from 'lucide-react';
 import { useUser } from '../context/UserContext';
 
+// Helper function to get avatar image
+const getAvatarImage = (avatarTheme) => {
+  const avatarMap = {
+    'Leaf': '/assets/avatars-headers/leaf-avatar.png',
+    'Sun': '/assets/avatars-headers/sun-avatar.png', 
+    'Tree': '/assets/avatars-headers/tree-avatar.png',
+    'Water': '/assets/avatars-headers/water-avatar.png'
+  };
+  return avatarMap[avatarTheme] || '/assets/avatars-headers/leaf-avatar.png';
+};
+
 // Image Modal Component
 const ImageModal = ({ imageUrl, onClose }) => {
   if (!imageUrl) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div className="relative max-w-4xl max-h-full">
         <button
           onClick={onClose}
@@ -162,17 +173,25 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
         </div>
 
         {/* Post Content */}
-        <div className="bg-white rounded-2xl shadow-lg border p-8 mb-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 mb-8">
           {/* Author Info */}
           <div className="flex items-center gap-4 mb-6">
             <img
-              src={`https://i.pravatar.cc/150?u=${post.author?.username || 'user'}`}
+              src={getAvatarImage(post.author?.avatar_theme)}
               alt={post.author?.username}
-              className="w-12 h-12 rounded-full"
+              className="w-12 h-12 rounded-full object-cover"
+              onError={(e) => {
+                e.target.src = `https://i.pravatar.cc/150?u=${post.author?.username || 'user'}`;
+              }}
             />
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-lg">{post.author?.username || 'Anonymous'}</h3>
+                <button
+                  onClick={() => onPageChange('profile', { userId: post.author?._id })}
+                  className="font-bold text-lg hover:text-green-600 transition-colors text-left"
+                >
+                  {post.author?.username || 'Anonymous'}
+                </button>
                 <span className="text-blue-500">✔️</span>
                 <span className={`px-2 py-1 rounded-full text-xs font-semibold ${post.author?.role === 'admin' ? 'bg-red-100 text-red-700' :
                     post.author?.role === 'partner' ? 'bg-purple-100 text-purple-700' :
@@ -259,7 +278,7 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
         </div>
 
         {/* Comments Section */}
-        <div className="bg-white rounded-2xl shadow-lg border p-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">
             Comments ({post.comments?.length || 0})
           </h2>
@@ -269,16 +288,19 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
             <form onSubmit={handleComment} className="mb-8">
               <div className="flex gap-4">
                 <img
-                  src={`https://i.pravatar.cc/150?u=${user.username}`}
+                  src={getAvatarImage(user.avatar_theme)}
                   alt={user.username}
-                  className="w-10 h-10 rounded-full"
+                  className="w-10 h-10 rounded-full object-cover"
+                  onError={(e) => {
+                    e.target.src = `https://i.pravatar.cc/150?u=${user.username}`;
+                  }}
                 />
                 <div className="flex-1">
                   <textarea
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder="Write a comment..."
-                    className="w-full p-4 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
+                    className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
                     rows="3"
                     required
                   />
@@ -312,14 +334,22 @@ const PostDetailsPage = ({ onPageChange, postId }) => {
               post.comments.map((comment, index) => (
                 <div key={index} className="flex gap-4">
                   <img
-                    src={`https://i.pravatar.cc/150?u=${comment.user?.username || 'user'}`}
+                    src={getAvatarImage(comment.user?.avatar_theme)}
                     alt={comment.user?.username}
-                    className="w-10 h-10 rounded-full"
+                    className="w-10 h-10 rounded-full object-cover"
+                    onError={(e) => {
+                      e.target.src = `https://i.pravatar.cc/150?u=${comment.user?.username || 'user'}`;
+                    }}
                   />
                   <div className="flex-1">
                     <div className="bg-gray-50 rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <h4 className="font-semibold text-gray-800">{comment.user?.username || 'Anonymous'}</h4>
+                        <button
+                          onClick={() => onPageChange('profile', { userId: comment.user?._id })}
+                          className="font-semibold text-gray-800 hover:text-green-600 transition-colors text-left"
+                        >
+                          {comment.user?.username || 'Anonymous'}
+                        </button>
                         <span className="text-xs text-gray-500">
                           {new Date(comment.created_at).toLocaleDateString()}
                         </span>

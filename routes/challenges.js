@@ -337,7 +337,7 @@ router.get('/:id/participants', async (req, res) => {
 // @route   PUT /api/challenges/:id
 // @desc    Update a challenge (Admin only)
 // @access  Private
-router.put('/:id', [auth, roleCheck('admin')], async (req, res) => {
+router.put('/:id', [auth, roleCheck('admin'), upload.single('badge')], async (req, res) => {
     try {
         const challenge = await Challenge.findById(req.params.id);
         
@@ -347,19 +347,43 @@ router.put('/:id', [auth, roleCheck('admin')], async (req, res) => {
 
         const {
             title,
-            description,
-            goal,
-            currentProgress,
-            isActive,
-            endDate
+            content,
+            target,
+            points,
+            duration,
+            location,
+            badgeTitle
         } = req.body;
 
         if (title) challenge.title = title;
-        if (description) challenge.description = description;
-        if (goal) challenge.goal = goal;
-        if (typeof currentProgress !== 'undefined') challenge.currentProgress = currentProgress;
-        if (typeof isActive !== 'undefined') challenge.isActive = isActive;
-        if (endDate) challenge.endDate = endDate;
+        if (content) challenge.description = content;
+        if (target) challenge.target = parseInt(target);
+        if (points) challenge.points = parseInt(points);
+        if (duration) challenge.duration = duration;
+        if (location) challenge.location = location;
+        if (badgeTitle) challenge.badgeTitle = badgeTitle;
+
+        // Handle badge image upload
+        if (req.file) {
+            // Upload to Cloudinary
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'challenge-badges',
+                transformation: [
+                    { width: 200, height: 200, crop: 'fill' }
+                ]
+            });
+            
+            // Delete old badge if exists
+            if (challenge.badge_url) {
+                const publicId = challenge.badge_url.split('/').pop().split('.')[0];
+                await cloudinary.uploader.destroy(`challenge-badges/${publicId}`);
+            }
+            
+            challenge.badge_url = result.secure_url;
+            
+            // Delete local file
+            fs.unlinkSync(req.file.path);
+        }
 
         await challenge.save();
         res.json(challenge);
@@ -396,7 +420,7 @@ router.post('/', [auth, roleCheck('admin', 'partner'), upload.fields([{ name: 'b
         console.log('Creating challenge with data:', req.body);
         console.log('Files received:', req.files);
         
-        const { title, content, target, points, duration, location } = req.body;
+        const { title, content, target, points, duration, location, badgeTitle } = req.body;
         
         if (!title || !content || !target) {
             console.log('Missing required fields:', { title: !!title, content: !!content, target: !!target });
@@ -404,7 +428,6 @@ router.post('/', [auth, roleCheck('admin', 'partner'), upload.fields([{ name: 'b
         }
 
         let badgeUrl = null;
-        let imageUrl = null;
 
         // Handle badge upload
         if (req.files && req.files.badge) {
@@ -421,21 +444,6 @@ router.post('/', [auth, roleCheck('admin', 'partner'), upload.fields([{ name: 'b
             }
         }
 
-        // Handle image upload (optional)
-        if (req.files && req.files.image) {
-            try {
-                const imageResult = await cloudinary.uploader.upload(req.files.image[0].path, {
-                    folder: 'challenges',
-                    resource_type: 'auto'
-                });
-                imageUrl = imageResult.secure_url;
-                console.log('Challenge image uploaded to Cloudinary');
-            } catch (error) {
-                console.error('Cloudinary image upload error:', error);
-                return res.status(500).json({ msg: 'Failed to upload image' });
-            }
-        }
-
         const newChallenge = new Challenge({
             title,
             description: content,
@@ -444,8 +452,8 @@ router.post('/', [auth, roleCheck('admin', 'partner'), upload.fields([{ name: 'b
             points: parseInt(points) || 50,
             duration: duration || '2-3 weeks',
             location: location || 'HAU Campus',
-            badgeUrl,
-            imageUrl,
+            badgeTitle: badgeTitle || '',
+            badge_url: badgeUrl,
             createdBy: req.user.id,
             participants: [],
             isActive: true
@@ -632,45 +640,54 @@ router.put('/submissions/:id/review', [auth, roleCheck('admin')], async (req, re
             
             if (user && challenge) {
                 // Award points to user (use challenge.points if available, otherwise 50)
-                user.points = (user.points || 0) + (challenge.points || 50);
-                user.questsCompleted = (user.questsCompleted || 0) + 1;
+                const pointsEarned = challenge.points || 50;
+                user.points = (user.points || 0) + pointsEarned;
+                user.eco_score = (user.eco_score || 0) + pointsEarned;
+                
+                // Add challenge to user's completed challenges
+                if (!user.challengesCompleted.includes(challenge._id)) {
+                    user.challengesCompleted.push(challenge._id);
+                }
+                
+                // Add challenge badge to user's badges if it exists (simplified - only badgeTitle and badge_url)
+                if (challenge.badge_url && challenge.badgeTitle) {
+                    // Create a badge entry for the challenge
+                    const challengeBadge = {
+                        name: challenge.badgeTitle,
+                        description: `Badge earned from completing ${challenge.title}`,
+                        image_url: challenge.badge_url,
+                        challenge_id: challenge._id
+                    };
+                    
+                    // Add to user's badges array
+                    if (!user.badges) user.badges = [];
+                    user.badges.push(challengeBadge);
+                }
+                
+                // Add challenge to challenge participants array
+                if (!challenge.participants.includes(user._id)) {
+                    challenge.participants.push(user._id);
+                    await challenge.save();
+                }
+                
                 await user.save();
-                console.log(`Awarded ${challenge.points || 50} points and updated quest count to user ${user.username}`);
+                console.log(`Awarded ${pointsEarned} points and updated challenge completion for user ${user.username}`);
 
-                // Award appropriate badge based on challenge type
-                let badgeToAward = null;
-                
-                // Check if this is a tree planting challenge
-                if (challenge.title.toLowerCase().includes('tree') || challenge.title.toLowerCase().includes('plant')) {
-                    badgeToAward = await Badge.findOne({ name: 'Tree Master' });
-                    console.log('Looking for Tree Master badge for tree planting challenge');
-                } else {
-                    // Default challenge completion badge
-                    badgeToAward = await Badge.findOne({ name: 'Community Champion' });
-                    console.log('Looking for Community Champion badge for general challenge');
-                }
-                
-                console.log('Badge to award:', badgeToAward);
-                
-                if (badgeToAward) {
-                    const existingUserBadge = await UserBadge.findOne({
-                        user_id: submission.user_id,
-                        badge_id: badgeToAward._id
-                    });
-
-                    console.log('Existing user badge check:', existingUserBadge);
-
-                    if (!existingUserBadge) {
-                        const userBadge = new UserBadge({
-                            user_id: submission.user_id,
-                            badge_id: badgeToAward._id
-                        });
-                        await userBadge.save();
-                        console.log(`${badgeToAward.name} badge awarded to user ${submission.user_id}`);
-                    } else {
-                        console.log(`User already has ${badgeToAward.name} badge`);
+                // Create notification for challenge approval
+                const { createNotification } = require('./notifications');
+                await createNotification(
+                    user._id,
+                    'challenge_approved',
+                    'Challenge Approved!',
+                    `Your challenge submission for "${challenge.title}" has been approved! You earned ${pointsEarned} points and a badge.`,
+                    {
+                        challengeId: challenge._id,
+                        challengeTitle: challenge.title,
+                        pointsEarned: pointsEarned,
+                        submissionId: submission._id
                     }
-                }
+                );
+
 
                 // Update challenge progress
                 if (challenge) {
@@ -679,6 +696,28 @@ router.put('/submissions/:id/review', [auth, roleCheck('admin')], async (req, re
                     await challenge.save();
                     console.log(`Updated challenge progress to ${challenge.currentProgress}`);
                 }
+            }
+        }
+
+        // Create notification for challenge rejection
+        if (status === 'rejected') {
+            const challenge = await Challenge.findById(submission.challenge_id);
+            const user = await User.findById(submission.user_id);
+            
+            if (user && challenge) {
+                const { createNotification } = require('./notifications');
+                await createNotification(
+                    user._id,
+                    'challenge_rejected',
+                    'Challenge Submission Rejected',
+                    `Your challenge submission for "${challenge.title}" was rejected.${rejection_reason ? ' Reason: ' + rejection_reason : ''}`,
+                    {
+                        challengeId: challenge._id,
+                        challengeTitle: challenge.title,
+                        submissionId: submission._id,
+                        rejectionReason: rejection_reason
+                    }
+                );
             }
         }
 

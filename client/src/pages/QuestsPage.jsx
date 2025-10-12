@@ -286,6 +286,31 @@ const QuestsPage = ({ onPageChange }) => {
         const matchesCategory = selectedCategory === 'All' || quest.category === selectedCategory;
         const matchesDifficulty = selectedDifficulty === 'All' || quest.difficulty === selectedDifficulty;
         return matchesSearch && matchesCategory && matchesDifficulty;
+    }).sort((a, b) => {
+        // Priority order: Available quests first, then user's in-progress/completed, then full quests last
+        
+        // Check if quest is full
+        const aIsFull = a.participants >= a.maxParticipants;
+        const bIsFull = b.participants >= b.maxParticipants;
+        
+        // Check if user has submission for this quest
+        const aHasSubmission = a.existingSubmission;
+        const bHasSubmission = b.existingSubmission;
+        
+        // Priority 1: Available quests (not full, no user submission)
+        if (!aIsFull && !aHasSubmission && (bIsFull || bHasSubmission)) return -1;
+        if (!bIsFull && !bHasSubmission && (aIsFull || aHasSubmission)) return 1;
+        
+        // Priority 2: User's submissions (in progress or completed)
+        if (aHasSubmission && !bHasSubmission) return -1;
+        if (bHasSubmission && !aHasSubmission) return 1;
+        
+        // Priority 3: Full quests last
+        if (aIsFull && !bIsFull) return 1;
+        if (bIsFull && !aIsFull) return -1;
+        
+        // If same priority, sort by points (higher points first)
+        return b.points - a.points;
     });
 
     if (loading) {
@@ -515,9 +540,9 @@ const QuestsPage = ({ onPageChange }) => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <img
-                src="/vite.svg"
+                src="/assets/hau-eco-quest-logo.png"
                 alt="HAU Eco-Quest Logo"
-                className="h-8 w-8 bg-white rounded-full p-1"
+                className="h-8 w-8"
               />
               <h3 className="text-2xl font-bold">HAU Eco-Quest</h3>
             </div>

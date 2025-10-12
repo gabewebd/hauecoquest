@@ -24,12 +24,11 @@ router.get('/profile', auth, async (req, res) => {
 // @access  Private
 router.put('/profile', auth, async (req, res) => {
   try {
-    const { username, hau_affiliation, avatar_theme, header_theme } = req.body;
+    const { username, avatar_theme, header_theme } = req.body;
 
     const user = await User.findById(req.user.id);
 
     if (username) user.username = username;
-    if (hau_affiliation) user.hau_affiliation = hau_affiliation;
     if (avatar_theme) user.avatar_theme = avatar_theme;
     if (header_theme) user.header_theme = header_theme;
 
@@ -161,7 +160,10 @@ router.get('/:id/stats', async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
       .select('-password')
-      .populate('questsCompleted', 'title points category');
+      .populate('questsCompleted', 'title points category')
+      .populate('challengesCompleted', 'title points badgeTitle')
+      .populate('badges', 'name description image_url')
+      .populate('achievements');
 
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
@@ -172,9 +174,16 @@ router.get('/:id/stats', async (req, res) => {
       eco_score: user.eco_score,
       points: user.points,
       questsCompleted: user.questsCompleted.length,
+      challengesCompleted: user.challengesCompleted.length,
+      badges: user.badges.length,
+      achievements: user.achievements.length,
       avatar_theme: user.avatar_theme,
       role: user.role,
-      completedQuests: user.questsCompleted
+      department: user.department,
+      completedQuests: user.questsCompleted,
+      completedChallenges: user.challengesCompleted,
+      userBadges: user.badges,
+      userAchievements: user.achievements
     };
 
     res.json(stats);

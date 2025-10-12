@@ -73,11 +73,11 @@ const ChallengeSchema = new mongoose.Schema({
             type: Date
         }
     }],
-    badgeReward: {
+    badgeTitle: {
         type: String,
-        default: 'Tree Master'
+        default: ''
     },
-    badgeUrl: {
+    badge_url: {
         type: String,
         default: ''
     },
@@ -95,10 +95,6 @@ const ChallengeSchema = new mongoose.Schema({
     },
     endDate: {
         type: Date
-    },
-    imageUrl: {
-        type: String,
-        default: ''
     },
     created_at: {
         type: Date,
