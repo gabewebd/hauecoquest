@@ -476,7 +476,7 @@ const CommunityPage = ({ onPageChange, pageParams }) => {
   };
 
   return (
-    <div className="font-sans bg-gray-50 text-gray-900 min-h-screen pb-28">
+    <div className="font-sans bg-gray-50 text-gray-900 min-h-screen">
       <main className="pt-16 md:pt-20 pb-12">
         {/* Page Header */}
         <section className="bg-white border-b border-gray-200 shadow-sm">
