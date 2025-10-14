@@ -282,6 +282,14 @@ export const postAPI = {
     });
     return handleApiResponse(response);
   },
+
+  pinPost: async (postId) => {
+    const response = await fetch(`${API_URL}/posts/${postId}/pin`, {
+      method: 'PUT',
+      headers: getHeaders(),
+    });
+    return handleApiResponse(response);
+  },
 };
 
 // Admin APIs
