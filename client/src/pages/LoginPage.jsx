@@ -67,17 +67,16 @@ const LoginPage = ({ onPageChange }) => {
                 </svg>
             </div>
 
-            <div className="relative min-h-screen flex items-center justify-center px-4 py-12">
+            <div className="relative min-h-screen flex items-center justify-center px-4 py-8 sm:py-12">
                 <div className="w-full max-w-md">
 
-
-                    <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-10">
-                        <div className="text-center mb-8">
-                            <div className="inline-block bg-gradient-to-br from-green-400 to-emerald-600 p-4 rounded-2xl mb-4 shadow-lg">
-                                <Sparkles className="w-8 h-8 text-white" />
+                    <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10">
+                        <div className="text-center mb-6 sm:mb-8">
+                            <div className="inline-block bg-gradient-to-br from-green-400 to-emerald-600 p-3 sm:p-4 rounded-2xl mb-3 sm:mb-4 shadow-lg">
+                                <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                             </div>
-                            <h1 className="text-4xl font-black text-gray-900 mb-2">Welcome Back!</h1>
-                            <p className="text-gray-600 text-lg">Continue your eco-adventure and make an impact</p>
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 mb-2">Welcome Back!</h1>
+                            <p className="text-gray-600 text-base sm:text-lg">Continue your eco-adventure and make an impact</p>
                         </div>
                         
                         {error && (
@@ -86,11 +85,11 @@ const LoginPage = ({ onPageChange }) => {
                             </div>
                         )}
 
-                        <form onSubmit={onSubmit} className="space-y-5">
+                        <form onSubmit={onSubmit} className="space-y-4 sm:space-y-5">
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
                                 <div className="relative">
-                                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                    <Mail className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                                     <input 
                                         type="email" 
                                         placeholder="your.email@hau.edu.ph" 
@@ -98,7 +97,7 @@ const LoginPage = ({ onPageChange }) => {
                                         value={email}
                                         onChange={onChange}
                                         required
-                                        className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all font-medium"
+                                        className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 bg-gray-50 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all font-medium text-sm sm:text-base"
                                     />
                                 </div>
                             </div>
@@ -106,7 +105,7 @@ const LoginPage = ({ onPageChange }) => {
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
                                 <div className="relative">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                    <Lock className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                                     <input 
                                         type="password"
                                         placeholder="Enter your password" 
@@ -114,7 +113,7 @@ const LoginPage = ({ onPageChange }) => {
                                         value={password}
                                         onChange={onChange}
                                         required
-                                        className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all font-medium" 
+                                        className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 bg-gray-50 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all font-medium text-sm sm:text-base" 
                                     />
                                 </div>
                             </div>
@@ -130,36 +129,36 @@ const LoginPage = ({ onPageChange }) => {
                             <button 
                                 type="submit" 
                                 disabled={loading}
-                                className="w-full flex justify-center items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black py-4 rounded-full text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-6"
+                                className="w-full flex justify-center items-center gap-2 sm:gap-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black py-3 sm:py-4 rounded-full text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none mt-4 sm:mt-6"
                             >
                                 {loading ? (
                                     <>
-                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        Logging in...
+                                        <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        <span className="text-sm sm:text-base">Logging in...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <Rocket className="w-6 h-6" />
-                                        Enter Quest Hall
+                                        <Rocket className="w-5 h-5 sm:w-6 sm:h-6" />
+                                        <span className="text-sm sm:text-base">Enter Quest Hall</span>
                                     </>
                                 )}
                             </button>
                         </form>
 
-                        <div className="relative my-8">
+                        <div className="relative my-6 sm:my-8">
                             <div className="absolute inset-0 flex items-center">
                                 <div className="w-full border-t-2 border-gray-200"></div>
                             </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="px-4 bg-white text-gray-500 font-medium">or</span>
+                            <div className="relative flex justify-center text-xs sm:text-sm">
+                                <span className="px-3 sm:px-4 bg-white text-gray-500 font-medium">or</span>
                             </div>
                         </div>
 
-                        <p className="text-center text-gray-600">
+                        <p className="text-center text-gray-600 text-sm sm:text-base">
                             New to HAU Eco-Quest?{" "}
                             <button 
                                 onClick={handleSignupClick} 
-                                className="font-black text-green-600 hover:text-green-700 transition-colors"
+                                className="font-black text-green-600 hover:text-green-700 transition-colors text-sm sm:text-base"
                             >
                                 Begin Your Journey
                             </button>

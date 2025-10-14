@@ -1,27 +1,27 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../context/UserContext';
-import { Users, BookOpen, BarChart, Shield, CheckCircle, XCircle, Edit, Trash2, Plus, Search, Filter, Calendar, MapPin, Award, X, Save, Clock, Eye, FileCheck, Heart, MessageCircle, FileText, TrendingUp, TrendingDown, Activity, Zap, Target } from 'lucide-react';
+import { Users, BookOpen, BarChart, Shield, CheckCircle, XCircle, Edit, Trash2, Plus, Search, Filter, Calendar, MapPin, Award, X, Save, Clock, Eye, FileCheck, Heart, MessageCircle, FileText, TrendingUp, TrendingDown, Activity, Zap, Target, Bell } from 'lucide-react';
 
 // --- HELPER COMPONENTS ---
 
 const StatCard = ({ icon, value, label, bgColor }) => (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
-        <div className="flex items-center gap-4">
-            <div className={`${bgColor} p-4 rounded-xl`}>{icon}</div>
+    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
+        <div className="flex items-center gap-3 sm:gap-4">
+            <div className={`${bgColor} p-3 sm:p-4 rounded-xl`}>{icon}</div>
             <div>
-                <p className="text-3xl font-bold text-gray-800">{value}</p>
-                <p className="text-sm text-gray-600 font-semibold">{label}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-800">{value}</p>
+                <p className="text-xs sm:text-sm text-gray-600 font-semibold">{label}</p>
             </div>
         </div>
     </div>
 );
 
 const QuickAction = ({ icon, title, subtitle, onClick }) => (
-    <button onClick={onClick} className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all w-full text-left">
-        <div className="bg-gray-100 p-3 rounded-lg">{icon}</div>
+    <button onClick={onClick} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-gray-50 transition-all w-full text-left">
+        <div className="bg-gray-100 p-2 sm:p-3 rounded-lg">{icon}</div>
         <div className="flex-1">
-            <p className="font-semibold text-gray-800">{title}</p>
+            <p className="font-semibold text-sm sm:text-base text-gray-800">{title}</p>
             <p className="text-xs text-gray-600">{subtitle}</p>
         </div>
     </button>
@@ -41,13 +41,13 @@ const ActivityItem = ({ icon, title, subtitle, time }) => (
 const TabButton = ({ id, label, icon, activeTab, setActiveTab }) => (
     <button
         onClick={() => setActiveTab(id)}
-        className={`flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all text-sm ${activeTab === id
+        className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all text-xs sm:text-sm ${activeTab === id
                 ? 'bg-green-500 text-white shadow-md'
                 : 'bg-white text-gray-600 hover:bg-gray-50 hover:text-green-600'
             }`}
     >
         {icon}
-        {label}
+        <span className="hidden sm:inline">{label}</span>
     </button>
 );
 
@@ -349,18 +349,18 @@ const OverviewTab = ({ stats, setActiveTab, users }) => {
 
     return (
     <div className="space-y-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard icon={<Users className="w-6 h-6 text-blue-500" />} value={stats.totalUsers} label="Total Users" bgColor="bg-blue-50" />
-            <StatCard icon={<BookOpen className="w-6 h-6 text-green-500" />} value={stats.activeQuests} label="Active Quests" bgColor="bg-green-50" />
-            <StatCard icon={<Shield className="w-6 h-6 text-yellow-500" />} value={stats.pendingPartners} label="Pending Role Requests" bgColor="bg-yellow-50" />
-            <StatCard icon={<FileCheck className="w-6 h-6 text-orange-500" />} value={stats.pendingSubmissions} label="Pending Submissions" bgColor="bg-orange-50" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <StatCard icon={<Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />} value={stats.totalUsers} label="Total Users" bgColor="bg-blue-50" />
+            <StatCard icon={<BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />} value={stats.activeQuests} label="Active Quests" bgColor="bg-green-50" />
+            <StatCard icon={<Shield className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-500" />} value={stats.pendingPartners} label="Pending Role Requests" bgColor="bg-yellow-50" />
+            <StatCard icon={<FileCheck className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />} value={stats.pendingSubmissions} label="Pending Submissions" bgColor="bg-orange-50" />
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                <h3 className="text-lg sm:text-xl font-bold mb-4">Quick Actions</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <QuickAction
                         icon={<Users className="w-6 h-6 text-blue-500" />}
                         title="Manage Users"
@@ -387,9 +387,9 @@ const OverviewTab = ({ stats, setActiveTab, users }) => {
                     />
                 </div>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
                 <h3 className="text-lg font-bold text-gray-800 mb-4">User Role Distribution</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                     <div className="text-center p-4 bg-blue-50 rounded-lg">
                         <div className="text-2xl font-bold text-blue-600 mb-1">
                             {userRoleData.user || 0}
@@ -489,16 +489,16 @@ const UserProfileModal = ({ user, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">User Profile</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                    <h3 className="text-lg sm:text-2xl font-bold">User Profile</h3>
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <div className="p-6 space-y-6">
+                <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                     {loading && (
                         <div className="text-center py-8">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -697,16 +697,16 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
                     </div>
 
                 {/* Search and Filters */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-6">
                     {/* Search Bar - Left */}
-                    <div className="relative w-full md:w-64">
+                    <div className="relative w-full sm:w-64">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             <input
                                 type="text"
                                 placeholder="Search users..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors text-sm"
                             />
                         </div>
                     
@@ -714,7 +714,7 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
                     <div className="flex gap-2 flex-wrap">
                             <button
                                 onClick={() => setFilterRole('all')}
-                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'all'
+                                className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition ${filterRole === 'all'
                                         ? 'bg-gray-500 text-white'
                                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
@@ -723,7 +723,7 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
                             </button>
                             <button
                                 onClick={() => setFilterRole('student')}
-                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'student'
+                                className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition ${filterRole === 'student'
                                         ? 'bg-blue-500 text-white'
                                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
@@ -732,7 +732,7 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
                             </button>
                             <button
                                 onClick={() => setFilterRole('partner')}
-                                className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filterRole === 'partner'
+                                className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition ${filterRole === 'partner'
                                         ? 'bg-purple-500 text-white'
                                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                     }`}
@@ -743,23 +743,23 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full">
+                    <table className="w-full min-w-[600px]">
                         <thead className="bg-gray-50 border-b border-gray-100">
                             <tr>
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Name</th>
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Email</th>
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Role</th>
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Points</th>
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Joined</th>
-                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-600">Actions</th>
+                                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-600">Name</th>
+                                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-600 hidden sm:table-cell">Email</th>
+                                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-600">Role</th>
+                                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-600">Points</th>
+                                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-600 hidden md:table-cell">Joined</th>
+                                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-semibold text-gray-600">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {filteredUsers.map(user => (
                                 <tr key={user._id} className="border-b border-gray-100 hover:bg-gray-50">
-                                    <td className="px-4 py-3 font-semibold">{user.username}</td>
-                                    <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
-                                    <td className="px-4 py-3 text-sm">
+                                    <td className="px-2 sm:px-4 py-3 font-semibold text-sm">{user.username}</td>
+                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-gray-600 hidden sm:table-cell">{user.email}</td>
+                                    <td className="px-2 sm:px-4 py-3 text-sm">
                                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${user.role === 'partner'
                                                 ? 'bg-purple-100 text-purple-700'
                                                 : user.role === 'admin'
@@ -769,13 +769,13 @@ const UsersTab = ({ users, pendingPartners, onApprove, onReject, onDeleteUser })
                                             {user.role}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-gray-600">{user.points || 0}</td>
-                                    <td className="px-4 py-3 text-sm text-gray-600">{new Date(user.created_at).toLocaleDateString()}</td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex gap-2">
+                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-gray-600">{user.points || 0}</td>
+                                    <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-gray-600 hidden md:table-cell">{new Date(user.created_at).toLocaleDateString()}</td>
+                                    <td className="px-2 sm:px-4 py-3">
+                                        <div className="flex gap-1 sm:gap-2">
                                             <button
                                                 onClick={() => onDeleteUser(user._id)}
-                                                className="p-2 hover:bg-red-50 rounded-lg transition"
+                                                className="p-1 sm:p-2 hover:bg-red-50 rounded-lg transition"
                                                 title="Delete User"
                                             >
                                                 <Trash2 className="w-4 h-4 text-red-600" />
@@ -872,16 +872,16 @@ const QuestModal = ({ quest, onClose, onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">{quest ? 'Edit Quest' : 'Create New Quest'}</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                    <h3 className="text-lg sm:text-2xl font-bold">{quest ? 'Edit Quest' : 'Create New Quest'}</h3>
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Quest Title</label>
                         <input
@@ -894,7 +894,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold mb-2">Category</label>
                             <select
@@ -923,7 +923,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold mb-2">Points Reward</label>
                             <input
@@ -947,7 +947,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold mb-2">Location</label>
                             <input
@@ -1052,7 +1052,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                     </div>
 
 
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
                         <button
                             type="submit"
                             className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2"
@@ -1189,14 +1189,14 @@ const QuestsTab = ({ quests, setQuests }) => {
     return (
         <div className="space-y-6">
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">Quest Management</h3>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <h3 className="text-lg sm:text-xl font-bold">Quest Management</h3>
                     <button
                         onClick={() => {
                             setEditingQuest(null);
                             setShowModal(true);
                         }}
-                        className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition font-semibold"
+                        className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition font-semibold text-sm sm:text-base w-full sm:w-auto"
                     >
                         <Plus className="w-4 h-4" />
                         Create Quest
@@ -1204,16 +1204,16 @@ const QuestsTab = ({ quests, setQuests }) => {
                 </div>
 
                 {/* Search and Filters */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-6">
                     {/* Search Bar - Left */}
-                    <div className="relative w-full md:w-64">
+                    <div className="relative w-full sm:w-64">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search quests..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                            className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors text-sm"
                         />
                     </div>
                     
@@ -1223,7 +1223,7 @@ const QuestsTab = ({ quests, setQuests }) => {
                         <select
                             value={categoryFilter}
                             onChange={(e) => setCategoryFilter(e.target.value)}
-                            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                            className="px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors text-sm"
                         >
                             <option value="all">All Categories</option>
                             {categories.map(category => (
@@ -1242,38 +1242,38 @@ const QuestsTab = ({ quests, setQuests }) => {
                         </div>
                     ) : (
                         filteredQuests.map(quest => (
-                        <div key={quest._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
-                            <div className="flex items-start justify-between mb-3">
+                        <div key={quest._id} className="border border-gray-200 rounded-xl p-4 sm:p-5 hover:shadow-md transition">
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between mb-3 gap-3">
                                 <div className="flex-1">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <h4 className="text-lg font-bold">{quest.title}</h4>
-                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${quest.isActive
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                                        <h4 className="text-base sm:text-lg font-bold">{quest.title}</h4>
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold self-start ${quest.isActive
                                                 ? 'bg-green-100 text-green-700'
                                                 : 'bg-gray-100 text-gray-700'
                                             }`}>
                                             {quest.isActive ? 'Active' : 'Inactive'}
                                         </span>
                                     </div>
-                                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                                    <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600">
                                         <span className="flex items-center gap-1">
-                                            <BookOpen className="w-4 h-4" />
+                                            <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />
                                             {quest.category}
                                         </span>
                                         <span className="flex items-center gap-1">
-                                            <Award className="w-4 h-4" />
+                                            <Award className="w-3 h-3 sm:w-4 sm:h-4" />
                                             {quest.points} points
                                         </span>
                                         <span className="flex items-center gap-1">
-                                            <Users className="w-4 h-4" />
+                                            <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                                             {quest.completions?.length || 0} participants
                                         </span>
                                         <span className="flex items-center gap-1">
-                                            <Calendar className="w-4 h-4" />
+                                            <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
                                             {quest.duration}
                                         </span>
                                     </div>
                                 </div>
-                                <div className="flex gap-2 ml-4">
+                                <div className="flex gap-2 self-start sm:ml-4">
                                     <button
                                         onClick={() => {
                                             setEditingQuest(quest);
@@ -1281,13 +1281,13 @@ const QuestsTab = ({ quests, setQuests }) => {
                                         }}
                                         className="p-2 hover:bg-blue-50 rounded-lg transition border border-blue-200"
                                     >
-                                        <Edit className="w-5 h-5 text-blue-600" />
+                                        <Edit className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                                     </button>
                                     <button
                                         onClick={() => handleDeleteQuest(quest._id)}
                                         className="p-2 hover:bg-red-50 rounded-lg transition border border-red-200"
                                     >
-                                        <Trash2 className="w-5 h-5 text-red-600" />
+                                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
                                     </button>
                                 </div>
                             </div>
@@ -1383,58 +1383,58 @@ const AnalyticsTab = ({ stats, users, quests }) => {
     return (
         <div className="space-y-8">
             {/* Overview Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-blue-100 p-3 rounded-lg">
-                            <Users className="w-6 h-6 text-blue-600" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="bg-blue-100 p-2 sm:p-3 rounded-lg">
+                            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold">{stats.totalUsers}</p>
-                            <p className="text-sm text-gray-500">Total Users</p>
+                            <p className="text-xl sm:text-2xl font-bold">{stats.totalUsers}</p>
+                            <p className="text-xs sm:text-sm text-gray-500">Total Users</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-green-100 p-3 rounded-lg">
-                            <BookOpen className="w-6 h-6 text-green-600" />
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="bg-green-100 p-2 sm:p-3 rounded-lg">
+                            <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold">{quests.length}</p>
-                            <p className="text-sm text-gray-500">Total Quests</p>
+                            <p className="text-xl sm:text-2xl font-bold">{quests.length}</p>
+                            <p className="text-xs sm:text-sm text-gray-500">Total Quests</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-yellow-100 p-3 rounded-lg">
-                            <Award className="w-6 h-6 text-yellow-600" />
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="bg-yellow-100 p-2 sm:p-3 rounded-lg">
+                            <Award className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold">{analyticsData.totalEngagement}</p>
-                            <p className="text-sm text-gray-500">Quest Completions</p>
+                            <p className="text-xl sm:text-2xl font-bold">{analyticsData.totalEngagement}</p>
+                            <p className="text-xs sm:text-sm text-gray-500">Quest Completions</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-purple-100 p-3 rounded-lg">
-                            <BarChart className="w-6 h-6 text-purple-600" />
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="bg-purple-100 p-2 sm:p-3 rounded-lg">
+                            <BarChart className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
                         </div>
                         <div>
-                            <p className="text-2xl font-bold">{analyticsData.averagePoints}</p>
-                            <p className="text-sm text-gray-500">Avg Points/User</p>
+                            <p className="text-xl sm:text-2xl font-bold">{analyticsData.averagePoints}</p>
+                            <p className="text-xs sm:text-sm text-gray-500">Avg Points/User</p>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                 <SimpleBarChart 
                     data={userGrowthChartData} 
                     title="User Registration Growth" 
@@ -1446,14 +1446,14 @@ const AnalyticsTab = ({ stats, users, quests }) => {
                 />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                 <SimpleBarChart 
                     data={categoryChartData} 
                     title="Quest Category Performance" 
                     color="green" 
                 />
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                    <h3 className="text-xl font-bold mb-4">Platform Health</h3>
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h3 className="text-lg sm:text-xl font-bold mb-4">Platform Health</h3>
                     <div className="space-y-4">
                         <div className="flex justify-between items-center">
                             <span className="text-sm font-medium">Active Users</span>
@@ -1683,62 +1683,62 @@ const CommunityTab = ({ posts, setPosts }) => {
     return (
         <div className="space-y-6">
             {/* Admin Post Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex items-center gap-3">
-                        <div className="p-3 bg-red-100 rounded-lg">
-                            <Users className="w-6 h-6 text-red-600" />
+                        <div className="p-2 sm:p-3 bg-red-100 rounded-lg">
+                            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold">Admin Posts</h3>
-                            <p className="text-2xl font-bold text-red-600">{adminPosts.length}</p>
+                            <h3 className="text-base sm:text-lg font-bold">Admin Posts</h3>
+                            <p className="text-xl sm:text-2xl font-bold text-red-600">{adminPosts.length}</p>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex items-center gap-3">
-                        <div className="p-3 bg-blue-100 rounded-lg">
-                            <Users className="w-6 h-6 text-blue-600" />
+                        <div className="p-2 sm:p-3 bg-blue-100 rounded-lg">
+                            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold">Partner Posts</h3>
-                            <p className="text-2xl font-bold text-blue-600">{partnerPosts.length}</p>
+                            <h3 className="text-base sm:text-lg font-bold">Partner Posts</h3>
+                            <p className="text-xl sm:text-2xl font-bold text-blue-600">{partnerPosts.length}</p>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
                     <div className="flex items-center gap-3">
-                        <div className="p-3 bg-green-100 rounded-lg">
-                            <Users className="w-6 h-6 text-green-600" />
+                        <div className="p-2 sm:p-3 bg-green-100 rounded-lg">
+                            <Users className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold">User Posts</h3>
-                            <p className="text-2xl font-bold text-green-600">{userPosts.length}</p>
+                            <h3 className="text-base sm:text-lg font-bold">User Posts</h3>
+                            <p className="text-xl sm:text-2xl font-bold text-green-600">{userPosts.length}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
-                        <h3 className="text-xl font-bold">Community Content Management</h3>
-                        <p className="text-sm text-gray-500">Manage all community posts and challenges</p>
+                        <h3 className="text-lg sm:text-xl font-bold">Community Content Management</h3>
+                        <p className="text-xs sm:text-sm text-gray-500">Manage all community posts and challenges</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                         <button
                             onClick={() => {
                                 setEditingPost(null);
                                 setShowModal(true);
                             }}
-                            className="flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition font-semibold"
+                            className="flex items-center justify-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition font-semibold text-sm"
                         >
                             <Plus className="w-4 h-4" />
                             Create Post
                         </button>
                         <button
                             onClick={() => setShowChallengeModal(true)}
-                            className="flex items-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition font-semibold"
+                            className="flex items-center justify-center gap-2 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition font-semibold text-sm"
                         >
                             <Users className="w-4 h-4" />
                             Create Challenge
@@ -1746,26 +1746,26 @@ const CommunityTab = ({ posts, setPosts }) => {
                     </div>
                 </div>
 
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-6">
                     {/* Search Bar - Left */}
-                    <div className="relative w-full md:w-64">
+                    <div className="relative w-full sm:w-64">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             <input
                                 type="text"
                                 placeholder="Search content..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors text-sm"
                             />
                         </div>
                     
                     {/* Filters - Right */}
-                    <div className="flex gap-3 flex-wrap">
+                    <div className="flex gap-2 sm:gap-3 flex-wrap">
                         {/* Content Type Filter */}
                         <select
                             value={activeFilter}
                             onChange={(e) => setActiveFilter(e.target.value)}
-                            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors"
+                            className="px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-300 transition-colors text-sm"
                         >
                             <option value="all">All Content</option>
                             <option value="posts">Posts Only</option>
@@ -2221,54 +2221,54 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
     return (
         <div className="space-y-6">
             {/* Submission Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 group">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 bg-yellow-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                            <Clock className="w-6 h-6 text-yellow-600" />
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 group">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-2 sm:p-3 bg-yellow-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold">Pending</h3>
-                            <p className="text-2xl font-bold text-yellow-600 group-hover:text-yellow-700 transition-colors">
+                            <h3 className="text-sm sm:text-lg font-bold">Pending</h3>
+                            <p className="text-lg sm:text-2xl font-bold text-yellow-600 group-hover:text-yellow-700 transition-colors">
                                 {submissions.filter(s => s.status === 'pending').length + challengeSubmissions.filter(s => s.status === 'pending').length}
                             </p>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 group">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 bg-green-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                            <CheckCircle className="w-6 h-6 text-green-600" />
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 group">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-2 sm:p-3 bg-green-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                            <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold">Approved</h3>
-                            <p className="text-2xl font-bold text-green-600 group-hover:text-green-700 transition-colors">
+                            <h3 className="text-sm sm:text-lg font-bold">Approved</h3>
+                            <p className="text-lg sm:text-2xl font-bold text-green-600 group-hover:text-green-700 transition-colors">
                                 {submissions.filter(s => s.status === 'approved').length + challengeSubmissions.filter(s => s.status === 'approved').length}
                             </p>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 group">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 bg-red-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                            <XCircle className="w-6 h-6 text-red-600" />
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 group">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-2 sm:p-3 bg-red-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                            <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold">Rejected</h3>
-                            <p className="text-2xl font-bold text-red-600 group-hover:text-red-700 transition-colors">
+                            <h3 className="text-sm sm:text-lg font-bold">Rejected</h3>
+                            <p className="text-lg sm:text-2xl font-bold text-red-600 group-hover:text-red-700 transition-colors">
                                 {submissions.filter(s => s.status === 'rejected').length + challengeSubmissions.filter(s => s.status === 'rejected').length}
                             </p>
                         </div>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 group">
-                    <div className="flex items-center gap-3">
-                        <div className="p-3 bg-blue-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
-                            <FileCheck className="w-6 h-6 text-blue-600" />
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300 group">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-2 sm:p-3 bg-blue-100 rounded-lg group-hover:scale-110 transition-transform duration-300">
+                            <FileCheck className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold">Total</h3>
-                            <p className="text-2xl font-bold text-blue-600 group-hover:text-blue-700 transition-colors">
+                            <h3 className="text-sm sm:text-lg font-bold">Total</h3>
+                            <p className="text-lg sm:text-2xl font-bold text-blue-600 group-hover:text-blue-700 transition-colors">
                                 {submissions.length + challengeSubmissions.length}
                             </p>
                         </div>
@@ -2276,16 +2276,16 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                 </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
-                        <h3 className="text-xl font-bold">Submissions Review</h3>
-                        <p className="text-sm text-gray-500">Review and approve quest and challenge submissions</p>
+                        <h3 className="text-lg sm:text-xl font-bold">Submissions Review</h3>
+                        <p className="text-xs sm:text-sm text-gray-500">Review and approve quest and challenge submissions</p>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                         <button
                             onClick={() => setFilter('pending')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filter === 'pending'
+                            className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition ${filter === 'pending'
                                     ? 'bg-yellow-500 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
@@ -2294,7 +2294,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                         </button>
                         <button
                             onClick={() => setFilter('approved')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filter === 'approved'
+                            className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition ${filter === 'approved'
                                     ? 'bg-green-500 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
@@ -2303,7 +2303,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                         </button>
                         <button
                             onClick={() => setFilter('rejected')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filter === 'rejected'
+                            className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition ${filter === 'rejected'
                                     ? 'bg-red-500 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
@@ -2312,7 +2312,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                         </button>
                         <button
                             onClick={() => setFilter('all')}
-                            className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${filter === 'all'
+                            className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition ${filter === 'all'
                                     ? 'bg-blue-500 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
@@ -2323,10 +2323,10 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                 </div>
 
                 {/* Submission Type Tabs */}
-                <div className="flex gap-2 mb-6">
+                <div className="flex gap-2 mb-6 overflow-x-auto">
                     <button
                         onClick={() => setActiveTab('quests')}
-                        className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'quests'
+                        className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition whitespace-nowrap ${activeTab === 'quests'
                                 ? 'bg-green-500 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
@@ -2335,7 +2335,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                     </button>
                     <button
                         onClick={() => setActiveTab('challenges')}
-                        className={`px-4 py-2 rounded-lg font-semibold text-sm transition ${activeTab === 'challenges'
+                        className={`px-3 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm transition whitespace-nowrap ${activeTab === 'challenges'
                                 ? 'bg-purple-500 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
@@ -2354,34 +2354,36 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                 ) : (
                     <div className="space-y-4">
                         {filteredSubmissions.map(submission => (
-                            <div key={submission._id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
-                                <div className="flex items-start justify-between gap-4">
+                            <div key={submission._id} className="border border-gray-200 rounded-xl p-4 sm:p-5 hover:shadow-md transition">
+                                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                                     <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                            <h4 className="text-lg font-bold">{submission.quest_id?.title || 'Unknown Quest'}</h4>
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                                            <h4 className="text-base sm:text-lg font-bold">{submission.quest_id?.title || 'Unknown Quest'}</h4>
+                                            <div className="flex gap-2 flex-wrap">
                                                 <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Quest</span>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                    submission.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                                        'bg-red-100 text-red-700'
-                                                }`}>
-                                                {submission.status.toUpperCase()}
-                                            </span>
+                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${submission.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                        submission.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                                            'bg-red-100 text-red-700'
+                                                    }`}>
+                                                    {submission.status.toUpperCase()}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-2">
+                                        <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600 mb-2">
                                             <span className="flex items-center gap-1">
-                                                <Users className="w-4 h-4" />
+                                                <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                                                 {submission.user_id?.username || 'Unknown User'}
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Award className="w-4 h-4" />
+                                                <Award className="w-3 h-3 sm:w-4 sm:h-4" />
                                                 {submission.quest_id?.points || 0} points
                                             </span>
                                             <span className="flex items-center gap-1">
-                                                <Clock className="w-4 h-4" />
+                                                <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                                                 {new Date(submission.submitted_at).toLocaleDateString()}
                                             </span>
                                             <span className="flex items-center gap-1 text-xs">
-                                                <Shield className="w-4 h-4" />
+                                                <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
                                                 {submission.user_id?.role || 'user'}
                                             </span>
                                         </div>
@@ -2394,13 +2396,13 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                                             </p>
                                         )}
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-1 sm:gap-2 self-start sm:self-auto">
                                         <button
                                                 onClick={() => setSelectedSubmission({...submission, type: 'quest'})}
-                                            className="p-2 hover:bg-blue-50 hover:shadow-md rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-400 transform hover:scale-105"
+                                            className="p-1 sm:p-2 hover:bg-blue-50 hover:shadow-md rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-400 transform hover:scale-105"
                                             title="View Details"
                                         >
-                                            <Eye className="w-5 h-5 text-blue-600 hover:text-blue-700" />
+                                            <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 hover:text-blue-700" />
                                         </button>
                                         {submission.status === 'pending' && (
                                             <>
@@ -2411,17 +2413,17 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                                                         console.log('🚀 BUTTON CLICKED: Event:', e);
                                                             handleApprove(submission._id, 'quest');
                                                     }}
-                                                    className="p-2 hover:bg-green-50 hover:shadow-md rounded-lg transition-all duration-200 border border-green-200 hover:border-green-400 transform hover:scale-105"
+                                                    className="p-1 sm:p-2 hover:bg-green-50 hover:shadow-md rounded-lg transition-all duration-200 border border-green-200 hover:border-green-400 transform hover:scale-105"
                                                     title="Approve"
                                                 >
-                                                    <CheckCircle className="w-5 h-5 text-green-600 hover:text-green-700" />
+                                                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 hover:text-green-700" />
                                                 </button>
                                                 <button
                                                         onClick={() => handleReject(submission._id, 'quest')}
-                                                    className="p-2 hover:bg-red-50 hover:shadow-md rounded-lg transition-all duration-200 border border-red-200 hover:border-red-400 transform hover:scale-105"
+                                                    className="p-1 sm:p-2 hover:bg-red-50 hover:shadow-md rounded-lg transition-all duration-200 border border-red-200 hover:border-red-400 transform hover:scale-105"
                                                     title="Reject"
                                                 >
-                                                    <XCircle className="w-5 h-5 text-red-600 hover:text-red-700" />
+                                                    <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 hover:text-red-700" />
                                                 </button>
                                             </>
                                         )}
@@ -2520,16 +2522,16 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
 
             {/* Submission Details Modal */}
             {selectedSubmission && (
-                <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                            <h3 className="text-2xl font-bold">Submission Details</h3>
+                <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2 sm:p-4">
+                    <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-3xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                        <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                            <h3 className="text-lg sm:text-2xl font-bold">Submission Details</h3>
                             <button onClick={() => setSelectedSubmission(null)} className="p-2 hover:bg-gray-100 rounded-lg transition">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
 
-                        <div className="p-6 space-y-4">
+                        <div className="p-4 sm:p-6 space-y-4">
                             <div>
                                 <h4 className="font-semibold text-gray-700 mb-1">
                                     {selectedSubmission.type === 'quest' ? 'Quest' : 'Challenge'}
@@ -2595,7 +2597,7 @@ const SubmissionsTab = ({ onApprove, onReject }) => {
                             )}
 
                             {selectedSubmission.status === 'pending' && (
-                                <div className="flex gap-3 pt-4 border-t">
+                                <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
                                     <button
                                         onClick={(e) => {
                                             console.log('🚀 MODAL BUTTON CLICKED: Approve button clicked for submission:', selectedSubmission._id);
@@ -2640,16 +2642,16 @@ const PostModal = ({ post, onClose, onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">{post ? 'Edit Post' : 'Create New Post'}</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                    <h3 className="text-lg sm:text-2xl font-bold">{post ? 'Edit Post' : 'Create New Post'}</h3>
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Post Title</label>
                         <input
@@ -2710,7 +2712,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <p className="text-xs text-gray-500 mt-1">Optional: Upload an image for this post</p>
                     </div>
 
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
                         <button
                             type="submit"
                             className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2"
@@ -2763,16 +2765,16 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">Create Community Challenge</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                    <h3 className="text-lg sm:text-2xl font-bold">Create Community Challenge</h3>
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Challenge Title</label>
                         <input
@@ -2797,7 +2799,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold mb-2">Target Goal</label>
                             <input
@@ -2824,7 +2826,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold mb-2">Duration</label>
                             <input
@@ -2882,7 +2884,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                         )}
                     </div>
 
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
                         <button
                             type="submit"
                             className="flex-1 bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition font-semibold"
@@ -3099,37 +3101,37 @@ const AdminDashboard = () => {
 
     return (
         <div className="font-sans bg-gray-50 text-gray-800 min-h-screen">
-            <main className="container mx-auto px-6 pt-24 pb-12">
+            <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-8 sm:pb-12">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-8 rounded-xl shadow-sm mb-8 text-white relative overflow-hidden">
+                <div className="bg-gradient-to-r from-purple-500 to-indigo-600 p-4 sm:p-8 rounded-xl shadow-sm mb-6 sm:mb-8 text-white relative overflow-hidden">
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-2xl"></div>
                         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full blur-xl"></div>
                     </div>
-                    <div className="relative z-10 flex items-center gap-6">
-                        <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-4 border-white/20">
-                            <Shield className="w-10 h-10 text-white" />
+                    <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-4 border-white/20">
+                            <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                         </div>
-                        <div>
-                            <div className="flex items-center gap-4 mb-2">
-                                <h2 className="text-4xl font-bold text-white">Admin Dashboard</h2>
-                                <span className="px-4 py-2 rounded-full text-sm font-semibold bg-white/20 text-white backdrop-blur-sm">
+                        <div className="flex-1">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
+                                <h2 className="text-2xl sm:text-4xl font-bold text-white">Admin Dashboard</h2>
+                                <span className="px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-semibold bg-white/20 text-white backdrop-blur-sm self-start">
                                     Platform Administrator
                                 </span>
                             </div>
-                            <p className="text-white/90 text-lg">Welcome back, {user.username}! Manage the HAU Eco-Quest platform.</p>
+                            <p className="text-white/90 text-sm sm:text-lg">Welcome back, {user.username}! Manage the HAU Eco-Quest platform.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Navigation Tabs */}
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 inline-flex items-center gap-3 mb-8 flex-wrap">
+                <div className="bg-white p-2 sm:p-3 rounded-xl shadow-sm border border-gray-200 flex flex-wrap items-center gap-2 sm:gap-3 mb-6 sm:mb-8 overflow-x-auto">
                     <TabButton id="overview" label="Overview" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="users" label="Users" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="quests" label="Quests" icon={<BookOpen className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="community" label="Community" icon={<FileText className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="submissions" label="Submissions" icon={<FileCheck className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
-                    <TabButton id="notifications" label="Notifications" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <TabButton id="notifications" label="Notifications" icon={<Bell className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
 
                 {/* Tab Content */}

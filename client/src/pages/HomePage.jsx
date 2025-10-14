@@ -96,10 +96,10 @@ export default function HomePage({ onPageChange }) {
           </svg>
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-16 md:py-24 lg:py-32">
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-20 md:py-24 lg:py-32">
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
             <div className="text-center md:text-left z-10">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black mb-4 md:mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black mb-4 md:mb-6 leading-tight pt-4 sm:pt-0">
                 IMAGINE A PLACE...
               </h1>
               <p className="text-base sm:text-lg md:text-xl mb-6 md:mb-8 text-green-50 leading-relaxed">

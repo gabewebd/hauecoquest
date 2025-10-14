@@ -212,9 +212,9 @@ const ContactQuestMasters = ({ onPageChange }) => {
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <img
-                      src="/vite.svg"
+                      src="/assets/hau-eco-quest-logo.png"
                       alt="HAU Eco-Quest Logo"
-                      className="h-8 w-8 bg-white rounded-full p-1"
+                      className="h-8 w-8"
                     />
                     <h3 className="text-2xl font-bold">HAU Eco-Quest</h3>
                   </div>

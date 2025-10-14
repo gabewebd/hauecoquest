@@ -1,7 +1,7 @@
 //Josh Andrei Aguiluz
 import React, { useState, useEffect } from 'react';
 import { useUser } from "../context/UserContext";
-import { BookOpen, PlusCircle, User, Settings, BarChart, TreePine, Recycle, Droplets, Sun, Zap, Activity, Badge, Trophy, CheckCircle, Clock, List, ChevronRight, Award, UserCircle, Users, Crown, Building, Target, MapPin, Calendar, Search, TrendingUp, TrendingDown, XCircle, Eye, FileText, Heart, MessageCircle, Edit, Trash2, Share2, X, Save } from 'lucide-react';
+import { BookOpen, PlusCircle, User, Settings, BarChart, TreePine, Recycle, Droplets, Sun, Zap, Activity, Badge, Trophy, CheckCircle, Clock, List, ChevronRight, Award, UserCircle, Users, Crown, Building, Target, MapPin, Calendar, Search, TrendingUp, TrendingDown, XCircle, Eye, FileText, Heart, MessageCircle, Edit, Trash2, Share2, X, Save, Bell } from 'lucide-react';
 
 // Helper to get avatar image
 const getPostAvatarImage = (avatarTheme) => {
@@ -17,25 +17,25 @@ const getPostAvatarImage = (avatarTheme) => {
 // --- ALL HELPER COMPONENTS ARE NOW DEFINED AT THE TOP LEVEL ---
 
 const StatCard = ({ icon, value, label, change }) => (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
-        <div className="flex items-center gap-4">
+    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
+        <div className="flex items-center gap-3 sm:gap-4">
             {icon}
             <div>
-                <p className="text-3xl font-bold text-gray-800">{value}</p>
-                <p className="text-sm text-gray-600 font-semibold">{label}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-800">{value}</p>
+                <p className="text-xs sm:text-sm text-gray-600 font-semibold">{label}</p>
             </div>
         </div>
         {change && <p className="text-xs text-green-600 mt-2 font-semibold">{change}</p>}
     </div>
 );
 const QuickLink = ({ icon, title, subtitle, onClick }) => (
-    <button onClick={onClick} className="w-full flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 transition-all text-left">
-        <div className="bg-gray-100 p-3 rounded-lg">{icon}</div>
+    <button onClick={onClick} className="w-full flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl hover:bg-gray-50 transition-all text-left">
+        <div className="bg-gray-100 p-2 sm:p-3 rounded-lg">{icon}</div>
         <div className="flex-1">
-            <p className="font-semibold text-gray-800">{title}</p>
+            <p className="font-semibold text-sm sm:text-base text-gray-800">{title}</p>
             <p className="text-xs text-gray-600">{subtitle}</p>
         </div>
-        <ChevronRight className="w-5 h-5 text-gray-400" />
+        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
     </button>
 );
 const ActivityItem = ({ icon, title, subtitle, time, points }) => (
@@ -52,29 +52,29 @@ const ActivityItem = ({ icon, title, subtitle, time, points }) => (
     </div>
 );
 const QuestStat = ({ icon, value, label }) => (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 text-center hover:shadow-md transition-all">
-        <div className="mx-auto w-fit mb-3">{icon}</div>
-        <p className="text-3xl font-bold text-gray-800">{value}</p>
-        <p className="text-sm text-gray-600 font-semibold">{label}</p>
+    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 text-center hover:shadow-md transition-all">
+        <div className="mx-auto w-fit mb-2 sm:mb-3">{icon}</div>
+        <p className="text-2xl sm:text-3xl font-bold text-gray-800">{value}</p>
+        <p className="text-xs sm:text-sm text-gray-600 font-semibold">{label}</p>
     </div>
 );
 const GoalItem = ({ title, value, progress, label }) => (
-    <div className="mb-4 p-4 bg-white rounded-xl border border-gray-200">
-        <div className="flex justify-between font-semibold text-sm mb-2">
+    <div className="mb-4 p-3 sm:p-4 bg-white rounded-xl border border-gray-200">
+        <div className="flex justify-between font-semibold text-xs sm:text-sm mb-2">
             <p className="text-gray-800">{title}</p>
             <p className="text-green-600">{value}</p>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
-            <div className="bg-gradient-to-r from-orange-400 to-orange-500 h-3 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+        <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3 mb-2">
+            <div className="bg-gradient-to-r from-orange-400 to-orange-500 h-2 sm:h-3 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
         </div>
         <p className="text-xs text-gray-600">{label}</p>
     </div>
 );
 const CategoryProgress = ({ icon, title, value, progress }) => (
-    <div className="mb-4 p-4 bg-white rounded-xl border border-gray-200">
-        <div className="flex items-center gap-3 mb-2">
-            <div className="w-6">{icon}</div>
-            <p className="font-semibold text-sm flex-1 text-gray-800">{title}</p>
+    <div className="mb-4 p-3 sm:p-4 bg-white rounded-xl border border-gray-200">
+        <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <div className="w-5 sm:w-6">{icon}</div>
+            <p className="font-semibold text-xs sm:text-sm flex-1 text-gray-800">{title}</p>
             <p className="text-xs text-gray-600">{value}</p>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
@@ -83,10 +83,10 @@ const CategoryProgress = ({ icon, title, value, progress }) => (
     </div>
 );
 const ImpactCard = ({ icon, value, label, color }) => (
-    <div className={`p-6 rounded-2xl text-center shadow-lg ${color}`}>
-        <div className="mx-auto w-fit mb-3">{icon}</div>
-        <p className="text-2xl font-bold text-white">{value}</p>
-        <p className="text-sm text-white/90">{label}</p>
+    <div className={`p-4 sm:p-6 rounded-2xl text-center shadow-lg ${color}`}>
+        <div className="mx-auto w-fit mb-2 sm:mb-3">{icon}</div>
+        <p className="text-xl sm:text-2xl font-bold text-white">{value}</p>
+        <p className="text-xs sm:text-sm text-white/90">{label}</p>
     </div>
 );
 
@@ -298,7 +298,7 @@ const AchievementSection = ({ achievements, challengeBadges = [] }) => (
                     <p className="text-gray-500">No badges earned yet. Complete challenges to earn badges!</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {challengeBadges.map((badge, index) => (
                         <div key={index} className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 text-center hover:shadow-md transition-all">
                             {badge.image_url ? (
@@ -380,13 +380,13 @@ const OverviewTabContent = ({ dashboardData, onPageChange, userData }) => {
             </div>
             
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <StatCard icon={<CheckCircle className="w-8 h-8 text-green-500" />} value={dashboardData.questsCompleted} label="Quests Completed" change="+1 this month" />
                 <StatCard icon={<Target className="w-8 h-8 text-purple-500" />} value={dashboardData.challengesCompleted || 0} label="Challenges Completed" change="+0 this month" />
                 <StatCard icon={<Trophy className="w-8 h-8 text-yellow-500" />} value={dashboardData.ecoPoints} label="Eco Points" change="+150 this week" />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                     <h3 className="text-xl font-bold mb-4">Quick Adventures</h3>
                     <div className="space-y-3">
@@ -2013,14 +2013,14 @@ const TabButton = ({ id, label, icon, activeTab, setActiveTab }) => (
     <button
         data-tab={id}
         onClick={() => setActiveTab(id)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all duration-200 text-sm ${
+        className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-full font-semibold transition-all duration-200 text-xs sm:text-sm ${
             activeTab === id
                 ? 'bg-green-500 text-white shadow-md'
                 : 'bg-white text-gray-600 hover:bg-gray-100'
         }`}
     >
         {icon}
-        {label}
+        <span className="hidden sm:inline">{label}</span>
     </button>
 );
 
@@ -2032,26 +2032,26 @@ const PendingApprovalCard = ({ user }) => {
         <Crown className="w-8 h-8 text-red-500" />;
     
     return (
-        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-6 rounded-2xl shadow-lg mb-8 text-white">
-            <div className="flex items-center gap-6">
-                <div className="bg-white/20 p-4 rounded-full">
+        <div className="bg-gradient-to-r from-yellow-400 to-orange-500 p-4 sm:p-6 rounded-2xl shadow-lg mb-6 sm:mb-8 text-white">
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                <div className="bg-white/20 p-3 sm:p-4 rounded-full">
                     {roleIcon}
                 </div>
-                <div className="flex-1">
-                    <h2 className="text-2xl font-bold mb-2">🕐 Role Request Pending</h2>
-                    <p className="text-white/90 mb-1">
+                <div className="flex-1 text-center sm:text-left">
+                    <h2 className="text-lg sm:text-2xl font-bold mb-2">🕐 Role Request Pending</h2>
+                    <p className="text-white/90 mb-1 text-sm sm:text-base">
                         Your <strong>{roleTitle}</strong> request is being reviewed by our administrators.
                     </p>
-                    <p className="text-white/80 text-sm">
+                    <p className="text-white/80 text-xs sm:text-sm">
                         You'll receive access to additional features once your request is approved.
                         In the meantime, you can still participate in quests and earn points!
                     </p>
                 </div>
                 <div className="text-center">
-                    <div className="bg-white/20 px-4 py-2 rounded-full mb-2">
-                        <Clock className="w-6 h-6 mx-auto" />
+                    <div className="bg-white/20 px-3 sm:px-4 py-2 rounded-full mb-2">
+                        <Clock className="w-5 h-5 sm:w-6 sm:h-6 mx-auto" />
                     </div>
-                    <p className="text-sm font-semibold">Awaiting Approval</p>
+                    <p className="text-xs sm:text-sm font-semibold">Awaiting Approval</p>
                 </div>
             </div>
         </div>
@@ -2090,20 +2090,20 @@ const RoleRequestCard = ({ user, onRequestRole }) => {
 
     return (
         <>
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 rounded-xl shadow-sm mb-6 text-white sticky top-20 z-30">
-                <div className="flex items-center gap-4">
-                    <div className="bg-white/20 p-3 rounded-lg">
-                        <Settings className="w-6 h-6 text-white" />
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 sm:p-4 rounded-xl shadow-sm mb-4 sm:mb-6 text-white sticky top-16 sm:top-20 z-30">
+                <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+                    <div className="bg-white/20 p-2 sm:p-3 rounded-lg">
+                        <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                     </div>
-                    <div className="flex-1">
-                        <h3 className="text-lg font-bold mb-1">🚀 Upgrade Your Account</h3>
-                        <p className="text-white/90 text-sm">
+                    <div className="flex-1 text-center sm:text-left">
+                        <h3 className="text-base sm:text-lg font-bold mb-1">🚀 Upgrade Your Account</h3>
+                        <p className="text-white/90 text-xs sm:text-sm">
                             Ready for more responsibilities? Request Partner or Admin access!
                         </p>
                     </div>
                     <button
                         onClick={() => setShowModal(true)}
-                        className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg font-semibold transition text-sm"
+                        className="bg-white/20 hover:bg-white/30 px-3 sm:px-4 py-2 rounded-lg font-semibold transition text-sm w-full sm:w-auto"
                     >
                         Request Role
                     </button>
@@ -2111,11 +2111,11 @@ const RoleRequestCard = ({ user, onRequestRole }) => {
             </div>
 
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-                        <div className="p-6">
-                            <h3 className="text-2xl font-bold mb-4">Request Role Upgrade</h3>
-                            <p className="text-gray-600 mb-6">
+                <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2 sm:p-4">
+                    <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full">
+                        <div className="p-4 sm:p-6">
+                            <h3 className="text-lg sm:text-2xl font-bold mb-4">Request Role Upgrade</h3>
+                            <p className="text-gray-600 mb-6 text-sm sm:text-base">
                                 Choose the role you'd like to request. Your request will be reviewed by administrators.
                             </p>
 
@@ -2206,35 +2206,35 @@ const getHeaderTheme = (themeName) => {
 };
 
 const DashboardHeader = ({ userData, levelProgress, avatarStyle, headerTheme }) => (
-    <div className={`bg-gradient-to-r ${headerTheme} p-8 rounded-xl shadow-sm mb-8 relative overflow-hidden`}>
+    <div className={`bg-gradient-to-r ${headerTheme} p-4 sm:p-8 rounded-xl shadow-sm mb-6 sm:mb-8 relative overflow-hidden`}>
         <div className="absolute inset-0 opacity-10">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-2xl"></div>
             <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full blur-xl"></div>
         </div>
-        <div className="relative z-10 flex flex-col sm:flex-row items-center gap-6">
+        <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
             <div className="relative">
-                <div className={`w-24 h-24 rounded-full ${avatarStyle.bg} flex items-center justify-center shadow-lg border-4 border-white/20`}>
-                    <UserCircle className={`w-20 h-20 ${avatarStyle.color}`} />
+                <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full ${avatarStyle.bg} flex items-center justify-center shadow-lg border-4 border-white/20`}>
+                    <UserCircle className={`w-16 h-16 sm:w-20 sm:h-20 ${avatarStyle.color}`} />
                 </div>
-                <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white text-sm font-bold w-10 h-10 rounded-full border-4 border-white flex items-center justify-center shadow-lg">
+                <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 bg-gradient-to-r from-orange-400 to-orange-500 text-white text-xs sm:text-sm font-bold w-8 h-8 sm:w-10 sm:h-10 rounded-full border-4 border-white flex items-center justify-center shadow-lg">
                     {userData.level}
                 </div>
             </div>
             <div className="flex-1 text-center sm:text-left">
-                <div className="flex items-center gap-4 mb-3">
-                    <h2 className="text-4xl font-bold text-white">Welcome back, {userData.name}! 👋</h2>
-                    <span className="px-4 py-2 rounded-full text-sm font-semibold bg-white/20 text-white backdrop-blur-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
+                    <h2 className="text-2xl sm:text-4xl font-bold text-white">Welcome back, {userData.name}! 👋</h2>
+                    <span className="px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-semibold bg-white/20 text-white backdrop-blur-sm self-center sm:self-auto">
                         Environmental Champion
                     </span>
                 </div>
-                <p className="text-white/90 text-lg mb-4">{userData.title}</p>
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
-                    <div className="flex justify-between text-sm text-white/90 mb-2">
+                <p className="text-white/90 text-sm sm:text-lg mb-4">{userData.title}</p>
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-3 sm:p-4">
+                    <div className="flex justify-between text-xs sm:text-sm text-white/90 mb-2">
                         <span className="font-semibold">Progress to Level {userData.level + 1}</span>
                         <span className="font-bold">{userData.points % 100} / 100 eco-points</span>
                     </div>
-                    <div className="w-full bg-white/30 rounded-full h-3">
-                        <div className="bg-white h-3 rounded-full transition-all duration-500 shadow-lg" style={{ width: `${Math.min(levelProgress || 0, 100)}%` }}></div>
+                    <div className="w-full bg-white/30 rounded-full h-2 sm:h-3">
+                        <div className="bg-white h-2 sm:h-3 rounded-full transition-all duration-500 shadow-lg" style={{ width: `${Math.min(levelProgress || 0, 100)}%` }}></div>
                     </div>
                 </div>
             </div>
@@ -2397,7 +2397,7 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
     
     return (
         <div className="font-sans bg-gray-50 text-gray-800 min-h-screen">
-            <main className="container mx-auto px-6 pt-24 pb-12">
+            <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-8 sm:pb-12">
                 {user.requested_role && !user.is_approved && (
                     <PendingApprovalCard user={user} />
                 )}
@@ -2409,10 +2409,10 @@ const DashboardPage = ({ onPageChange }) => { // Added onPageChange prop
                 <DashboardHeader userData={userData} levelProgress={levelProgress} avatarStyle={avatarStyle} headerTheme={headerTheme} />
                 
                 {/* Navigation Tabs */}
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 inline-flex items-center gap-3 mb-8">
+                <div className="bg-white p-2 sm:p-3 rounded-xl shadow-sm border border-gray-200 flex items-center gap-2 sm:gap-3 mb-6 sm:mb-8 overflow-x-auto">
                     <TabButton id="overview" label="Overview" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="achievements" label="Achievements" icon={<Trophy className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
-                    <TabButton id="notifications" label="Notifications" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <TabButton id="notifications" label="Notifications" icon={<Bell className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
 
                 {/* Tab Content */}

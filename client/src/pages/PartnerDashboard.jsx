@@ -5,18 +5,18 @@ import {
     BookOpen, BarChart, Users, TrendingUp, Plus, Edit, Trash2,
     Search, Calendar, MapPin, Award, Target, CheckCircle, Clock,
     FileText, Share2, Eye, MessageCircle, Heart, X, Save, Camera,
-    TrendingDown, Activity, Zap
+    TrendingDown, Activity, Zap, Bell
 } from 'lucide-react';
 
 // --- HELPER COMPONENTS ---
 
 const StatCard = ({ icon, value, label, bgColor, trend }) => (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
-        <div className="flex items-center gap-4">
-            <div className={`${bgColor} p-4 rounded-xl`}>{icon}</div>
+    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all">
+        <div className="flex items-center gap-3 sm:gap-4">
+            <div className={`${bgColor} p-3 sm:p-4 rounded-xl`}>{icon}</div>
             <div className="flex-1">
-                <p className="text-3xl font-bold text-gray-800">{value}</p>
-                <p className="text-sm text-gray-600 font-semibold">{label}</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-800">{value}</p>
+                <p className="text-xs sm:text-sm text-gray-600 font-semibold">{label}</p>
                 {trend && <p className="text-xs text-green-600 font-semibold mt-2">↑ {trend}</p>}
             </div>
         </div>
@@ -26,15 +26,15 @@ const StatCard = ({ icon, value, label, bgColor, trend }) => (
 const TabButton = ({ id, label, icon, activeTab, setActiveTab, badge }) => (
     <button
         onClick={() => setActiveTab(id)}
-        className={`relative flex items-center gap-3 px-6 py-3 rounded-xl font-semibold transition-all text-sm ${activeTab === id
+        className={`relative flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-semibold transition-all text-xs sm:text-sm ${activeTab === id
                 ? 'bg-green-500 text-white shadow-md'
                 : 'bg-white text-gray-600 hover:bg-gray-50 hover:text-green-600'
             }`}
     >
         {icon}
-        {label}
+        <span className="hidden sm:inline">{label}</span>
         {badge && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center font-bold">
                 {badge}
             </span>
         )}
@@ -52,19 +52,19 @@ const SimpleBarChart = ({ data, title, color = 'green' }) => {
     };
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">{title}</h3>
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4">{title}</h3>
             <div className="space-y-3">
                 {data.map((item, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                        <div className="w-20 text-sm font-semibold text-gray-700">{item.label}</div>
-                        <div className="flex-1 bg-gray-200 rounded-full h-4 relative overflow-hidden">
+                    <div key={index} className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-16 sm:w-20 text-xs sm:text-sm font-semibold text-gray-700">{item.label}</div>
+                        <div className="flex-1 bg-gray-200 rounded-full h-3 sm:h-4 relative overflow-hidden">
                             <div 
                                 className={`h-full ${colorClasses[color]} rounded-full transition-all duration-500`}
                                 style={{ width: `${(item.value / maxValue) * 100}%` }}
                             ></div>
                         </div>
-                        <div className="w-12 text-sm font-bold text-gray-800">{item.value}</div>
+                        <div className="w-10 sm:w-12 text-xs sm:text-sm font-bold text-gray-800">{item.value}</div>
                     </div>
                 ))}
             </div>
@@ -85,9 +85,9 @@ const LineChart = ({ data, title, color = 'green' }) => {
     };
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">{title}</h3>
-            <div className="h-32 relative">
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4">{title}</h3>
+            <div className="h-24 sm:h-32 relative">
                 <svg className="w-full h-full" viewBox="0 0 300 100">
                     <polyline
                         fill="none"
@@ -132,14 +132,14 @@ const DonutChart = ({ data, title, size = 120 }) => {
     const colors = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
     
     return (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">{title}</h3>
-            <div className="flex items-center gap-6">
-                <div className="relative" style={{ width: size, height: size }}>
-                    <svg width={size} height={size} className="transform -rotate-90">
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4">{title}</h3>
+            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                <div className="relative" style={{ width: size * 0.8, height: size * 0.8 }}>
+                    <svg width={size * 0.8} height={size * 0.8} className="transform -rotate-90">
                         {data.map((item, index) => {
                             const percentage = (item.value / total) * 100;
-                            const circumference = 2 * Math.PI * 45;
+                            const circumference = 2 * Math.PI * 36;
                             const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
                             const strokeDashoffset = -cumulativePercentage * circumference / 100;
                             
@@ -148,12 +148,12 @@ const DonutChart = ({ data, title, size = 120 }) => {
                             return (
                                 <circle
                                     key={index}
-                                    cx="60"
-                                    cy="60"
-                                    r="45"
+                                    cx="48"
+                                    cy="48"
+                                    r="36"
                                     fill="none"
                                     stroke={colors[index % colors.length]}
-                                    strokeWidth="20"
+                                    strokeWidth="16"
                                     strokeDasharray={strokeDasharray}
                                     strokeDashoffset={strokeDashoffset}
                                     className="transition-all duration-500"
@@ -163,7 +163,7 @@ const DonutChart = ({ data, title, size = 120 }) => {
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-gray-800">{total}</div>
+                            <div className="text-lg sm:text-2xl font-bold text-gray-800">{total}</div>
                             <div className="text-xs text-gray-500">Total</div>
                         </div>
                     </div>
@@ -175,8 +175,8 @@ const DonutChart = ({ data, title, size = 120 }) => {
                                 className="w-3 h-3 rounded-full" 
                                 style={{ backgroundColor: colors[index % colors.length] }}
                             ></div>
-                            <span className="text-sm text-gray-700">{item.label}</span>
-                            <span className="text-sm font-semibold text-gray-800">{item.value}</span>
+                            <span className="text-xs sm:text-sm text-gray-700">{item.label}</span>
+                            <span className="text-xs sm:text-sm font-semibold text-gray-800">{item.value}</span>
                         </div>
                     ))}
                 </div>
@@ -193,17 +193,17 @@ const GroupedBarChart = ({ data, title, categories, colors = ['#3B82F6', '#10B98
     const categorySpacing = 60;
     
     return (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">{title}</h3>
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+            <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-4">{title}</h3>
             <div className="flex items-center justify-between mb-4">
-                <div className="flex gap-4">
+                <div className="flex gap-2 sm:gap-4 flex-wrap">
                     {categories.map((category, index) => (
                         <div key={index} className="flex items-center gap-2">
                             <div 
                                 className="w-3 h-3 rounded" 
                                 style={{ backgroundColor: colors[index] }}
                             ></div>
-                            <span className="text-sm text-gray-600">{category}</span>
+                            <span className="text-xs sm:text-sm text-gray-600">{category}</span>
                         </div>
                     ))}
                 </div>
@@ -359,16 +359,16 @@ const QuestModal = ({ quest, onClose, onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">{quest ? 'Edit Quest' : 'Create New Quest'}</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                    <h3 className="text-lg sm:text-2xl font-bold">{quest ? 'Edit Quest' : 'Create New Quest'}</h3>
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Quest Title</label>
                         <input
@@ -381,7 +381,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold mb-2">Category</label>
                             <select
@@ -410,7 +410,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold mb-2">Points Reward</label>
                             <input
@@ -434,7 +434,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold mb-2">Location</label>
                             <input
@@ -539,7 +539,7 @@ const QuestModal = ({ quest, onClose, onSave }) => {
                     </div>
 
 
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
                         <button
                             type="submit"
                             className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2"
@@ -594,16 +594,16 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">{challenge ? 'Edit Challenge' : 'Create Community Challenge'}</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                    <h3 className="text-lg sm:text-2xl font-bold">{challenge ? 'Edit Challenge' : 'Create Community Challenge'}</h3>
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Challenge Title</label>
                         <input
@@ -628,7 +628,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold mb-2">Target Goal</label>
                             <input
@@ -655,7 +655,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                         </div>
                         </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold mb-2">Duration</label>
                             <input
@@ -713,7 +713,7 @@ const ChallengeModal = ({ challenge, onClose, onSave }) => {
                         )}
                     </div>
 
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
                         <button
                             type="submit"
                             className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2"
@@ -750,16 +750,16 @@ const PostModal = ({ post, onClose, onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                    <h3 className="text-2xl font-bold">{post ? 'Edit Post' : 'Create New Post'}</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+                    <h3 className="text-lg sm:text-2xl font-bold">{post ? 'Edit Post' : 'Create New Post'}</h3>
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
                         <X className="w-5 h-5" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
                     <div>
                         <label className="block text-sm font-semibold mb-2">Post Title</label>
                         <input
@@ -821,7 +821,7 @@ const PostModal = ({ post, onClose, onSave }) => {
                         <p className="text-xs text-gray-500 mt-1">Optional: Upload an image for this post</p>
                     </div>
 
-                    <div className="flex gap-3 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
                         <button
                             type="submit"
                             className="flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600 transition font-semibold flex items-center justify-center gap-2"
@@ -2102,35 +2102,35 @@ const PartnerDashboard = () => {
 
     return (
         <div className="font-sans bg-gray-50 text-gray-800 min-h-screen">
-            <main className="container mx-auto px-6 pt-24 pb-12">
+            <main className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-24 pb-8 sm:pb-12">
                 {/* Header */}
-                <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-8 rounded-xl shadow-sm mb-8 text-white relative overflow-hidden">
+                <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-4 sm:p-8 rounded-xl shadow-sm mb-6 sm:mb-8 text-white relative overflow-hidden">
                     <div className="absolute inset-0 opacity-10">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full blur-2xl"></div>
                         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full blur-xl"></div>
                     </div>
-                    <div className="relative z-10 flex items-center gap-6">
-                        <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-4 border-white/20">
-                            <BookOpen className="w-10 h-10 text-white" />
+                    <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-4 border-white/20">
+                            <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                         </div>
-                        <div>
-                            <div className="flex items-center gap-4 mb-2">
-                                <h2 className="text-4xl font-bold text-white">Partner Dashboard</h2>
-                                <span className="px-4 py-2 rounded-full text-sm font-semibold bg-white/20 text-white backdrop-blur-sm">
+                        <div className="flex-1 text-center sm:text-left">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
+                                <h2 className="text-2xl sm:text-4xl font-bold text-white">Partner Dashboard</h2>
+                                <span className="px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-semibold bg-white/20 text-white backdrop-blur-sm self-center sm:self-auto">
                                     Environmental Partner
                                 </span>
                             </div>
-                            <p className="text-white/90 text-lg">Welcome back, {user.username}! Manage your environmental initiatives.</p>
+                            <p className="text-white/90 text-sm sm:text-lg">Welcome back, {user.username}! Manage your environmental initiatives.</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Navigation Tabs */}
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 inline-flex items-center gap-3 mb-8">
+                <div className="bg-white p-2 sm:p-3 rounded-xl shadow-sm border border-gray-200 flex flex-wrap items-center gap-2 sm:gap-3 mb-6 sm:mb-8 overflow-x-auto">
                     <TabButton id="overview" label="Overview" icon={<BarChart className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                     <TabButton id="quests" label="My Quests" icon={<BookOpen className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} badge={quests.filter(q => q.isActive).length} />
                     <TabButton id="community" label="Community" icon={<FileText className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
-                    <TabButton id="notifications" label="Notifications" icon={<Users className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
+                    <TabButton id="notifications" label="Notifications" icon={<Bell className="w-4 h-4" />} activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
 
                 {/* Tab Content */}

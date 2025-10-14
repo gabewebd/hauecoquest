@@ -21,34 +21,34 @@ import TiktokIcon from '../img/Tiktok.png';
 
 // AchievementSection component for Badge Collection (same as DashboardPage.jsx)
 const AchievementSection = ({ achievements, challengeBadges = [] }) => (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <h3 className="text-xl font-bold mb-4">Badge Collection</h3>
+    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
+        <h3 className="text-lg sm:text-xl font-bold mb-4">Badge Collection</h3>
         {challengeBadges.length === 0 ? (
-            <div className="text-center py-8">
-                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="text-center py-6 sm:py-8">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                     🏆
                 </div>
-                <p className="text-gray-500">No badges earned yet. Complete challenges to earn badges!</p>
+                <p className="text-sm sm:text-base text-gray-500">No badges earned yet. Complete challenges to earn badges!</p>
             </div>
         ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {challengeBadges.map((badge, index) => (
-                    <div key={index} className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-sm border border-green-200 text-center hover:shadow-md transition-all">
+                    <div key={index} className="bg-gradient-to-br from-green-50 to-green-100 p-4 sm:p-6 rounded-xl shadow-sm border border-green-200 text-center hover:shadow-md transition-all">
                         {badge.image_url ? (
                             <img 
                                 src={badge.image_url} 
                                 alt={badge.name || 'Challenge Badge'} 
-                                className="w-20 h-20 mx-auto mb-4 rounded-lg object-cover shadow-md"
+                                className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 rounded-lg object-cover shadow-md"
                             />
                         ) : (
-                            <div className="w-20 h-20 mx-auto mb-4 bg-green-200 rounded-lg flex items-center justify-center text-3xl">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 sm:mb-4 bg-green-200 rounded-lg flex items-center justify-center text-2xl sm:text-3xl">
                                 🌳
                             </div>
                         )}
-                        <h4 className="font-bold text-lg mb-2 text-green-800">
+                        <h4 className="font-bold text-base sm:text-lg mb-2 text-green-800">
                             {badge.name === 'Plant Trees Challenge' ? 'Tree Planter' : (badge.name || 'Challenge Badge')}
                         </h4>
-                        <p className="text-green-600 text-sm mb-2">
+                        <p className="text-green-600 text-xs sm:text-sm mb-2">
                             {badge.name === 'Plant Trees Challenge' ? 'Earned by planting trees' : (badge.description || 'Earned from completing a challenge')}
                         </p>
                         <p className="text-xs text-green-500">
@@ -458,25 +458,25 @@ const ProfilePage = ({ onPageChange, userId }) => {
   }
 
   return (
-    <div className="pt-20 flex flex-col min-h-screen">
+    <div className="pt-16 sm:pt-20 flex flex-col min-h-screen">
       {/* Banner */}
       <div className="relative flex justify-center">
         <div 
           className="bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `url(${headerImages[displayUser?.header_theme || headerTheme] || headerImages.orange})`,
-            height: '400px',
+            height: '300px',
             width: '1200px', // Fixed width to match header image aspect ratio
             maxWidth: '100%' // Ensure it doesn't exceed screen width
           }}
         >
         </div>
         {/* Profile Card */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-20 w-full max-w-4xl px-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 flex items-center relative">
+        <div className="absolute left-1/2 transform -translate-x-1/2 -bottom-16 sm:-bottom-20 w-full max-w-4xl px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 flex flex-col sm:flex-row items-center relative">
             {/* Avatar */}
-            <div className="relative">
-              <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
+            <div className="relative mb-4 sm:mb-0">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
                 {currentAvatar?.image ? (
                   <img 
                     src={currentAvatar.image} 
@@ -489,7 +489,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
                   />
                 ) : null}
                 <div className={`w-full h-full ${currentAvatar?.bg} flex justify-center items-center`} style={{display: currentAvatar?.image ? 'none' : 'flex'}}>
-                <UserCircle className={`w-20 h-20 ${currentAvatar?.color}`} />
+                <UserCircle className={`w-16 h-16 sm:w-20 sm:h-20 ${currentAvatar?.color}`} />
                 </div>
               </div>
               <div className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
@@ -498,10 +498,10 @@ const ProfilePage = ({ onPageChange, userId }) => {
             </div>
 
             {/* Info */}
-            <div className="ml-6 flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-2xl font-bold">{displayUser?.username || "Guest"}</h2>
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+            <div className="ml-0 sm:ml-6 flex-1 text-center sm:text-left">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-2">
+                <h2 className="text-xl sm:text-2xl font-bold">{displayUser?.username || "Guest"}</h2>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold self-center sm:self-auto ${
                   displayUser?.role === 'admin' 
                     ? 'bg-red-100 text-red-700' 
                     : displayUser?.role === 'partner'
@@ -511,21 +511,21 @@ const ProfilePage = ({ onPageChange, userId }) => {
                   {displayUser?.role === 'admin' ? 'Admin' : displayUser?.role === 'partner' ? 'Partner' : 'Student'}
                 </span>
               </div>
-              <p className="text-gray-600">{displayUser?.department || displayUser?.hau_affiliation || "HAU Student"}</p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm sm:text-base text-gray-600">{displayUser?.department || displayUser?.hau_affiliation || "HAU Student"}</p>
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
                 Start making a difference on campus.
               </p>
 
               {/* Stats - Show for all users */}
               {(displayUser?.role === 'user' || !displayUser?.role) && (
-              <div className="flex gap-6 mt-4 text-sm text-gray-600">
-                <div className="flex items-center gap-1">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 mt-4 text-xs sm:text-sm text-gray-600">
+                <div className="flex items-center gap-1 justify-center sm:justify-start">
                     <Trophy className="w-4 h-4 text-yellow-500" /> {displayUser?.eco_score || displayUser?.points || 0} points
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 justify-center sm:justify-start">
                   <Award className="w-4 h-4 text-orange-500" /> {displayUser?.approvedQuestCount || displayUser?.questsCompleted?.length || userQuests.filter(sub => sub.status === 'approved').length} quests completed
                 </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 justify-center sm:justify-start">
                     <Award className="w-4 h-4 text-purple-500" /> {displayUser?.approvedChallengeCount || userChallengeSubmissions.filter(sub => sub.status === 'approved').length} challenges completed
               </div>
                 </div>
@@ -534,7 +534,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
 
             {/* Actions - Only show edit button for own profile */}
             {isOwnProfile && (
-              <div className="flex gap-2 absolute top-4 right-4">
+              <div className="flex gap-2 absolute top-2 sm:top-4 right-2 sm:right-4">
                 <button
                   onClick={() => { 
                     setSelectedAvatar(displayUser?.avatar_theme || "Leaf");
@@ -543,9 +543,9 @@ const ProfilePage = ({ onPageChange, userId }) => {
                     setEditTab("profile"); 
                     setIsEditOpen(true); 
                   }}
-                  className="px-3 py-1 bg-gray-100 rounded-lg text-sm flex items-center gap-1 hover:bg-gray-200"
+                  className="px-2 sm:px-3 py-1 bg-gray-100 rounded-lg text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-200"
                 >
-                  <Edit className="w-4 h-4" /> Edit Profile
+                  <Edit className="w-3 h-3 sm:w-4 sm:h-4" /> <span className="hidden sm:inline">Edit Profile</span>
                 </button>
               </div>
             )}
@@ -554,15 +554,15 @@ const ProfilePage = ({ onPageChange, userId }) => {
       </div>
 
       {/* Tabs Section */}
-      <div className="mt-28 max-w-4xl mx-auto px-4 flex-grow">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-3 mb-6">
-          <div className="flex justify-center gap-3">
+      <div className="mt-20 sm:mt-28 max-w-4xl mx-auto px-4 flex-grow">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-2 sm:p-3 mb-4 sm:mb-6">
+          <div className="flex justify-center gap-2 sm:gap-3 overflow-x-auto">
           {(displayUser?.role === 'user' || !displayUser?.role) ? 
               ["Activity", "Photo History", "Achievements"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all duration-200 text-sm ${
+                  className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-full font-semibold transition-all duration-200 text-xs sm:text-sm whitespace-nowrap ${
                   activeTab === tab
                       ? "bg-green-500 text-white shadow-md"
                       : "bg-white text-gray-600 hover:bg-gray-100"
@@ -575,7 +575,7 @@ const ProfilePage = ({ onPageChange, userId }) => {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-all duration-200 text-sm ${
+                  className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-full font-semibold transition-all duration-200 text-xs sm:text-sm whitespace-nowrap ${
                   activeTab === tab
                       ? "bg-green-500 text-white shadow-md"
                       : "bg-white text-gray-600 hover:bg-gray-100"
@@ -589,10 +589,10 @@ const ProfilePage = ({ onPageChange, userId }) => {
         </div>
 
         {/* Content */}
-        <div className="py-10">
+        <div className="py-6 sm:py-10">
           {loading ? (
-            <div className="flex justify-center items-center py-12">
-              <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="flex justify-center items-center py-8 sm:py-12">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
             <>
@@ -618,10 +618,10 @@ const ProfilePage = ({ onPageChange, userId }) => {
                         return (
                           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200">
                             {/* Post Header */}
-                            <div className="p-6 pb-4">
-                              <div className="flex items-center justify-between mb-3">
+                            <div className="p-4 sm:p-6 pb-4">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-2">
                                 <div>
-                                  <h4 className="font-semibold text-gray-900">{post.author?.username || 'Unknown User'}</h4>
+                                  <h4 className="font-semibold text-gray-900 text-sm sm:text-base">{post.author?.username || 'Unknown User'}</h4>
                                   <p className="text-xs text-gray-500">{new Date(post.created_at).toLocaleDateString()}</p>
                     </div>
                                 <div>
@@ -631,8 +631,8 @@ const ProfilePage = ({ onPageChange, userId }) => {
                         </div>
                           </div>
                               
-                              <h3 className="font-bold text-xl mb-3 text-gray-900">{post.title}</h3>
-                              <p className="text-gray-700 mb-4 leading-relaxed whitespace-pre-wrap">{displayText}</p>
+                              <h3 className="font-bold text-lg sm:text-xl mb-3 text-gray-900">{post.title}</h3>
+                              <p className="text-gray-700 mb-4 leading-relaxed whitespace-pre-wrap text-sm sm:text-base">{displayText}</p>
                               
                               {post.content.split(' ').length > WORD_LIMIT && (
                           <button 
@@ -646,11 +646,11 @@ const ProfilePage = ({ onPageChange, userId }) => {
 
                             {/* Post Image */}
                             {post.image_url && (
-                              <div className="px-6 pb-4">
+                              <div className="px-4 sm:px-6 pb-4">
                                 <img 
                                   src={post.image_url} 
                                   alt={post.title}
-                                  className="w-full h-64 object-cover rounded-lg shadow-sm"
+                                  className="w-full h-48 sm:h-64 object-cover rounded-lg shadow-sm"
                                   onError={(e) => {
                                     e.target.style.display = 'none';
                                   }}
@@ -659,9 +659,9 @@ const ProfilePage = ({ onPageChange, userId }) => {
               )}
 
                             {/* Post Footer */}
-                            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-6 text-sm text-gray-500">
+                            <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-100">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div className="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-500">
                                   <div className="flex items-center gap-1">
                                     <span className="text-red-500">❤️</span>
                                     <span>{post.likes?.length || 0} likes</span>
@@ -672,14 +672,14 @@ const ProfilePage = ({ onPageChange, userId }) => {
                                   </div>
                                 </div>
                                 {post.tags && post.tags.length > 0 && (
-                                  <div className="flex gap-2">
-                                    {post.tags.slice(0, 3).map((tag, tagIndex) => (
+                                  <div className="flex flex-wrap gap-2">
+                                    {post.tags.slice(0, 2).map((tag, tagIndex) => (
                                       <span key={tagIndex} className="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded-full">
                                         #{tag}
                           </span>
                                     ))}
-                                    {post.tags.length > 3 && (
-                                      <span className="text-xs text-gray-400">+{post.tags.length - 3} more</span>
+                                    {post.tags.length > 2 && (
+                                      <span className="text-xs text-gray-400">+{post.tags.length - 2} more</span>
                                     )}
                         </div>
                                 )}

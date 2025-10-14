@@ -20,10 +20,10 @@ const TopChampionCard = ({ user, rank, onPageChange }) => {
   const pointsDisplay = user.points.toLocaleString();
 
   return (
-    <div className={`relative ${style.bg} p-6 rounded-2xl border-2 ${style.border} text-center flex flex-col items-center`}>
-      {style.crown && <Crown className="absolute -top-4 text-yellow-500 w-8 h-8" />}
+    <div className={`relative ${style.bg} p-4 sm:p-6 rounded-2xl border-2 ${style.border} text-center flex flex-col items-center`}>
+      {style.crown && <Crown className="absolute -top-4 text-yellow-500 w-6 h-6 sm:w-8 sm:h-8" />}
       <div className="relative mb-3">
-        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-4 border-white shadow-lg">
           {user.avatarImage ? (
             <img 
               src={user.avatarImage} 
@@ -35,24 +35,24 @@ const TopChampionCard = ({ user, rank, onPageChange }) => {
               }}
             />
           ) : null}
-          <div className={`w-full h-full bg-gradient-to-br from-green-400 to-green-500 flex items-center justify-center text-white text-3xl font-bold`} style={{display: user.avatarImage ? 'none' : 'flex'}}>
+          <div className={`w-full h-full bg-gradient-to-br from-green-400 to-green-500 flex items-center justify-center text-white text-2xl sm:text-3xl font-bold`} style={{display: user.avatarImage ? 'none' : 'flex'}}>
             {user.avatarInitial}
           </div>
         </div>
-        <div className="absolute -bottom-1 -right-1 bg-white text-sm font-bold w-8 h-8 rounded-full border-2 flex items-center justify-center border-yellow-300">{user.level}</div>
+        <div className="absolute -bottom-1 -right-1 bg-white text-xs sm:text-sm font-bold w-6 h-6 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center border-yellow-300">{user.level}</div>
       </div>
-      <div className="absolute -top-2 -left-2 bg-white text-lg font-black w-10 h-10 rounded-full border-2 flex items-center justify-center border-gray-300 text-gray-700">
+      <div className="absolute -top-2 -left-2 bg-white text-sm sm:text-lg font-black w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center border-gray-300 text-gray-700">
         #{rank}
       </div>
       <button
         onClick={() => onPageChange('profile', { userId: user.id })}
-        className="font-bold text-lg text-gray-800 hover:text-green-600 hover:underline cursor-pointer"
+        className="font-bold text-base sm:text-lg text-gray-800 hover:text-green-600 hover:underline cursor-pointer"
       >
         {user.name}
       </button>
-      <p className={`text-sm font-semibold ${style.text} mb-2`}>{user.title}</p>
+      <p className={`text-xs sm:text-sm font-semibold ${style.text} mb-2`}>{user.title}</p>
       {/* FIXED: Replaced text-dark-green with text-green-900 */}
-      <p className="text-2xl font-bold text-green-900">{pointsDisplay}</p>
+      <p className="text-xl sm:text-2xl font-bold text-green-900">{pointsDisplay}</p>
     </div>
   );
 };
@@ -63,11 +63,11 @@ const LeaderboardRow = ({ user, rank, onPageChange }) => {
   const pointsDisplay = user.points.toLocaleString();
 
   return (
-    <div className="flex items-center bg-white p-3 rounded-xl mb-2 hover:bg-green-50/50 transition-colors">
-      <div className="w-8 text-center font-bold text-gray-500 text-lg">#{rank}</div>
-      <div className="flex items-center gap-3 flex-1 ml-4">
+    <div className="flex items-center bg-white p-2 sm:p-3 rounded-xl mb-2 hover:bg-green-50/50 transition-colors">
+      <div className="w-6 sm:w-8 text-center font-bold text-gray-500 text-sm sm:text-lg">#{rank}</div>
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 ml-2 sm:ml-4">
         <div className="relative">
-          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-gray-200">
             {user.avatarImage ? (
               <img 
                 src={user.avatarImage} 
@@ -79,20 +79,20 @@ const LeaderboardRow = ({ user, rank, onPageChange }) => {
                 }}
               />
             ) : null}
-            <div className="w-full h-full bg-gray-200 flex items-center justify-center font-bold text-lg text-gray-600" style={{display: user.avatarImage ? 'none' : 'flex'}}>
+            <div className="w-full h-full bg-gray-200 flex items-center justify-center font-bold text-sm sm:text-lg text-gray-600" style={{display: user.avatarImage ? 'none' : 'flex'}}>
               {user.avatarInitial}
             </div>
           </div>
-          <div className="absolute -bottom-0 -right-0 bg-white text-xs font-bold w-5 h-5 rounded-full border flex items-center justify-center">{user.level}</div>
+          <div className="absolute -bottom-0 -right-0 bg-white text-xs font-bold w-4 h-4 sm:w-5 sm:h-5 rounded-full border flex items-center justify-center">{user.level}</div>
         </div>
-        <div>
+        <div className="flex-1 min-w-0">
           <button
             onClick={() => onPageChange('profile', { userId: user.id })}
-            className="font-bold text-gray-800 hover:text-green-600 hover:underline cursor-pointer"
+            className="font-bold text-sm sm:text-base text-gray-800 hover:text-green-600 hover:underline cursor-pointer truncate"
           >
             {user.name}
           </button>
-          <p className="text-sm text-gray-500">{user.title}</p>
+          <p className="text-xs sm:text-sm text-gray-500 truncate">{user.title}</p>
         </div>
       </div>
       <div className="hidden md:flex items-center gap-3 text-gray-400">
@@ -101,7 +101,7 @@ const LeaderboardRow = ({ user, rank, onPageChange }) => {
         <Sprout className="w-5 h-5" title="Planter" />
       </div>
       {/* FIXED: Replaced text-primary-green with text-green-600 */}
-      <div className="w-24 text-right font-bold text-green-600 text-lg">{pointsDisplay}</div>
+      <div className="w-16 sm:w-24 text-right font-bold text-green-600 text-sm sm:text-lg">{pointsDisplay}</div>
     </div>
   );
 };
@@ -123,38 +123,38 @@ const DepartmentRow = ({ department, rank, onPageChange, onDepartmentSelect }) =
   };
 
   return (
-    <div className="flex items-center bg-gradient-to-r from-white to-green-50 p-6 rounded-2xl mb-4 hover:from-green-50 hover:to-green-100 transition-all duration-300 border-2 border-green-100 hover:border-green-200 shadow-md hover:shadow-lg">
-      <div className="w-16 text-center font-black text-gray-700 text-3xl bg-white rounded-full w-12 h-12 flex items-center justify-center border-2 border-gray-200">
+    <div className="flex flex-col sm:flex-row items-center bg-gradient-to-r from-white to-green-50 p-4 sm:p-6 rounded-2xl mb-4 hover:from-green-50 hover:to-green-100 transition-all duration-300 border-2 border-green-100 hover:border-green-200 shadow-md hover:shadow-lg">
+      <div className="w-12 h-12 sm:w-16 sm:h-16 text-center font-black text-gray-700 text-xl sm:text-3xl bg-white rounded-full flex items-center justify-center border-2 border-gray-200 mb-4 sm:mb-0">
         #{rank}
       </div>
-      <div className="flex items-center gap-6 flex-1 ml-6">
-        <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white shadow-lg flex items-center justify-center bg-white">
+      <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 flex-1 ml-0 sm:ml-6">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden border-4 border-white shadow-lg flex items-center justify-center bg-white">
           <img 
             src={getDepartmentLogo(department.department)} 
             alt={`${department.department} logo`}
-            className="w-16 h-16 object-contain"
+            className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
           />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 text-center sm:text-left">
           <button
             onClick={() => onDepartmentSelect(department.department)}
-            className="font-black text-2xl text-gray-800 hover:text-green-600 hover:underline cursor-pointer transition-colors block mb-2"
+            className="font-black text-lg sm:text-2xl text-gray-800 hover:text-green-600 hover:underline cursor-pointer transition-colors block mb-2 w-full text-center sm:text-left"
           >
             {department.department}
           </button>
-          <p className="text-lg text-gray-600 font-semibold mb-3">{department.userCount} students</p>
-          <div className="flex flex-wrap gap-2">
+          <p className="text-sm sm:text-lg text-gray-600 font-semibold mb-3">{department.userCount} students</p>
+          <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
             {department.topUsers.map((user, index) => (
-              <span key={index} className="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">
+              <span key={index} className="text-xs sm:text-sm bg-green-100 text-green-700 px-2 sm:px-3 py-1 rounded-full font-semibold">
                 {user.username} ({user.points}pts)
               </span>
             ))}
           </div>
         </div>
       </div>
-      <div className="text-right">
-        <div className="text-3xl font-black text-green-600">{department.totalPoints.toLocaleString()}</div>
-        <div className="text-lg text-gray-600 font-semibold">Total Points</div>
+      <div className="text-center sm:text-right mt-4 sm:mt-0">
+        <div className="text-2xl sm:text-3xl font-black text-green-600">{department.totalPoints.toLocaleString()}</div>
+        <div className="text-sm sm:text-lg text-gray-600 font-semibold">Total Points</div>
       </div>
     </div>
   );
@@ -334,18 +334,18 @@ const LeaderboardPage = ({ onPageChange }) => {
 
   return (
     <div className="font-sans bg-gray-50 text-gray-900">
-      <main className="pt-20 pb-12">
+      <main className="pt-16 sm:pt-20 pb-8 sm:pb-12">
         {/* Page Header - Compact */}
         <section className="bg-white border-b border-gray-200 shadow-sm">
-          <div className="container mx-auto px-6 py-8">
+          <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-3 rounded-xl shadow-lg">
-                  <Crown className="w-7 h-7 text-white" />
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="bg-gradient-to-br from-green-400 to-emerald-500 p-2 sm:p-3 rounded-xl shadow-lg">
+                  <Crown className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-black text-gray-900 mb-1">Hall of Fame</h1>
-                  <p className="text-gray-600 text-sm">Celebrate our environmental champions and see how you rank among the eco-heroes</p>
+                  <h1 className="text-2xl sm:text-3xl font-black text-gray-900 mb-1">Hall of Fame</h1>
+                  <p className="text-gray-600 text-xs sm:text-sm">Celebrate our environmental champions and see how you rank among the eco-heroes</p>
                 </div>
               </div>
             </div>
@@ -354,47 +354,47 @@ const LeaderboardPage = ({ onPageChange }) => {
 
         {/* Stats Bar */}
         <section className="bg-white border-b border-gray-200">
-          <div className="container mx-auto px-6 py-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <Users className="w-5 h-5 text-blue-600" />
+          <div className="container mx-auto px-4 sm:px-6 py-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-gray-900">{stats.totalUsers}</p>
+                  <p className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalUsers}</p>
                   <p className="text-xs text-gray-500 font-semibold">
                     {selectedDepartment === 'all' ? 'Total Students' : 'Department Students'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                  <Swords className="w-5 h-5 text-amber-600" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <Swords className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-gray-900">{stats.totalQuests}</p>
+                  <p className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalQuests}</p>
                   <p className="text-xs text-gray-500 font-semibold">
                     {selectedDepartment === 'all' ? 'All Quests' : 'Quests Completed'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <Users2 className="w-5 h-5 text-purple-600" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <Users2 className="w-4 h-4 sm:w-5 sm:h-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-gray-900">{selectedDepartment === 'all' ? departments.length : stats.totalUsers}</p>
+                  <p className="text-lg sm:text-xl font-bold text-gray-900">{selectedDepartment === 'all' ? departments.length : stats.totalUsers}</p>
                   <p className="text-xs text-gray-500 font-semibold">
                     {selectedDepartment === 'all' ? 'Departments' : 'Active Students'}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <Leaf className="w-5 h-5 text-green-600" />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <Leaf className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-gray-900">{stats.totalPoints}</p>
+                  <p className="text-lg sm:text-xl font-bold text-gray-900">{stats.totalPoints}</p>
                   <p className="text-xs text-gray-500 font-semibold">
                     {selectedDepartment === 'all' ? 'Combined Points' : 'Department Points'}
                   </p>
@@ -406,14 +406,14 @@ const LeaderboardPage = ({ onPageChange }) => {
 
         {/* Filters Bar - Sticky */}
         <section className="bg-white border-b border-gray-200 shadow-sm sticky top-16 z-40">
-          <div className="container mx-auto px-6 py-4">
-            <div className="flex flex-col md:flex-row gap-4">
+          <div className="container mx-auto px-4 sm:px-6 py-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               {/* Department Filter */}
-              <div className="w-full md:w-80 ml-auto">
+              <div className="w-full sm:w-80 ml-auto">
                 <select
                   value={selectedDepartment}
                   onChange={(e) => setSelectedDepartment(e.target.value)}
-                  className="w-full bg-gray-50 text-gray-900 border-2 border-gray-200 rounded-lg px-4 py-2.5 font-semibold focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full bg-gray-50 text-gray-900 border-2 border-gray-200 rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 font-semibold focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm sm:text-base"
                 >
                   {departmentOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -427,15 +427,15 @@ const LeaderboardPage = ({ onPageChange }) => {
         </section>
 
         {/* Leaderboard Section */}
-        <section id="leaderboard-section" className="container mx-auto px-6 py-8">
+        <section id="leaderboard-section" className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
           {selectedDepartment === 'all' ? (
             // Department leaderboard
-            <div className="space-y-6">
-              <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Department Rankings</h2>
-                  <p className="text-gray-600">Click on any department to view their top environmental champions</p>
+            <div className="space-y-4 sm:space-y-6">
+              <div className="bg-white p-4 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
+                <div className="text-center mb-6 sm:mb-8">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Department Rankings</h2>
+                  <p className="text-sm sm:text-base text-gray-600">Click on any department to view their top environmental champions</p>
                 </div>
                 {departments.length > 0 ? (
                   <div className="space-y-4">
@@ -463,17 +463,17 @@ const LeaderboardPage = ({ onPageChange }) => {
             usersWithRank.length > 0 ? (
               <>
                 {/* Department Header */}
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold text-gray-900">Top Environmental Champions</h2>
-                  <p className="text-lg text-gray-600 mt-2">
+                <div className="text-center mb-6 sm:mb-8">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Top Environmental Champions</h2>
+                  <p className="text-base sm:text-lg text-gray-600 mt-2">
                     {departmentOptions.find(d => d.value === selectedDepartment)?.label}
                   </p>
                   {departmentData && (
-                    <div className="mt-4 p-4 bg-green-50 rounded-xl border-2 border-green-200">
-                      <p className="text-lg font-bold text-green-800">
+                    <div className="mt-4 p-3 sm:p-4 bg-green-50 rounded-xl border-2 border-green-200">
+                      <p className="text-base sm:text-lg font-bold text-green-800">
                         Department Total: {departmentData.totalPoints.toLocaleString()} points
                       </p>
-                      <p className="text-sm text-green-600">
+                      <p className="text-xs sm:text-sm text-green-600">
                         {departmentData.totalUsers} students contributing
                       </p>
                     </div>
@@ -482,19 +482,19 @@ const LeaderboardPage = ({ onPageChange }) => {
 
                 {/* Show top 3 champions if we have 3 or more users */}
                 {usersWithRank.length >= 3 && (
-                  <div className="mb-12">
-                    <h3 className="text-2xl font-bold text-center mb-8 text-gray-900">Top Champions</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                  <div className="mb-8 sm:mb-12">
+                    <h3 className="text-xl sm:text-2xl font-bold text-center mb-6 sm:mb-8 text-gray-900">Top Champions</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 items-end">
                       {/* 2nd Place */}
-                      <div className="order-2 md:order-1">
+                      <div className="order-2 sm:order-1">
                         <TopChampionCard key={usersWithRank[1].id} user={usersWithRank[1]} rank={usersWithRank[1].originalRank} onPageChange={onPageChange} />
                       </div>
                       {/* 1st Place - Center and elevated */}
-                      <div className="order-1 md:order-2 transform md:scale-110 md:-mt-4">
+                      <div className="order-1 sm:order-2 transform sm:scale-110 sm:-mt-4">
                         <TopChampionCard key={usersWithRank[0].id} user={usersWithRank[0]} rank={usersWithRank[0].originalRank} onPageChange={onPageChange} />
                       </div>
                       {/* 3rd Place */}
-                      <div className="order-3 md:order-3">
+                      <div className="order-3 sm:order-3">
                         <TopChampionCard key={usersWithRank[2].id} user={usersWithRank[2]} rank={usersWithRank[2].originalRank} onPageChange={onPageChange} />
                       </div>
                     </div>
@@ -502,8 +502,8 @@ const LeaderboardPage = ({ onPageChange }) => {
                 )}
 
                 {/* Show all users in a simple list format */}
-                <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-                  <h3 className="text-2xl font-bold mb-4 text-gray-900">
+                <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-200">
+                  <h3 className="text-xl sm:text-2xl font-bold mb-4 text-gray-900">
                     {usersWithRank.length >= 3 ? 'Complete User Rankings' : 'User Rankings'}
                   </h3>
                   {usersWithRank.length >= 3 ? (
@@ -520,10 +520,10 @@ const LeaderboardPage = ({ onPageChange }) => {
 
                   {/* Show More Button */}
                   {usersWithRank.length >= 3 && displayCount < usersWithRank.length && (
-                    <div className="text-center mt-6">
+                    <div className="text-center mt-4 sm:mt-6">
                       <button
                         onClick={handleShowMore}
-                        className="bg-green-500 text-white font-bold py-3 px-6 rounded-full hover:bg-green-600 transition"
+                        className="bg-green-500 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-full hover:bg-green-600 transition text-sm sm:text-base"
                       >
                         Show More (+10)
                       </button>
@@ -532,30 +532,30 @@ const LeaderboardPage = ({ onPageChange }) => {
                 </div>
               </>
             ) : (
-              <div className="bg-white p-12 rounded-2xl shadow-lg border border-gray-200 text-center">
-                <Sprout className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-bold text-gray-600 mb-2">No Users Found</h3>
-                <p className="text-gray-500">There are no users registered in this department yet.</p>
+              <div className="bg-white p-8 sm:p-12 rounded-2xl shadow-lg border border-gray-200 text-center">
+                <Sprout className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg sm:text-xl font-bold text-gray-600 mb-2">No Users Found</h3>
+                <p className="text-sm sm:text-base text-gray-500">There are no users registered in this department yet.</p>
               </div>
             )
           )}
         </section>
 
         {/* CTA */}
-        <section className="py-32 px-6 bg-gray-100 text-center">
+        <section className="py-16 sm:py-32 px-4 sm:px-6 bg-gray-100 text-center">
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-5xl md:text-6xl font-black mb-8 leading-tight text-gray-900">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-black mb-6 sm:mb-8 leading-tight text-gray-900">
               Climb the Eco-Hero Rankings!
             </h2>
-            <p className="text-xl text-gray-600 mb-10">
+            <p className="text-base sm:text-xl text-gray-600 mb-8 sm:mb-10">
               Complete quests, attend events, and make environmental impact to earn points and climb the leaderboard. Every action counts towards a sustainable future!
             </p>
             
             <button 
               onClick={() => onPageChange('quests')}
-              className="bg-green-600 hover:bg-green-700 text-white font-black px-12 py-5 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all inline-flex items-center gap-3 text-lg"
+              className="bg-green-600 hover:bg-green-700 text-white font-black px-8 sm:px-12 py-3 sm:py-5 rounded-full shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all inline-flex items-center gap-2 sm:gap-3 text-base sm:text-lg"
             >
-              <Rocket className="w-6 h-6" />
+              <Rocket className="w-5 h-5 sm:w-6 sm:h-6" />
               Start New Quest
             </button>
           </div>
@@ -563,8 +563,8 @@ const LeaderboardPage = ({ onPageChange }) => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-green-700 text-white pt-16 pb-8 px-6">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-left">
+      <footer className="bg-green-700 text-white pt-12 sm:pt-16 pb-6 sm:pb-8 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-left">
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-4">

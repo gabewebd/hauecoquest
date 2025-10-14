@@ -15,9 +15,9 @@ const StyledInput = ({ label, placeholder, type, icon, name, value, onChange }) 
                 name={name}
                 value={value}
                 onChange={onChange}
-                className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all font-medium"
+                className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 bg-gray-50 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all font-medium text-sm sm:text-base"
             />
-            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <div className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
                 {icon}
             </div>
         </div>
@@ -33,7 +33,7 @@ const StyledSelect = ({ label, icon, name, value, onChange, options }) => (
                 name={name}
                 value={value}
                 onChange={onChange}
-                className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all font-medium appearance-none"
+                className="w-full pl-10 sm:pl-12 pr-3 sm:pr-4 py-3 sm:py-4 bg-gray-50 border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all font-medium appearance-none text-sm sm:text-base"
             >
                 <option value="">Select your department</option>
                 {options.map(option => (
@@ -42,7 +42,7 @@ const StyledSelect = ({ label, icon, name, value, onChange, options }) => (
                     </option>
                 ))}
             </select>
-            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <div className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400">
                 {icon}
             </div>
             <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none">
@@ -114,9 +114,9 @@ const AccountDetailsForm = ({ goToStep, formData, handleInputChange }) => {
             />
             <button
                 type="submit"
-                className="w-full flex justify-center items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black py-4 rounded-full text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all mt-6"
+                className="w-full flex justify-center items-center gap-2 sm:gap-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black py-3 sm:py-4 rounded-full text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all mt-4 sm:mt-6"
             >
-                Continue to Role Selection
+                <span className="text-sm sm:text-base">Continue to Role Selection</span>
             </button>
         </form>
     );
@@ -188,18 +188,18 @@ const AgreementForm = ({ agreedToTerms, setAgreedToTerms, goToStep, handleSubmit
                 </button>
                 <button
                     type="submit"
-                    className="w-2/3 flex justify-center items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black py-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="w-2/3 flex justify-center items-center gap-1 sm:gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black py-3 sm:py-4 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
                     disabled={!agreedToTerms || loading}
                 >
                     {loading ? (
                         <>
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            Creating Account...
+                            <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-xs sm:text-sm">Creating Account...</span>
                         </>
                     ) : (
                         <>
-                            <Check className="w-5 h-5 mr-1" />
-                            Join the Adventure!
+                            <Check className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
+                            <span className="text-xs sm:text-sm">Join the Adventure!</span>
                         </>
                     )}
                 </button>
@@ -278,14 +278,14 @@ const SignUp = ({ onPageChange }) => {
     const isStep1 = step === 1;
 
     const StepIcon = ({ number, isCurrent, isComplete, label }) => (
-        <div className="flex items-center gap-2">
-            <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold transition-all duration-300 ${isComplete ? 'bg-green-600 text-white' :
+        <div className="flex items-center gap-1 sm:gap-2">
+            <div className={`w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full font-bold transition-all duration-300 text-xs sm:text-sm ${isComplete ? 'bg-green-600 text-white' :
                     isCurrent ? 'bg-green-600 text-white border-2 border-green-600' :
                         'border-2 border-gray-300 text-gray-500'
                 }`}>
-                {isComplete ? <Check className="w-4 h-4" /> : number}
+                {isComplete ? <Check className="w-3 h-3 sm:w-4 sm:h-4" /> : number}
             </div>
-            <span className={`font-bold ${isCurrent || isComplete ? 'text-green-600' : 'text-gray-400'}`}>
+            <span className={`font-bold text-xs sm:text-sm ${isCurrent || isComplete ? 'text-green-600' : 'text-gray-400'}`}>
                 {label}
             </span>
         </div>
@@ -314,22 +314,22 @@ const SignUp = ({ onPageChange }) => {
                 </svg>
             </div>
 
-            <div className="relative min-h-screen flex items-center justify-center px-4 py-12">
+            <div className="relative min-h-screen flex items-center justify-center px-4 py-8 sm:py-12">
                 <div className="w-full max-w-lg">
-                    <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-10">
+                    <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 md:p-10">
 
-                        <div className="text-center mb-8">
-                            <div className="inline-block bg-gradient-to-br from-green-400 to-emerald-600 p-4 rounded-2xl mb-4 shadow-lg">
-                                <GraduationCap className="w-8 h-8 text-white" />
+                        <div className="text-center mb-6 sm:mb-8">
+                            <div className="inline-block bg-gradient-to-br from-green-400 to-emerald-600 p-3 sm:p-4 rounded-2xl mb-3 sm:mb-4 shadow-lg">
+                                <GraduationCap className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                             </div>
-                            <h1 className="text-4xl font-black text-gray-900 mb-2">{FormTitle}</h1>
-                            <p className="text-gray-600 text-lg">{FormSubtitle}</p>
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 mb-2">{FormTitle}</h1>
+                            <p className="text-gray-600 text-base sm:text-lg">{FormSubtitle}</p>
                         </div>
 
-                        <div className="flex justify-center mb-8">
-                            <div className="flex items-center gap-4">
+                        <div className="flex justify-center mb-6 sm:mb-8">
+                            <div className="flex items-center gap-2 sm:gap-4">
                                 <StepIcon number={1} isCurrent={isStep1} isComplete={!isStep1} label="Account Details" />
-                                <div className={`h-0.5 w-12 transition-colors duration-300 ${isStep1 ? 'bg-gray-300' : 'bg-green-600'}`}></div>
+                                <div className={`h-0.5 w-8 sm:w-12 transition-colors duration-300 ${isStep1 ? 'bg-gray-300' : 'bg-green-600'}`}></div>
                                 <StepIcon number={2} isCurrent={!isStep1} isComplete={false} label="Terms & Agreement" />
                             </div>
                         </div>
