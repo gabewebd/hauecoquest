@@ -14,13 +14,25 @@ connectDB();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const prodOrigin = process.env.FRONTEND_URL;
 
 // Enhanced CORS configuration
+const allowedOrigins = [
+  'http://localhost:3000', 
+  'http://localhost:5173', 
+  'http://127.0.0.1:3000', 
+  'http://127.0.0.1:5173',
+  'https://hauecoquest.vercel.app' 
+];
+
+if (prodOrigin) {
+    allowedOrigins.push(...prodOrigin.split(',')); 
+}
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173'],
+  origin: allowedOrigins,
   credentials: true
 }));
-
 
 // Body parser middleware
 app.use(express.json({ limit: '10mb' }));
