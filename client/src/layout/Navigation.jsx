@@ -456,6 +456,11 @@ export function Navigation({ currentPage, onPageChange }) {
                                 try {
                                   await notificationAPI.markAllAsRead();
                                   await fetchUnreadNotifications();
+
+                                  // ✅ small delay to ensure dropdown updates visually before closing
+                                  setTimeout(() => {
+                                    setNotificationDropdownOpen(false);
+                                  }, 300);
                                 } catch (error) {
                                   console.error('Error marking all as read:', error);
                                 }
@@ -532,35 +537,42 @@ export function Navigation({ currentPage, onPageChange }) {
                               e.preventDefault();
                               e.stopPropagation();
                               console.log('View all notifications clicked (mobile)');
-                              setNotificationDropdownOpen(false);
-                              setMobileMenuOpen(false);
-                              
-                              // Navigate to dashboard based on role
+
                               const dashboardPage = user.role === 'admin' ? 'admin-dashboard' :
-                                                  user.role === 'partner' ? 'partner-dashboard' :
-                                                  'dashboard';
+                                                    user.role === 'partner' ? 'partner-dashboard' :
+                                                    'dashboard';
+
+                              // Navigate first, but delay closing so logic executes
                               onPageChange(dashboardPage);
-                              
-                              // Trigger notifications tab after navigation
+
                               setTimeout(() => {
-                                const notificationsTab = document.querySelector('[data-tab="notifications"]');
-                                if (notificationsTab) {
-                                  console.log('Found notifications tab, clicking it');
-                                  notificationsTab.click();
-                                } else {
-                                  console.log('Notifications tab not found, trying alternative selectors');
-                                  const altTab = document.querySelector('button[data-tab="notifications"]') ||
-                                                document.querySelector('[role="tab"][id="notifications"]');
-                                  if (altTab) {
-                                    altTab.click();
+                                // Robust looped check so it waits until dashboard renders
+                                const tryClick = () => {
+                                  const tab = document.querySelector('[data-tab="notifications"]') ||
+                                              document.querySelector('button[data-tab="notifications"]') ||
+                                              document.querySelector('[role="tab"][data-value="notifications"]');
+                                  if (tab) {
+                                    console.log('Notifications tab found, clicking it');
+                                    tab.click();
+                                  } else {
+                                    console.log('Waiting for notifications tab to render...');
+                                    setTimeout(tryClick, 300);
                                   }
-                                }
-                              }, 500);
+                                };
+                                tryClick();
+                              }, 700);
+
+                              // ✅ Close dropdown *after* navigation logic starts
+                              setTimeout(() => {
+                                setNotificationDropdownOpen(false);
+                                setMobileMenuOpen(false);
+                              }, 300);
                             }}
                             className="text-sm text-green-600 hover:text-green-700 font-semibold w-full py-2 hover:bg-green-50 rounded-lg transition-colors"
                           >
                             View all notifications
                           </button>
+
                         </div>
                       )}
                     </div>
