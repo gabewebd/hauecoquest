@@ -442,16 +442,17 @@ export function Navigation({ currentPage, onPageChange }) {
                   
                   {/* Mobile Notification Dropdown */}
                   {notificationDropdownOpen && (
-                    <div className="mt-2 ml-8 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto">
-                      <div className="p-3 border-b border-gray-200">
+                    <div className="mt-2 ml-8 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-80 overflow-hidden flex flex-col">
+                      {/* Header with Mark All as Read - NOT scrollable */}
+                      <div className="p-3 border-b border-gray-200 flex-shrink-0">
                         <div className="flex items-center justify-between">
                           <h3 className="font-bold text-gray-900 text-sm">Notifications</h3>
-                          <div className="flex gap-2">
-                            {unreadNotifications > 0 && (
+                          {unreadNotifications > 0 && (
                             <button
                               onClick={async (e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
+                                console.log('Mark all as read clicked (mobile)');
                                 try {
                                   await notificationAPI.markAllAsRead();
                                   await fetchUnreadNotifications();
@@ -459,16 +460,16 @@ export function Navigation({ currentPage, onPageChange }) {
                                   console.error('Error marking all as read:', error);
                                 }
                               }}
-                              className="text-sm text-green-600 hover:text-green-700 font-semibold"
+                              className="text-xs text-green-600 hover:text-green-700 font-semibold px-3 py-2 hover:bg-green-50 rounded transition-colors"
                             >
                               Mark all as read
                             </button>
-                            )}
-                          </div>
+                          )}
                         </div>
                       </div>
                       
-                      <div className="max-h-48 overflow-y-auto">
+                      {/* Scrollable notification list */}
+                      <div className="flex-1 overflow-y-auto max-h-48">
                         {notifications.length === 0 ? (
                           <div className="p-4 text-center text-gray-500">
                             <Bell className="w-6 h-6 mx-auto mb-2 text-gray-300" />
@@ -523,12 +524,14 @@ export function Navigation({ currentPage, onPageChange }) {
                         )}
                       </div>
                       
+                      {/* Footer with View All - NOT scrollable */}
                       {notifications.length > 0 && (
-                        <div className="p-3 border-t border-gray-200 text-center">
+                        <div className="p-3 border-t border-gray-200 text-center flex-shrink-0 bg-white">
                           <button
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
+                              console.log('View all notifications clicked (mobile)');
                               setNotificationDropdownOpen(false);
                               setMobileMenuOpen(false);
                               
@@ -538,21 +541,23 @@ export function Navigation({ currentPage, onPageChange }) {
                                                   'dashboard';
                               onPageChange(dashboardPage);
                               
-                              // Trigger notifications tab after navigation with longer delay
+                              // Trigger notifications tab after navigation
                               setTimeout(() => {
-                                // Try multiple selectors for notifications tab
-                                const notificationsTab = document.querySelector('[data-tab="notifications"]') ||
-                                                        document.querySelector('button[data-tab="notifications"]') ||
-                                                        document.querySelector('[role="tab"][data-value="notifications"]') ||
-                                                        document.querySelector('button:has-text("Notifications")');
+                                const notificationsTab = document.querySelector('[data-tab="notifications"]');
                                 if (notificationsTab) {
+                                  console.log('Found notifications tab, clicking it');
                                   notificationsTab.click();
                                 } else {
-                                  console.log('Notifications tab not found');
+                                  console.log('Notifications tab not found, trying alternative selectors');
+                                  const altTab = document.querySelector('button[data-tab="notifications"]') ||
+                                                document.querySelector('[role="tab"][id="notifications"]');
+                                  if (altTab) {
+                                    altTab.click();
+                                  }
                                 }
                               }, 500);
                             }}
-                            className="text-sm text-green-600 hover:text-green-700 font-semibold w-full py-2 hover:bg-green-50 rounded-lg transition-colors relative z-50"
+                            className="text-sm text-green-600 hover:text-green-700 font-semibold w-full py-2 hover:bg-green-50 rounded-lg transition-colors"
                           >
                             View all notifications
                           </button>
