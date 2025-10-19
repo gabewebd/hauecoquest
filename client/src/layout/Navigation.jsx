@@ -440,10 +440,11 @@ export function Navigation({ currentPage, onPageChange }) {
                           <div className="flex gap-2">
                             {unreadNotifications > 0 && (
                               <button
-                                onClick={async () => {
+                                onClick={async (e) => {
+                                  e.stopPropagation();
                                   try {
                                     await notificationAPI.markAllAsRead();
-                                    fetchUnreadNotifications();
+                                    await fetchUnreadNotifications();
                                   } catch (error) {
                                     console.error('Error marking all as read:', error);
                                   }
@@ -515,24 +516,24 @@ export function Navigation({ currentPage, onPageChange }) {
                       {notifications.length > 0 && (
                         <div className="p-3 border-t border-gray-200 text-center">
                           <button
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setNotificationDropdownOpen(false);
                               setMobileMenuOpen(false);
-                              // Navigate to dashboard notifications tab
-                              if (user.role === 'admin') {
-                                onPageChange('admin-dashboard');
-                              } else if (user.role === 'partner') {
-                                onPageChange('partner-dashboard');
-                              } else {
-                                onPageChange('dashboard');
-                              }
+                              
+                              // Navigate to dashboard based on role
+                              const dashboardPage = user.role === 'admin' ? 'admin-dashboard' :
+                                                  user.role === 'partner' ? 'partner-dashboard' :
+                                                  'dashboard';
+                              onPageChange(dashboardPage);
+                              
                               // Trigger notifications tab after navigation
                               setTimeout(() => {
                                 const notificationsTab = document.querySelector('[data-tab="notifications"]');
                                 if (notificationsTab) {
                                   notificationsTab.click();
                                 }
-                              }, 100);
+                              }, 300);
                             }}
                             className="text-sm text-green-600 hover:text-green-700 font-semibold"
                           >
