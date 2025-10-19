@@ -243,15 +243,17 @@ export function Navigation({ currentPage, onPageChange }) {
                         <div className="flex gap-2">
                           {unreadNotifications > 0 && (
                             <button
-                              onClick={async () => {
+                              onClick={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 try {
                                   await notificationAPI.markAllAsRead();
-                                  fetchUnreadNotifications();
+                                  await fetchUnreadNotifications();
                                 } catch (error) {
                                   console.error('Error marking all as read:', error);
                                 }
                               }}
-                              className="text-sm text-green-600 hover:text-green-700 font-semibold"
+                              className="text-xs text-green-600 hover:text-green-700 font-semibold z-50 relative px-2 py-1"
                             >
                               Mark all as read
                             </button>
@@ -318,23 +320,30 @@ export function Navigation({ currentPage, onPageChange }) {
                     {notifications.length > 0 && (
                       <div className="p-3 border-t border-gray-200 text-center">
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             setNotificationDropdownOpen(false);
-                            // Navigate to dashboard notifications tab
-                            if (user.role === 'admin') {
-                              onPageChange('admin-dashboard');
-                            } else if (user.role === 'partner') {
-                              onPageChange('partner-dashboard');
-                            } else {
-                              onPageChange('dashboard');
-                            }
-                            // Trigger notifications tab after navigation
+                            
+                            // Navigate to dashboard based on role
+                            const dashboardPage = user.role === 'admin' ? 'admin-dashboard' :
+                                                user.role === 'partner' ? 'partner-dashboard' :
+                                                'dashboard';
+                            onPageChange(dashboardPage);
+                            
+                            // Trigger notifications tab after navigation with longer delay
                             setTimeout(() => {
-                              const notificationsTab = document.querySelector('[data-tab="notifications"]');
+                              // Try multiple selectors for notifications tab
+                              const notificationsTab = document.querySelector('[data-tab="notifications"]') ||
+                                                      document.querySelector('button[data-tab="notifications"]') ||
+                                                      document.querySelector('[role="tab"][data-value="notifications"]') ||
+                                                      document.querySelector('button:has-text("Notifications")');
                               if (notificationsTab) {
                                 notificationsTab.click();
+                              } else {
+                                console.log('Notifications tab not found');
                               }
-                            }, 100);
+                            }, 500);
                           }}
                           className="text-sm text-green-600 hover:text-green-700 font-semibold"
                         >
@@ -439,20 +448,21 @@ export function Navigation({ currentPage, onPageChange }) {
                           <h3 className="font-bold text-gray-900 text-sm">Notifications</h3>
                           <div className="flex gap-2">
                             {unreadNotifications > 0 && (
-                              <button
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  try {
-                                    await notificationAPI.markAllAsRead();
-                                    await fetchUnreadNotifications();
-                                  } catch (error) {
-                                    console.error('Error marking all as read:', error);
-                                  }
-                                }}
-                                className="text-xs text-green-600 hover:text-green-700 font-semibold"
-                              >
-                                Mark all as read
-                              </button>
+                            <button
+                              onClick={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                try {
+                                  await notificationAPI.markAllAsRead();
+                                  await fetchUnreadNotifications();
+                                } catch (error) {
+                                  console.error('Error marking all as read:', error);
+                                }
+                              }}
+                              className="text-sm text-green-600 hover:text-green-700 font-semibold"
+                            >
+                              Mark all as read
+                            </button>
                             )}
                           </div>
                         </div>
@@ -517,6 +527,7 @@ export function Navigation({ currentPage, onPageChange }) {
                         <div className="p-3 border-t border-gray-200 text-center">
                           <button
                             onClick={(e) => {
+                              e.preventDefault();
                               e.stopPropagation();
                               setNotificationDropdownOpen(false);
                               setMobileMenuOpen(false);
@@ -527,15 +538,21 @@ export function Navigation({ currentPage, onPageChange }) {
                                                   'dashboard';
                               onPageChange(dashboardPage);
                               
-                              // Trigger notifications tab after navigation
+                              // Trigger notifications tab after navigation with longer delay
                               setTimeout(() => {
-                                const notificationsTab = document.querySelector('[data-tab="notifications"]');
+                                // Try multiple selectors for notifications tab
+                                const notificationsTab = document.querySelector('[data-tab="notifications"]') ||
+                                                        document.querySelector('button[data-tab="notifications"]') ||
+                                                        document.querySelector('[role="tab"][data-value="notifications"]') ||
+                                                        document.querySelector('button:has-text("Notifications")');
                                 if (notificationsTab) {
                                   notificationsTab.click();
+                                } else {
+                                  console.log('Notifications tab not found');
                                 }
-                              }, 300);
+                              }, 500);
                             }}
-                            className="text-sm text-green-600 hover:text-green-700 font-semibold"
+                            className="text-sm text-green-600 hover:text-green-700 font-semibold w-full py-2 hover:bg-green-50 rounded-lg transition-colors relative z-50"
                           >
                             View all notifications
                           </button>
