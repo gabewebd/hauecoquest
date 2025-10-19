@@ -1,5 +1,6 @@
 // API Utility for HAU Eco-Quest
-const API_URL = '/api';
+// const API_URL = '/api';
+const API_URL = import.meta.env.VITE_APP_API_URL || '/api';
 
 // Helper function to get auth token
 const getAuthToken = () => localStorage.getItem('token');
