@@ -1,6 +1,23 @@
 // API Utility for HAU Eco-Quest
-// const API_URL = '/api';
-const API_URL = import.meta.env.VITE_APP_API_URL || '/api';
+
+// Determine the API URL based on environment
+const getApiUrl = () => {
+  // Check if we're in production (Vercel)
+  if (import.meta.env.PROD) {
+    // Use environment variable or fallback
+    return import.meta.env.VITE_REACT_APP_API_URL || import.meta.env.VITE_APP_API_URL;
+  }
+  
+  // Development mode - use proxy
+  return '/api';
+};
+
+const API_URL = getApiUrl();
+
+// Log the API URL for debugging (only in development)
+if (import.meta.env.DEV) {
+  console.log('🔗 API URL:', API_URL);
+}
 
 // Helper function to get auth token
 const getAuthToken = () => localStorage.getItem('token');
@@ -115,7 +132,6 @@ export const userAPI = {
   },
 
   deleteAccount: async () => {
-    const token = getAuthToken();
     const response = await fetch(`${API_URL}/users/profile`, {
       method: 'DELETE',
       headers: getHeaders(),
@@ -174,7 +190,7 @@ export const questAPI = {
       headers: {
         'x-auth-token': token,
       },
-      body: formData, // FormData for file upload
+      body: formData,
     });
     return handleApiResponse(response);
   },
@@ -223,7 +239,6 @@ export const postAPI = {
   createPost: async (postData) => {
     const token = getAuthToken();
 
-    // If there's a file, use FormData, otherwise use JSON
     if (postData.photo) {
       const formData = new FormData();
       formData.append('title', postData.title);
@@ -373,4 +388,3 @@ export default {
   admin: adminAPI,
   notification: notificationAPI,
 };
-
