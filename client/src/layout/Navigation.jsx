@@ -442,7 +442,7 @@ export function Navigation({ currentPage, onPageChange }) {
                   
                   {/* Mobile Notification Dropdown */}
                   {notificationDropdownOpen && (
-                    <div className="mt-2 ml-8 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-80 overflow-hidden flex flex-col">
+                    <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-[90%] max-w-sm bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-80 overflow-hidden flex flex-col">
                       {/* Header with Mark All as Read - NOT scrollable */}
                       <div className="p-3 border-b border-gray-200 flex-shrink-0">
                         <div className="flex items-center justify-between">
