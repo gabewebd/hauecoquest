@@ -336,29 +336,41 @@ export function Navigation({ currentPage, onPageChange }) {
                       <div className="p-3 border-t border-gray-200 text-center">
                         <button
                           onClick={(e) => {
+                            // --- START: UPDATED LOGIC ---
                             e.preventDefault();
                             e.stopPropagation();
-                            setNotificationDropdownOpen(false);
-                            
-                            // Navigate to dashboard based on role
+                            console.log('View all notifications clicked (Desktop)');
+
                             const dashboardPage = user.role === 'admin' ? 'admin-dashboard' :
-                                                user.role === 'partner' ? 'partner-dashboard' :
-                                                'dashboard';
+                                                  user.role === 'partner' ? 'partner-dashboard' :
+                                                  'dashboard';
+
+                            // Navigate first
                             onPageChange(dashboardPage);
-                            
-                            // Trigger notifications tab after navigation with longer delay
+
                             setTimeout(() => {
-                              // Try multiple selectors for notifications tab
-                              const notificationsTab = document.querySelector('[data-tab="notifications"]') ||
-                                                      document.querySelector('button[data-tab="notifications"]') ||
-                                                      document.querySelector('[role="tab"][data-value="notifications"]') ||
-                                                      document.querySelector('button:has-text("Notifications")');
-                              if (notificationsTab) {
-                                notificationsTab.click();
-                              } else {
-                                console.log('Notifications tab not found');
-                              }
-                            }, 500);
+                              // Robust looped check to wait for tab to render
+                              const tryClick = () => {
+                                const tab = document.querySelector('[data-tab="notifications"]') ||
+                                            document.querySelector('button[data-tab="notifications"]') ||
+                                            document.querySelector('[role="tab"][data-value="notifications"]') ||
+                                            document.querySelector('button:has-text("Notifications")'); // Kept your original robust selector
+                                if (tab) {
+                                  console.log('Notifications tab found, clicking it');
+                                  tab.click();
+                                } else {
+                                  console.log('Waiting for notifications tab to render...');
+                                  setTimeout(tryClick, 300);
+                                }
+                              };
+                              tryClick();
+                            }, 700); // Using the slightly longer initial delay from mobile
+
+                            // Close dropdown *after* navigation logic starts
+                            setTimeout(() => {
+                              setNotificationDropdownOpen(false);
+                            }, 300);
+                            // --- END: UPDATED LOGIC ---
                           }}
                           className="text-sm text-green-600 hover:text-green-700 font-semibold"
                         >
