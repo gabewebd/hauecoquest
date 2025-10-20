@@ -29,19 +29,34 @@ export function Navigation({ currentPage, onPageChange }) {
 
   const dropdownRef = useRef(null);
   const notificationDropdownRef = useRef(null);
+  const mobileNotificationRef = useRef(null); // <-- FIX: 1. Added new ref for mobile dropdown
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setProfileDropdownOpen(false);
       }
-      if (notificationDropdownRef.current && !notificationDropdownRef.current.contains(event.target)) {
+      
+      // <-- FIX: 2. Updated click outside logic to check both refs
+      // Check if click is outside the desktop dropdown
+      const isOutsideDesktop = notificationDropdownRef.current
+        ? !notificationDropdownRef.current.contains(event.target)
+        : true;
+
+      // Check if click is outside the mobile notification container
+      const isOutsideMobile = mobileNotificationRef.current
+        ? !mobileNotificationRef.current.contains(event.target)
+        : true;
+
+      // Only close if the click is outside BOTH
+      if (isOutsideDesktop && isOutsideMobile) {
         setNotificationDropdownOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
+    // Add all refs to the dependency array
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [dropdownRef, notificationDropdownRef, mobileNotificationRef]); // <-- FIX: 2. Added new ref to dependency array
 
   // Fetch unread notifications
   useEffect(() => {
@@ -426,7 +441,8 @@ export function Navigation({ currentPage, onPageChange }) {
                 <div className="border-t border-gray-200 my-2"></div>
               )}
               {user && (
-                <div className="relative px-4 py-2">
+                // <-- FIX: 3. Added ref to this wrapper div
+                <div ref={mobileNotificationRef} className="relative px-4 py-2"> 
                   <button
                     onClick={() => setNotificationDropdownOpen(!notificationDropdownOpen)}
                     className="flex items-center gap-3 w-full px-3 py-3 rounded-lg font-bold text-sm text-gray-700 hover:bg-gray-100 transition-all"
