@@ -364,7 +364,7 @@ export function Navigation({ currentPage, onPageChange }) {
                                 }
                               };
                               tryClick();
-                            }, 700); // Using the slightly longer initial delay from mobile
+                            }, 1000); // Using the slightly longer initial delay from mobile
 
                             // Close dropdown *after* navigation logic starts
                             setTimeout(() => {
